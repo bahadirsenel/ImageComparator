@@ -1,4 +1,7 @@
-﻿using System;
+﻿using DiscreteCosineTransform;
+using Microsoft.VisualBasic.FileIO;
+using Ookii.Dialogs.Wpf;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -16,15 +19,12 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using DiscreteCosineTransform;
-using Microsoft.VisualBasic.FileIO;
-using Ookii.Dialogs.Wpf;
 
-namespace ImageComparator2 {
-
+namespace ImageComparator2
+{
     [Serializable]
-    public partial class MainWindow : Window, ISerializable {
-
+    public partial class MainWindow : Window, ISerializable
+    {
         #region Variables
         System.Diagnostics.Process process;
         VistaFolderBrowserDialog folderBrowserDialog;
@@ -59,7 +59,7 @@ namespace ImageComparator2 {
 
         public string ImagePath1 {
             get {
-                return (string) GetValue(ImagePathProperty1);
+                return (string)GetValue(ImagePathProperty1);
             }
             set {
                 SetValue(ImagePathProperty1, value);
@@ -68,7 +68,7 @@ namespace ImageComparator2 {
 
         public string ImagePath2 {
             get {
-                return (string) GetValue(ImagePathProperty2);
+                return (string)GetValue(ImagePathProperty2);
             }
             set {
                 SetValue(ImagePathProperty2, value);
@@ -77,12 +77,14 @@ namespace ImageComparator2 {
         #endregion
 
         #region Enums
-        public enum Orientation {
+        public enum Orientation
+        {
             Horizontal,
             Vertical
         }
 
-        public enum Confidence {
+        public enum Confidence
+        {
             Low,
             Medium,
             High,
@@ -91,8 +93,8 @@ namespace ImageComparator2 {
         #endregion
 
         [Serializable]
-        public class ListViewDataItem : INotifyPropertyChanged {
-
+        public class ListViewDataItem : INotifyPropertyChanged
+        {
             private bool selected;
 
             public string text {
@@ -109,7 +111,7 @@ namespace ImageComparator2 {
                 get;
                 set;
             }
-            
+
             public int hdHashHammingDistance {
                 get;
                 set;
@@ -135,7 +137,8 @@ namespace ImageComparator2 {
                 }
             }
 
-            public ListViewDataItem(string text, int confidence, int pHashHammingDistance, int hdHashHammingDistance, int vdHashHammingDistance, int aHashHammingDistance) {
+            public ListViewDataItem(string text, int confidence, int pHashHammingDistance, int hdHashHammingDistance, int vdHashHammingDistance, int aHashHammingDistance)
+            {
 
                 this.text = text;
                 this.confidence = confidence;
@@ -143,15 +146,15 @@ namespace ImageComparator2 {
                 this.hdHashHammingDistance = hdHashHammingDistance;
                 this.vdHashHammingDistance = vdHashHammingDistance;
                 this.aHashHammingDistance = aHashHammingDistance;
-                this.isSelected = false;
+                isSelected = false;
             }
 
             [field: NonSerialized]
             public event PropertyChangedEventHandler PropertyChanged;
         }
 
-        public MainWindow() {
-
+        public MainWindow()
+        {
             InitializeComponent();
             percentage.OnChange += percentageChanged;
             path = Environment.GetCommandLineArgs().ElementAt(0).Substring(0, Environment.GetCommandLineArgs().ElementAt(0).LastIndexOf("\\"));
@@ -170,116 +173,148 @@ namespace ImageComparator2 {
             openFileDialog.Filter = "*.mff|*.mff";
             openFileDialog.AddExtension = true;
 
-            previewImage1.RenderTransform = new TransformGroup {
+            previewImage1.RenderTransform = new TransformGroup
+            {
                 Children = new TransformCollection {
-                        new ScaleTransform(),
-                        new TranslateTransform()
-                    }
+                    new ScaleTransform(),
+                    new TranslateTransform()
+                }
             };
 
-            previewImage2.RenderTransform = new TransformGroup {
+            previewImage2.RenderTransform = new TransformGroup
+            {
                 Children = new TransformCollection {
-                        new ScaleTransform(),
-                        new TranslateTransform()
-                    }
+                    new ScaleTransform(),
+                    new TranslateTransform()
+                }
             };
 
-            try {
+            try
+            {
                 deserialize(path + @"\Bin\Image Comparator.imc");
-            } catch {
+            }
+            catch
+            {
                 opening = false;
             }
 
-            if (englishMenuItem.IsChecked) {
+            if (englishMenuItem.IsChecked)
+            {
                 console.Add("Drag-Drop to add folders:");
             }
             outputListView.ItemsSource = console;
         }
 
-        private void Window_Closing(object sender, CancelEventArgs e) {
-
-            try {
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            try
+            {
                 serialize(path + @"\Bin\Image Comparator.imc");
-            } catch {
+            }
+            catch
+            {
             }
 
-            try {
+            try
+            {
                 process.Kill();
-            } catch {
+            }
+            catch
+            {
             }
 
-            try {
+            try
+            {
                 File.Delete(path + @"\Bin\Results.imc");
-            } catch {
+            }
+            catch
+            {
             }
 
-            try {
+            try
+            {
                 File.Delete(path + @"\Bin\Directories.imc");
-            } catch {
+            }
+            catch
+            {
             }
 
-            try {
+            try
+            {
                 File.Delete(path + @"\Bin\Filters.imc");
-            } catch {
+            }
+            catch
+            {
             }
             Environment.Exit(0);
         }
 
-        private void saveResultsMenuItem_Click(object sender, RoutedEventArgs e) {
-
-            if (englishMenuItem.IsChecked) {
+        private void saveResultsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (englishMenuItem.IsChecked)
+            {
                 saveFileDialog.Title = "Save Results";
-            } else {
+            }
+            else
+            {
                 saveFileDialog.Title = "Sonuçları Kaydet";
             }
 
-            if ((bool) saveFileDialog.ShowDialog()) {
+            if ((bool)saveFileDialog.ShowDialog())
+            {
                 serialize(saveFileDialog.FileName);
 
-                if (englishMenuItem.IsChecked) {
+                if (englishMenuItem.IsChecked)
+                {
                     console.Add("Session have been saved to " + saveFileDialog.FileName);
-                } else {
+                }
+                else
+                {
                     console.Add("Oturum " + saveFileDialog.FileName + " konumuna kaydedildi.");
                 }
             }
         }
 
-        private void loadResultsMenuItem_Click(object sender, RoutedEventArgs e) {
-
-            if (englishMenuItem.IsChecked) {
+        private void loadResultsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (englishMenuItem.IsChecked)
+            {
                 openFileDialog.Title = "Load Results";
-            } else {
+            }
+            else
+            {
                 openFileDialog.Title = "Sonuçları Yükle";
             }
 
-            if ((bool) openFileDialog.ShowDialog()) {
+            if ((bool)openFileDialog.ShowDialog())
+            {
                 deserialize(openFileDialog.FileName);
             }
         }
 
-        private void exitMenuItem_Click(object sender, RoutedEventArgs e) {
-
+        private void exitMenuItem_Click(object sender, RoutedEventArgs e)
+        {
             Close();
         }
 
-        private void sendToRecycleBinMenuItem_Click(object sender, RoutedEventArgs e) {
-
+        private void sendToRecycleBinMenuItem_Click(object sender, RoutedEventArgs e)
+        {
             sendToRecycleBinMenuItem.IsChecked = true;
             deletePermanentlyMenuItem.IsChecked = false;
             sendToRecycleBinMenuItem.IsEnabled = false;
             deletePermanentlyMenuItem.IsEnabled = true;
         }
 
-        private void deletePermanentlyMenuItem_Click(object sender, RoutedEventArgs e) {
-
+        private void deletePermanentlyMenuItem_Click(object sender, RoutedEventArgs e)
+        {
             sendToRecycleBinMenuItem.IsChecked = false;
             deletePermanentlyMenuItem.IsChecked = true;
             sendToRecycleBinMenuItem.IsEnabled = true;
             deletePermanentlyMenuItem.IsEnabled = false;
         }
 
-        private void englishMenuItem_Click(object sender, RoutedEventArgs e) {
-
+        private void englishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
             englishMenuItem.IsChecked = true;
             turkishMenuItem.IsChecked = false;
             englishMenuItem.IsEnabled = false;
@@ -287,8 +322,8 @@ namespace ImageComparator2 {
             convertToEnglish();
         }
 
-        private void turkishMenuItem_Click(object sender, RoutedEventArgs e) {
-
+        private void turkishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
             englishMenuItem.IsChecked = false;
             turkishMenuItem.IsChecked = true;
             englishMenuItem.IsEnabled = true;
@@ -296,8 +331,8 @@ namespace ImageComparator2 {
             convertToTurkish();
         }
 
-        private void resetToDefaultsMenuItem_Click(object sender, RoutedEventArgs e) {
-
+        private void resetToDefaultsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
             jpegMenuItem.IsChecked = true;
             bmpMenuItem.IsChecked = true;
             pngMenuItem.IsChecked = true;
@@ -313,50 +348,67 @@ namespace ImageComparator2 {
             findExactDuplicatesOnlyMenuItem.IsChecked = false;
         }
 
-        private void howToUseMenuItem_Click(object sender, RoutedEventArgs e) {
+        private void howToUseMenuItem_Click(object sender, RoutedEventArgs e)
+        {
 
         }
 
-        private void aboutMenuItem_Click(object sender, RoutedEventArgs e) {
+        private void aboutMenuItem_Click(object sender, RoutedEventArgs e)
+        {
 
         }
 
-        private void addFolderButton_Click(object sender, RoutedEventArgs e) {
-
-            if (englishMenuItem.IsChecked) {
+        private void addFolderButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (englishMenuItem.IsChecked)
+            {
                 folderBrowserDialog.Description = "Add Folder";
-            } else {
+            }
+            else
+            {
                 folderBrowserDialog.Description = "Klasör Ekle";
             }
 
-            if ((bool) folderBrowserDialog.ShowDialog()) {
-                if (directories.Count == 0) {
+            if ((bool)folderBrowserDialog.ShowDialog())
+            {
+                if (directories.Count == 0)
+                {
                     console.Clear();
 
-                    if (englishMenuItem.IsChecked) {
+                    if (englishMenuItem.IsChecked)
+                    {
                         console.Add("Drag-Drop to add folders:");
-                    } else {
+                    }
+                    else
+                    {
                         console.Add("Klasör eklemek için sürükle-bırak:");
                     }
                 }
 
-                if (!directories.Contains(folderBrowserDialog.SelectedPath)) {
+                if (!directories.Contains(folderBrowserDialog.SelectedPath))
+                {
                     directories.Add(folderBrowserDialog.SelectedPath);
 
-                    if (englishMenuItem.IsChecked) {
+                    if (englishMenuItem.IsChecked)
+                    {
                         console.Insert(console.Count - 1, "Added " + folderBrowserDialog.SelectedPath);
-                    } else {
+                    }
+                    else
+                    {
                         console.Insert(console.Count - 1, "Klasör eklendi: " + folderBrowserDialog.SelectedPath);
                     }
                 }
             }
         }
 
-        private void findDuplicatesButton_Click(object sender, RoutedEventArgs e) {
-
-            if (directories.Count > 0) {
-                if (directories.Contains("C:\\") || directories.Contains("C:\\Windows")) {
-                    if (MessageBox.Show("Are you sure?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No) {
+        private void findDuplicatesButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (directories.Count > 0)
+            {
+                if (directories.Contains("C:\\") || directories.Contains("C:\\Windows"))
+                {
+                    if (MessageBox.Show("Are you sure?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.No)
+                    {
                         return;
                     }
                 }
@@ -377,18 +429,27 @@ namespace ImageComparator2 {
                 skipFilesWithDifferentOrientation = skipFilesWithDifferentOrientationMenuItem.IsChecked;
                 duplicatesOnly = findExactDuplicatesOnlyMenuItem.IsChecked;
 
-                for (int i = 0; i < directories.Count; i++) {
-
-                    if (includeSubfoldersMenuItem.IsChecked) {
-                        if (englishMenuItem.IsChecked) {
+                for (int i = 0; i < directories.Count; i++)
+                {
+                    if (includeSubfoldersMenuItem.IsChecked)
+                    {
+                        if (englishMenuItem.IsChecked)
+                        {
                             console.Add("Comparing images from " + directories[i] + " and its subdirectories.");
-                        } else {
+                        }
+                        else
+                        {
                             console.Add(directories[i] + " konumundaki ve alt klasörlerindeki resimler karşılaştırılıyor.");
                         }
-                    } else {
-                        if (englishMenuItem.IsChecked) {
+                    }
+                    else
+                    {
+                        if (englishMenuItem.IsChecked)
+                        {
                             console.Add("Comparing images from " + directories[i] + ".");
-                        } else {
+                        }
+                        else
+                        {
                             console.Add(directories[i] + " konumundaki resimler karşılaştırılıyor.");
                         }
                     }
@@ -402,18 +463,24 @@ namespace ImageComparator2 {
                 icoMenuItemChecked = icoMenuItem.IsChecked;
                 processThread = new Thread(run);
                 processThread.Start();
-            } else {
-                if (englishMenuItem.IsChecked) {
+            }
+            else
+            {
+                if (englishMenuItem.IsChecked)
+                {
                     console.Add("No directories added.");
-                } else {
+                }
+                else
+                {
                     console.Add("Klasör eklenmedi.");
                 }
             }
         }
 
-        private void findDuplicatesButton_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e) {
-
-            if (findDuplicatesButton.Visibility == Visibility.Visible) {
+        private void findDuplicatesButton_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (findDuplicatesButton.Visibility == Visibility.Visible)
+            {
                 saveResultsMenuItem.IsEnabled = true;
                 loadResultsMenuItem.IsEnabled = true;
                 jpegMenuItem.IsEnabled = true;
@@ -434,7 +501,9 @@ namespace ImageComparator2 {
                 deleteSelectedButton.IsEnabled = true;
                 removeFromListButton.IsEnabled = true;
                 clearButton.IsEnabled = true;
-            } else {
+            }
+            else
+            {
                 saveResultsMenuItem.IsEnabled = false;
                 loadResultsMenuItem.IsEnabled = false;
                 jpegMenuItem.IsEnabled = false;
@@ -458,36 +527,50 @@ namespace ImageComparator2 {
             }
         }
 
-        private void deleteSelectedButton_Click(object sender, RoutedEventArgs e) {
-
+        private void deleteSelectedButton_Click(object sender, RoutedEventArgs e)
+        {
             List<ListViewDataItem> selectedItems1 = new List<ListViewDataItem>();
             List<ListViewDataItem> selectedItems2 = new List<ListViewDataItem>();
 
-            for (int i = 0; i < bindingList1.Count; i++) {
-
-                if (bindingList1[i].isSelected && !fileAddedBefore(selectedItems1, bindingList1[i]) && !fileAddedBefore(selectedItems2, bindingList1[i])) {
-                    try {
-                        if (deletePermanentlyMenuItem.IsChecked) {
+            for (int i = 0; i < bindingList1.Count; i++)
+            {
+                if (bindingList1[i].isSelected && !fileAddedBefore(selectedItems1, bindingList1[i]) && !fileAddedBefore(selectedItems2, bindingList1[i]))
+                {
+                    try
+                    {
+                        if (deletePermanentlyMenuItem.IsChecked)
+                        {
                             FileSystem.DeleteFile(bindingList1[i].text, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-                        } else {
+                        }
+                        else
+                        {
                             FileSystem.DeleteFile(bindingList1[i].text, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         }
-                    } catch {
+                    }
+                    catch
+                    {
                     }
                     selectedItems1.Add(bindingList1[i]);
                 }
             }
 
-            for (int i = 0; i < bindingList2.Count; i++) {
-
-                if (bindingList2[i].isSelected && !fileAddedBefore(selectedItems1, bindingList2[i]) && !fileAddedBefore(selectedItems2, bindingList2[i])) {
-                    try {
-                        if (deletePermanentlyMenuItem.IsChecked) {
+            for (int i = 0; i < bindingList2.Count; i++)
+            {
+                if (bindingList2[i].isSelected && !fileAddedBefore(selectedItems1, bindingList2[i]) && !fileAddedBefore(selectedItems2, bindingList2[i]))
+                {
+                    try
+                    {
+                        if (deletePermanentlyMenuItem.IsChecked)
+                        {
                             FileSystem.DeleteFile(bindingList2[i].text, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-                        } else {
+                        }
+                        else
+                        {
                             FileSystem.DeleteFile(bindingList2[i].text, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         }
-                    } catch {
+                    }
+                    catch
+                    {
                     }
                     selectedItems2.Add(bindingList2[i]);
                 }
@@ -496,69 +579,86 @@ namespace ImageComparator2 {
             int tempIndex1, tempIndex2;
             ListViewDataItem tempListViewDataItem;
 
-            for (int i = 0; i < selectedItems1.Count; i++) {
-
+            for (int i = 0; i < selectedItems1.Count; i++)
+            {
                 tempListViewDataItem = selectedItems1[i];
                 tempIndex1 = findDuplicateIndex(bindingList1, tempListViewDataItem);
                 tempIndex2 = findDuplicateIndex(bindingList2, tempListViewDataItem);
 
-                if (tempIndex1 == -1 && tempIndex2 == -1) {
-                    for (int j = 0; j < bindingList1.Count; j++) {
-
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text) || bindingList2[j].text.Equals(tempListViewDataItem.text)) {
+                if (tempIndex1 == -1 && tempIndex2 == -1)
+                {
+                    for (int j = 0; j < bindingList1.Count; j++)
+                    {
+                        if (bindingList1[j].text.Equals(tempListViewDataItem.text) || bindingList2[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList1.RemoveAt(j);
                             bindingList2.RemoveAt(j);
                             j--;
                         }
                     }
-                } else if (tempIndex1 != -1 && tempIndex2 != -1) {
+                }
+                else if (tempIndex1 != -1 && tempIndex2 != -1)
+                {
                     bindingList2.RemoveAt(tempIndex2);
 
-                    if (tempIndex1 > tempIndex2) {
+                    if (tempIndex1 > tempIndex2)
+                    {
                         bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1 - 1].text, bindingList2[tempIndex1 - 1].confidence, bindingList2[tempIndex1 - 1].pHashHammingDistance, bindingList2[tempIndex1 - 1].hdHashHammingDistance, bindingList2[tempIndex1 - 1].vdHashHammingDistance, bindingList2[tempIndex1 - 1].aHashHammingDistance));
-                    } else {
+                    }
+                    else
+                    {
                         bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList2[tempIndex1].confidence, bindingList2[tempIndex1].pHashHammingDistance, bindingList2[tempIndex1].hdHashHammingDistance, bindingList2[tempIndex1].vdHashHammingDistance, bindingList2[tempIndex1].aHashHammingDistance));
                     }
 
                     bindingList2.RemoveAt(tempIndex1);
                     bindingList1.RemoveAt(tempIndex1);
 
-                    for (int j = 0; j < bindingList1.Count; j++) {
-
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text)) {
+                    for (int j = 0; j < bindingList1.Count; j++)
+                    {
+                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList1.RemoveAt(j + 1);
                         }
 
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text)) {
+                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
-                } else if (tempIndex1 != -1) {
-                    for (int j = 0; j < bindingList1.Count; j++) {
-
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text)) {
+                }
+                else if (tempIndex1 != -1)
+                {
+                    for (int j = 0; j < bindingList1.Count; j++)
+                    {
+                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList1.RemoveAt(j + 1);
                         }
 
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text)) {
+                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
                     bindingList1.RemoveAt(tempIndex1);
                     bindingList2.RemoveAt(tempIndex1);
-                } else {
-                    for (int j = 0; j < bindingList2.Count; j++) {
-
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text)) {
+                }
+                else
+                {
+                    for (int j = 0; j < bindingList2.Count; j++)
+                    {
+                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList1.RemoveAt(j + 1);
                         }
 
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text)) {
+                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList2.RemoveAt(j + 1);
                         }
@@ -567,10 +667,12 @@ namespace ImageComparator2 {
                     bindingList2.RemoveAt(tempIndex2);
                 }
 
-                for (int j = 0; j < bindingList1.Count - 1; j++) {
-                    for (int k = j + 1; k < bindingList1.Count; k++) {
-
-                        if (bindingList1[j].text.Equals(bindingList1[k].text) && bindingList2[j].text.Equals(bindingList2[k].text) || bindingList1[j].text.Equals(bindingList2[k].text) && bindingList2[j].text.Equals(bindingList1[k].text)) {
+                for (int j = 0; j < bindingList1.Count - 1; j++)
+                {
+                    for (int k = j + 1; k < bindingList1.Count; k++)
+                    {
+                        if (bindingList1[j].text.Equals(bindingList1[k].text) && bindingList2[j].text.Equals(bindingList2[k].text) || bindingList1[j].text.Equals(bindingList2[k].text) && bindingList2[j].text.Equals(bindingList1[k].text))
+                        {
                             bindingList1.RemoveAt(k);
                             bindingList2.RemoveAt(k);
                             k--;
@@ -579,68 +681,85 @@ namespace ImageComparator2 {
                 }
             }
 
-            for (int i = 0; i < selectedItems2.Count; i++) {
-
+            for (int i = 0; i < selectedItems2.Count; i++)
+            {
                 tempListViewDataItem = selectedItems2[i];
                 tempIndex1 = findDuplicateIndex(bindingList1, tempListViewDataItem);
                 tempIndex2 = findDuplicateIndex(bindingList2, tempListViewDataItem);
 
-                if (tempIndex1 == -1 && tempIndex2 == -1) {
-                    for (int j = 0; j < bindingList1.Count; j++) {
-
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text) || bindingList2[j].text.Equals(tempListViewDataItem.text)) {
+                if (tempIndex1 == -1 && tempIndex2 == -1)
+                {
+                    for (int j = 0; j < bindingList1.Count; j++)
+                    {
+                        if (bindingList1[j].text.Equals(tempListViewDataItem.text) || bindingList2[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList1.RemoveAt(j);
                             bindingList2.RemoveAt(j);
                             j--;
                         }
                     }
-                } else if (tempIndex1 != -1 && tempIndex2 != -1) {
+                }
+                else if (tempIndex1 != -1 && tempIndex2 != -1)
+                {
                     bindingList2.RemoveAt(tempIndex2);
 
-                    if (tempIndex1 > tempIndex2) {
+                    if (tempIndex1 > tempIndex2)
+                    {
                         bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1 - 1].text, bindingList2[tempIndex1 - 1].confidence, bindingList2[tempIndex1 - 1].pHashHammingDistance, bindingList2[tempIndex1 - 1].hdHashHammingDistance, bindingList2[tempIndex1 - 1].vdHashHammingDistance, bindingList2[tempIndex1 - 1].aHashHammingDistance));
-                    } else {
+                    }
+                    else
+                    {
                         bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList2[tempIndex1].confidence, bindingList2[tempIndex1].pHashHammingDistance, bindingList2[tempIndex1].hdHashHammingDistance, bindingList2[tempIndex1].vdHashHammingDistance, bindingList2[tempIndex1].aHashHammingDistance));
                     }
                     bindingList2.RemoveAt(tempIndex1);
                     bindingList1.RemoveAt(tempIndex1);
 
-                    for (int j = 0; j < bindingList2.Count; j++) {
-
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text)) {
+                    for (int j = 0; j < bindingList2.Count; j++)
+                    {
+                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex2].text, bindingList2[j].confidence, bindingList2[j].pHashHammingDistance, bindingList2[j].hdHashHammingDistance, bindingList2[j].vdHashHammingDistance, bindingList2[j].aHashHammingDistance));
                             bindingList1.RemoveAt(j + 1);
                         }
 
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text)) {
+                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex2].text, bindingList2[j].confidence, bindingList2[j].pHashHammingDistance, bindingList2[j].hdHashHammingDistance, bindingList2[j].vdHashHammingDistance, bindingList2[j].aHashHammingDistance));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
-                } else if (tempIndex1 != -1) {
-                    for (int j = 0; j < bindingList1.Count; j++) {
-
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text)) {
+                }
+                else if (tempIndex1 != -1)
+                {
+                    for (int j = 0; j < bindingList1.Count; j++)
+                    {
+                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList1.RemoveAt(j + 1);
                         }
 
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text)) {
+                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
                     bindingList1.RemoveAt(tempIndex1);
                     bindingList2.RemoveAt(tempIndex1);
-                } else {
-                    for (int j = 0; j < bindingList2.Count; j++) {
-
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text)) {
+                }
+                else
+                {
+                    for (int j = 0; j < bindingList2.Count; j++)
+                    {
+                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList1.RemoveAt(j + 1);
                         }
 
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text)) {
+                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
+                        {
                             bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
                             bindingList2.RemoveAt(j + 1);
                         }
@@ -649,10 +768,12 @@ namespace ImageComparator2 {
                     bindingList2.RemoveAt(tempIndex2);
                 }
 
-                for (int j = 0; j < bindingList1.Count - 1; j++) {
-                    for (int k = j + 1; k < bindingList1.Count; k++) {
-
-                        if (bindingList1[j].text.Equals(bindingList1[k].text) && bindingList2[j].text.Equals(bindingList2[k].text) || bindingList1[j].text.Equals(bindingList2[k].text) && bindingList2[j].text.Equals(bindingList1[k].text)) {
+                for (int j = 0; j < bindingList1.Count - 1; j++)
+                {
+                    for (int k = j + 1; k < bindingList1.Count; k++)
+                    {
+                        if (bindingList1[j].text.Equals(bindingList1[k].text) && bindingList2[j].text.Equals(bindingList2[k].text) || bindingList1[j].text.Equals(bindingList2[k].text) && bindingList2[j].text.Equals(bindingList1[k].text))
+                        {
                             bindingList1.RemoveAt(k);
                             bindingList2.RemoveAt(k);
                             k--;
@@ -661,50 +782,61 @@ namespace ImageComparator2 {
                 }
             }
 
-            if (sendToRecycleBinMenuItem.IsChecked) {
-                if (englishMenuItem.IsChecked) {
+            if (sendToRecycleBinMenuItem.IsChecked)
+            {
+                if (englishMenuItem.IsChecked)
+                {
                     console.Add((selectedItems1.Count + selectedItems2.Count) + " file(s) have been sent to recycle bin.");
-                } else {
+                }
+                else
+                {
                     console.Add((selectedItems1.Count + selectedItems2.Count) + " dosya geri dönüşüm kutusuna gönderildi.");
                 }
-            } else {
-                if (englishMenuItem.IsChecked) {
+            }
+            else
+            {
+                if (englishMenuItem.IsChecked)
+                {
                     console.Add((selectedItems1.Count + selectedItems2.Count) + " file(s) have been deleted.");
-                } else {
+                }
+                else
+                {
                     console.Add((selectedItems1.Count + selectedItems2.Count) + " dosya silindi.");
                 }
             }
         }
 
-        private void removeFromListButton_Click(object sender, RoutedEventArgs e) {
-
+        private void removeFromListButton_Click(object sender, RoutedEventArgs e)
+        {
             List<int> selectedIndices = new List<int>();
 
-            for (int i = 0; i < bindingList1.Count; i++) {
-
-                if (bindingList1[i].isSelected) {
+            for (int i = 0; i < bindingList1.Count; i++)
+            {
+                if (bindingList1[i].isSelected)
+                {
                     selectedIndices.Add(i);
                 }
             }
 
-            for (int i = 0; i < bindingList2.Count; i++) {
-
-                if (bindingList2[i].isSelected) {
+            for (int i = 0; i < bindingList2.Count; i++)
+            {
+                if (bindingList2[i].isSelected)
+                {
                     selectedIndices.Add(i);
                 }
             }
 
             selectedIndices.Sort();
 
-            for (int i = selectedIndices.Count - 1; i > -1; i--) {
-
+            for (int i = selectedIndices.Count - 1; i > -1; i--)
+            {
                 bindingList1.RemoveAt(selectedIndices[i]);
                 bindingList2.RemoveAt(selectedIndices[i]);
             }
         }
 
-        private void clearButton_Click(object sender, RoutedEventArgs e) {
-
+        private void clearButton_Click(object sender, RoutedEventArgs e)
+        {
             directories.Clear();
             files.Clear();
             console.Clear();
@@ -714,22 +846,29 @@ namespace ImageComparator2 {
             list2.Clear();
             percentage.Value = 0;
 
-            if (englishMenuItem.IsChecked) {
+            if (englishMenuItem.IsChecked)
+            {
                 console.Add("Drag-Drop to add folders:");
-            } else {
+            }
+            else
+            {
                 console.Add("Klasör eklemek için sürükle-bırak:");
             }
         }
 
-        private void pauseButton_Click(object sender, RoutedEventArgs e) {
-
-            if (pauseButton.Tag.Equals("0")) {
+        private void pauseButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (pauseButton.Tag.Equals("0"))
+            {
                 pauseButton.Tag = "1";
 
-                if (englishMenuItem.IsChecked) {
+                if (englishMenuItem.IsChecked)
+                {
                     pauseButton.Content = "Resume";
                     console.Add("Paused.");
-                } else {
+                }
+                else
+                {
                     pauseButton.Content = "Devam Et";
                     console.Add("Duraklatıldı.");
                 }
@@ -738,23 +877,30 @@ namespace ImageComparator2 {
 
                 bool otherThreadsRun = false;
 
-                for (int i = 0; i < threadList.Count; i++) {
-
-                    if (threadList.ElementAt(i).IsAlive) {
+                for (int i = 0; i < threadList.Count; i++)
+                {
+                    if (threadList.ElementAt(i).IsAlive)
+                    {
                         threadList.ElementAt(i).Suspend();
                         otherThreadsRun = true;
                     }
                 }
 
-                if (!otherThreadsRun) {
+                if (!otherThreadsRun)
+                {
                     processThread.Suspend();
                 }
-            } else {
+            }
+            else
+            {
                 pauseButton.Tag = "0";
 
-                if (englishMenuItem.IsChecked) {
+                if (englishMenuItem.IsChecked)
+                {
                     pauseButton.Content = "Pause";
-                } else {
+                }
+                else
+                {
                     pauseButton.Content = "Duraklat";
                 }
 
@@ -763,61 +909,79 @@ namespace ImageComparator2 {
                 pauseTime += pausedSecondTime - pausedFirstTime;
                 bool otherThreadsRun = false;
 
-                for (int i = 0; i < threadList.Count; i++) {
-
-                    if (threadList.ElementAt(i).ThreadState.Equals(ThreadState.Suspended)) {
+                for (int i = 0; i < threadList.Count; i++)
+                {
+                    if (threadList.ElementAt(i).ThreadState.Equals(ThreadState.Suspended))
+                    {
                         threadList.ElementAt(i).Resume();
                         otherThreadsRun = true;
                     }
                 }
 
-                if (!otherThreadsRun) {
+                if (!otherThreadsRun)
+                {
                     processThread.Resume();
                 }
             }
         }
 
-        private void stopButton_Click(object sender, RoutedEventArgs e) {
-
+        private void stopButton_Click(object sender, RoutedEventArgs e)
+        {
             findDuplicatesButton.Visibility = Visibility.Visible;
             pauseButton.Visibility = Visibility.Collapsed;
             stopButton.Visibility = Visibility.Collapsed;
 
-            try {
-                for (int i = 0; i < threadList.Count; i++) {
-
-                    if (threadList.ElementAt(i).ThreadState.Equals(ThreadState.Suspended)) {
+            try
+            {
+                for (int i = 0; i < threadList.Count; i++)
+                {
+                    if (threadList.ElementAt(i).ThreadState.Equals(ThreadState.Suspended))
+                    {
                         threadList.ElementAt(i).Resume();
                     }
                 }
-            } catch {
-
+            }
+            catch
+            {
             }
 
-            try {
-                for (int i = 0; i < threadList.Count; i++) {
-                    try {
+            try
+            {
+                for (int i = 0; i < threadList.Count; i++)
+                {
+                    try
+                    {
                         threadList.ElementAt(i).Abort();
-                    } catch {
+                    }
+                    catch
+                    {
                     }
                 }
-            } catch {
-
+            }
+            catch
+            {
             }
 
-            try {
+            try
+            {
                 processThread.Abort();
-            } catch (ThreadStateException) {
+            }
+            catch (ThreadStateException)
+            {
                 processThread.Resume();
             }
 
-            if (englishMenuItem.IsChecked) {
+            if (englishMenuItem.IsChecked)
+            {
                 pauseButton.Content = "Pause";
-            } else {
+            }
+            else
+            {
                 pauseButton.Content = "Duraklat";
             }
 
-            if (pauseButton.Tag.Equals("1")) {
+            if (pauseButton.Tag.Equals("1"))
+            {
                 console.RemoveAt(console.Count - 1);
             }
 
@@ -830,82 +994,110 @@ namespace ImageComparator2 {
             list1.Clear();
             list2.Clear();
 
-            if (englishMenuItem.IsChecked) {
+            if (englishMenuItem.IsChecked)
+            {
                 console[console.Count - 1] = "Interrupted by user.";
-            } else {
+            }
+            else
+            {
                 console[console.Count - 1] = "Kullanıcı tarafından durduruldu.";
             }
         }
 
-        private void listView1_KeyDown(object sender, KeyEventArgs e) {
-
-            if (e.Key == Key.Enter && listView1.SelectedIndex != -1) {
-                try {
+        private void listView1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && listView1.SelectedIndex != -1)
+            {
+                try
+                {
                     System.Diagnostics.Process.Start(bindingList1[listView1.SelectedIndex].text);
-                } catch {
+                }
+                catch
+                {
                     Console.WriteLine("Oops3");
                 }
-            } else if (e.Key == Key.Right && listView1.SelectedIndex != -1) {
+            }
+            else if (e.Key == Key.Right && listView1.SelectedIndex != -1)
+            {
                 listView2.SelectedIndex = listView1.SelectedIndex;
                 ListViewItem item = listView2.ItemContainerGenerator.ContainerFromIndex(listView2.SelectedIndex) as ListViewItem;
                 Keyboard.Focus(item);
             }
         }
 
-        private void listView2_KeyDown(object sender, KeyEventArgs e) {
-
-            if (e.Key == Key.Enter && listView2.SelectedIndex != -1) {
-                try {
+        private void listView2_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter && listView2.SelectedIndex != -1)
+            {
+                try
+                {
                     System.Diagnostics.Process.Start(bindingList2[listView2.SelectedIndex].text);
-                } catch {
+                }
+                catch
+                {
                     Console.WriteLine("Oops4");
                 }
-            } else if (e.Key == Key.Left && listView2.SelectedIndex != -1) {
+            }
+            else if (e.Key == Key.Left && listView2.SelectedIndex != -1)
+            {
                 listView1.SelectedIndex = listView2.SelectedIndex;
                 ListViewItem item = listView1.ItemContainerGenerator.ContainerFromIndex(listView1.SelectedIndex) as ListViewItem;
                 Keyboard.Focus(item);
             }
         }
 
-        private void listView1_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+        private void listView1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ListViewDataItem item = ((FrameworkElement)e.OriginalSource).DataContext as ListViewDataItem;
 
-            ListViewDataItem item = ((FrameworkElement) e.OriginalSource).DataContext as ListViewDataItem;
-
-            if (item != null) {
-                if (listView1.SelectedIndex != -1) {
-                    try {
+            if (item != null)
+            {
+                if (listView1.SelectedIndex != -1)
+                {
+                    try
+                    {
                         System.Diagnostics.Process.Start(bindingList1[listView1.SelectedIndex].text);
-                    } catch {
+                    }
+                    catch
+                    {
                         Console.WriteLine("Oops1");
                     }
                 }
             }
         }
 
-        private void listView2_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+        private void listView2_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            ListViewDataItem item = ((FrameworkElement)e.OriginalSource).DataContext as ListViewDataItem;
 
-            ListViewDataItem item = ((FrameworkElement) e.OriginalSource).DataContext as ListViewDataItem;
-
-            if (item != null) {
-                if (listView2.SelectedIndex != -1) {
-                    try {
+            if (item != null)
+            {
+                if (listView2.SelectedIndex != -1)
+                {
+                    try
+                    {
                         System.Diagnostics.Process.Start(bindingList2[listView2.SelectedIndex].text);
-                    } catch {
+                    }
+                    catch
+                    {
                         Console.WriteLine("Oops2");
                     }
                 }
             }
         }
 
-        private void listView1_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-
-            if (listView1.SelectedIndex == -1) {
+        private void listView1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (listView1.SelectedIndex == -1)
+            {
                 previewLabel.Visibility = Visibility.Visible;
                 informationLabel1.Content = "";
                 informationLabel2.Content = "";
                 ReloadImage1(null);
                 ReloadImage2(null);
-            } else {
+            }
+            else
+            {
                 bindingList2[listView1.Items.IndexOf(listView1.SelectedItems[listView1.SelectedItems.Count - 1])].isSelected = false;
                 previewLabel.Visibility = Visibility.Collapsed;
                 ReloadImage1(bindingList1.ElementAt(listView1.SelectedIndex).text);
@@ -915,15 +1107,18 @@ namespace ImageComparator2 {
             }
         }
 
-        private void listView2_SelectionChanged(object sender, SelectionChangedEventArgs e) {
-
-            if (listView2.SelectedIndex == -1) {
+        private void listView2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (listView2.SelectedIndex == -1)
+            {
                 previewLabel.Visibility = Visibility.Visible;
                 informationLabel1.Content = "";
                 informationLabel2.Content = "";
                 ReloadImage1(null);
                 ReloadImage2(null);
-            } else {
+            }
+            else
+            {
                 bindingList1[listView2.Items.IndexOf(listView2.SelectedItems[listView2.SelectedItems.Count - 1])].isSelected = false;
                 previewLabel.Visibility = Visibility.Collapsed;
                 ReloadImage1(bindingList1.ElementAt(listView2.SelectedIndex).text);
@@ -933,61 +1128,79 @@ namespace ImageComparator2 {
             }
         }
 
-        private void listView1_ScrollChanged(object sender, RoutedEventArgs e) {
-
+        private void listView1_ScrollChanged(object sender, RoutedEventArgs e)
+        {
             ScrollViewer listView1ScrollViewer = GetDescendantByType(listView1, typeof(ScrollViewer)) as ScrollViewer;
             ScrollViewer listView2ScrollViewer = GetDescendantByType(listView2, typeof(ScrollViewer)) as ScrollViewer;
             listView2ScrollViewer.ScrollToVerticalOffset(listView1ScrollViewer.VerticalOffset);
         }
 
-        private void listView2_ScrollChanged(object sender, RoutedEventArgs e) {
-
+        private void listView2_ScrollChanged(object sender, RoutedEventArgs e)
+        {
             ScrollViewer listView1ScrollViewer = GetDescendantByType(listView1, typeof(ScrollViewer)) as ScrollViewer;
             ScrollViewer listView2ScrollViewer = GetDescendantByType(listView2, typeof(ScrollViewer)) as ScrollViewer;
             listView1ScrollViewer.ScrollToVerticalOffset(listView2ScrollViewer.VerticalOffset);
         }
 
-        private void outputListView_DragEnter(object sender, DragEventArgs e) {
-
-            if (e.Data.GetDataPresent(DataFormats.FileDrop) && findDuplicatesButton.Visibility == Visibility.Visible) {
+        private void outputListView_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop) && findDuplicatesButton.Visibility == Visibility.Visible)
+            {
                 e.Effects = DragDropEffects.All;
-            } else {
+            }
+            else
+            {
                 e.Effects = DragDropEffects.None;
             }
         }
 
-        private void outputListView_Drop(object sender, DragEventArgs e) {
-
-            if (findDuplicatesButton.Visibility == Visibility.Visible) {
-                string[] dragDrop = (string[]) e.Data.GetData(DataFormats.FileDrop, false);
+        private void outputListView_Drop(object sender, DragEventArgs e)
+        {
+            if (findDuplicatesButton.Visibility == Visibility.Visible)
+            {
+                string[] dragDrop = (string[])e.Data.GetData(DataFormats.FileDrop, false);
                 DirectoryInfo directoryInfo;
 
-                if (directories.Count == 0) {
+                if (directories.Count == 0)
+                {
                     console.Clear();
 
-                    if (englishMenuItem.IsChecked) {
+                    if (englishMenuItem.IsChecked)
+                    {
                         console.Add("Drag-Drop to add folders:");
-                    } else {
+                    }
+                    else
+                    {
                         console.Add("Klasör eklemek için sürükle-bırak:");
                     }
                 }
 
-                for (int i = 0; i < dragDrop.Length; i++) {
-
+                for (int i = 0; i < dragDrop.Length; i++)
+                {
                     directoryInfo = new DirectoryInfo(dragDrop[i]);
 
-                    if (!directories.Contains(dragDrop[i])) {
-                        if (directoryInfo.Exists) {
+                    if (!directories.Contains(dragDrop[i]))
+                    {
+                        if (directoryInfo.Exists)
+                        {
                             directories.Add(dragDrop[i]);
-                            if (englishMenuItem.IsChecked) {
+                            if (englishMenuItem.IsChecked)
+                            {
                                 console.Insert(console.Count - 1, "Added " + dragDrop[i]);
-                            } else {
+                            }
+                            else
+                            {
                                 console.Insert(console.Count - 1, "Klasör eklendi: " + dragDrop[i]);
                             }
-                        } else {
-                            if (englishMenuItem.IsChecked) {
+                        }
+                        else
+                        {
+                            if (englishMenuItem.IsChecked)
+                            {
                                 console.Insert(console.Count - 1, "Directories only.");
-                            } else {
+                            }
+                            else
+                            {
                                 console.Insert(console.Count - 1, "Sadece klasörler eklenebilir.");
                             }
                         }
@@ -996,39 +1209,51 @@ namespace ImageComparator2 {
             }
         }
 
-        private void percentageChanged(object sender, EventArgs e) {
-
-            Action<int> updateProgressBar = delegate (int value) {
+        private void percentageChanged(object sender, EventArgs e)
+        {
+            Action<int> updateProgressBar = delegate (int value)
+            {
                 progressBar.Value = value;
 
-                if (!findDuplicatesButton.IsVisible) {
-                    if (comparing) {
-                        if (englishMenuItem.IsChecked) {
+                if (!findDuplicatesButton.IsVisible)
+                {
+                    if (comparing)
+                    {
+                        if (englishMenuItem.IsChecked)
+                        {
                             console[console.Count - 1] = value + "% done, comparing results...";
-                        } else {
+                        }
+                        else
+                        {
                             console[console.Count - 1] = value + "% tamamlandı, karşılaştırma yapılıyor...";
                         }
-                    } else {
-                        if (englishMenuItem.IsChecked) {
+                    }
+                    else
+                    {
+                        if (englishMenuItem.IsChecked)
+                        {
                             console[console.Count - 1] = value + "% done, processing files...";
-                        } else {
+                        }
+                        else
+                        {
                             console[console.Count - 1] = value + "% tamamlandı, dosyalar işleniyor...";
                         }
                     }
                 }
             };
 
-            lock (myLock) {
+            lock (myLock)
+            {
                 Dispatcher.Invoke(DispatcherPriority.Normal, updateProgressBar, percentage.Value);
             }
         }
 
-        private void previewImageBorder_ManipulationDelta(object sender, ManipulationDeltaEventArgs e) {
-
-            var st1 = (ScaleTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
-            var st2 = (ScaleTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
-            var tt1 = (TranslateTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
-            var tt2 = (TranslateTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
+        private void previewImageBorder_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+        {
+            var st1 = (ScaleTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var st2 = (ScaleTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var tt1 = (TranslateTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
+            var tt2 = (TranslateTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
 
             st1.ScaleX *= e.DeltaManipulation.Scale.X;
             st2.ScaleX *= e.DeltaManipulation.Scale.X;
@@ -1040,16 +1265,17 @@ namespace ImageComparator2 {
             tt2.Y += e.DeltaManipulation.Translation.Y;
         }
 
-        private void previewImage_MouseWheel(object sender, MouseWheelEventArgs e) {
-
+        private void previewImage_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
             var zoom = e.Delta > 0 ? .2 : -.2;
             var position = e.GetPosition(previewImage1);
             previewImage1.RenderTransformOrigin = new System.Windows.Point(position.X / previewImage1.ActualWidth, position.Y / previewImage1.ActualHeight);
             previewImage2.RenderTransformOrigin = new System.Windows.Point(position.X / previewImage2.ActualWidth, position.Y / previewImage2.ActualHeight);
-            var st1 = (ScaleTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
-            var st2 = (ScaleTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var st1 = (ScaleTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var st2 = (ScaleTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
 
-            if (zoom < 0 && (st1.ScaleX <= 1 || st2.ScaleX <= 1)) {
+            if (zoom < 0 && (st1.ScaleX <= 1 || st2.ScaleX <= 1))
+            {
                 return;
             }
             st1.ScaleX += zoom;
@@ -1058,15 +1284,18 @@ namespace ImageComparator2 {
             st2.ScaleY += zoom;
         }
 
-        private void previewImage1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
-
-            if (e.ClickCount == 2) {
+        private void previewImage1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
                 ResetPanZoom1();
                 ResetPanZoom2();
-            } else {
+            }
+            else
+            {
                 previewImage1.CaptureMouse();
-                var tt1 = (TranslateTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
-                var tt2 = (TranslateTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
+                var tt1 = (TranslateTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
+                var tt2 = (TranslateTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
                 previewImage1Start = e.GetPosition(this);
                 previewImage2Start = e.GetPosition(this);
                 previewImage1Origin = new System.Windows.Point(tt1.X, tt1.Y);
@@ -1074,15 +1303,54 @@ namespace ImageComparator2 {
             }
         }
 
-        private void previewImage2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e) {
+        private void zoomInButton_Click(object sender, RoutedEventArgs e)
+        {
+            var zoom = .2;
+            previewImage1.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+            previewImage2.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+            var st1 = (ScaleTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var st2 = (ScaleTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
 
-            if (e.ClickCount == 2) {
+            if (zoom < 0 && (st1.ScaleX <= 1 || st2.ScaleX <= 1))
+            {
+                return;
+            }
+            st1.ScaleX += zoom;
+            st2.ScaleX += zoom;
+            st1.ScaleY += zoom;
+            st2.ScaleY += zoom;
+        }
+
+        private void zoomOutButton_Click(object sender, RoutedEventArgs e)
+        {
+            var zoom = -.2;
+            previewImage1.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+            previewImage2.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
+            var st1 = (ScaleTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var st2 = (ScaleTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
+
+            if (zoom < 0 && (st1.ScaleX <= 1 || st2.ScaleX <= 1))
+            {
+                return;
+            }
+            st1.ScaleX += zoom;
+            st2.ScaleX += zoom;
+            st1.ScaleY += zoom;
+            st2.ScaleY += zoom;
+        }
+
+        private void previewImage2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
                 ResetPanZoom1();
                 ResetPanZoom2();
-            } else {
+            }
+            else
+            {
                 previewImage2.CaptureMouse();
-                var tt1 = (TranslateTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
-                var tt2 = (TranslateTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
+                var tt1 = (TranslateTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
+                var tt2 = (TranslateTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
                 previewImage1Start = e.GetPosition(this);
                 previewImage2Start = e.GetPosition(this);
                 previewImage1Origin = new System.Windows.Point(tt1.X, tt1.Y);
@@ -1090,11 +1358,12 @@ namespace ImageComparator2 {
             }
         }
 
-        private void previewImage1_MouseMove(object sender, MouseEventArgs e) {
-
-            if (previewImage1.IsMouseCaptured) {
-                var tt1 = (TranslateTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
-                var tt2 = (TranslateTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
+        private void previewImage1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (previewImage1.IsMouseCaptured)
+            {
+                var tt1 = (TranslateTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
+                var tt2 = (TranslateTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
                 var v1 = previewImage1Start - e.GetPosition(this);
                 var v2 = previewImage2Start - e.GetPosition(this);
                 tt1.X = previewImage1Origin.X - v1.X;
@@ -1104,11 +1373,12 @@ namespace ImageComparator2 {
             }
         }
 
-        private void previewImage2_MouseMove(object sender, MouseEventArgs e) {
-
-            if (previewImage2.IsMouseCaptured) {
-                var tt1 = (TranslateTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
-                var tt2 = (TranslateTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
+        private void previewImage2_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (previewImage2.IsMouseCaptured)
+            {
+                var tt1 = (TranslateTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
+                var tt2 = (TranslateTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
                 var v1 = previewImage1Start - e.GetPosition(this);
                 var v2 = previewImage2Start - e.GetPosition(this);
                 tt1.X = previewImage1Origin.X - v1.X;
@@ -1118,38 +1388,38 @@ namespace ImageComparator2 {
             }
         }
 
-        private void previewImage1_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
-
+        private void previewImage1_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
             previewImage1.ReleaseMouseCapture();
         }
 
-        private void previewImage2_MouseLeftButtonUp(object sender, MouseButtonEventArgs e) {
-
+        private void previewImage2_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
             previewImage2.ReleaseMouseCapture();
         }
 
-        protected MainWindow(SerializationInfo info, StreamingContext ctxt) {
-
-            jpegMenuItemChecked = (bool) info.GetValue("jpegMenuItemChecked", typeof(bool));
-            gifMenuItemChecked = (bool) info.GetValue("gifMenuItemChecked", typeof(bool));
-            pngMenuItemChecked = (bool) info.GetValue("pngMenuItemChecked", typeof(bool));
-            bmpMenuItemChecked = (bool) info.GetValue("bmpMenuItemChecked", typeof(bool));
-            tiffMenuItemChecked = (bool) info.GetValue("tiffMenuItemChecked", typeof(bool));
-            icoMenuItemChecked = (bool) info.GetValue("icoMenuItemChecked", typeof(bool));
-            sendsToRecycleBin = (bool) info.GetValue("sendsToRecycleBin", typeof(bool));
-            isEnglish = (bool) info.GetValue("isEnglish", typeof(bool));
-            includeSubfolders = (bool) info.GetValue("includeSubfolders", typeof(bool));
-            skipFilesWithDifferentOrientation = (bool) info.GetValue("skipFilesWithDifferentOrientation", typeof(bool));
-            duplicatesOnly = (bool) info.GetValue("duplicatesOnly", typeof(bool));
-            files = (List<string>) info.GetValue("files", typeof(List<string>));
-            resolutionArray = (System.Drawing.Size[]) info.GetValue("resolutionArray", typeof(System.Drawing.Size[]));
-            bindingList1 = (ObservableCollection<ListViewDataItem>) info.GetValue("bindingList1", typeof(ObservableCollection<ListViewDataItem>));
-            bindingList2 = (ObservableCollection<ListViewDataItem>) info.GetValue("bindingList2", typeof(ObservableCollection<ListViewDataItem>));
-            console = (ObservableCollection<string>) info.GetValue("console", typeof(ObservableCollection<string>));
+        protected MainWindow(SerializationInfo info, StreamingContext ctxt)
+        {
+            jpegMenuItemChecked = (bool)info.GetValue("jpegMenuItemChecked", typeof(bool));
+            gifMenuItemChecked = (bool)info.GetValue("gifMenuItemChecked", typeof(bool));
+            pngMenuItemChecked = (bool)info.GetValue("pngMenuItemChecked", typeof(bool));
+            bmpMenuItemChecked = (bool)info.GetValue("bmpMenuItemChecked", typeof(bool));
+            tiffMenuItemChecked = (bool)info.GetValue("tiffMenuItemChecked", typeof(bool));
+            icoMenuItemChecked = (bool)info.GetValue("icoMenuItemChecked", typeof(bool));
+            sendsToRecycleBin = (bool)info.GetValue("sendsToRecycleBin", typeof(bool));
+            isEnglish = (bool)info.GetValue("isEnglish", typeof(bool));
+            includeSubfolders = (bool)info.GetValue("includeSubfolders", typeof(bool));
+            skipFilesWithDifferentOrientation = (bool)info.GetValue("skipFilesWithDifferentOrientation", typeof(bool));
+            duplicatesOnly = (bool)info.GetValue("duplicatesOnly", typeof(bool));
+            files = (List<string>)info.GetValue("files", typeof(List<string>));
+            resolutionArray = (System.Drawing.Size[])info.GetValue("resolutionArray", typeof(System.Drawing.Size[]));
+            bindingList1 = (ObservableCollection<ListViewDataItem>)info.GetValue("bindingList1", typeof(ObservableCollection<ListViewDataItem>));
+            bindingList2 = (ObservableCollection<ListViewDataItem>)info.GetValue("bindingList2", typeof(ObservableCollection<ListViewDataItem>));
+            console = (ObservableCollection<string>)info.GetValue("console", typeof(ObservableCollection<string>));
         }
 
-        public void GetObjectData(SerializationInfo info, StreamingContext context) {
-
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
             info.AddValue("jpegMenuItemChecked", jpegMenuItem.IsChecked);
             info.AddValue("gifMenuItemChecked", gifMenuItem.IsChecked);
             info.AddValue("pngMenuItemChecked", pngMenuItem.IsChecked);
@@ -1168,22 +1438,23 @@ namespace ImageComparator2 {
             info.AddValue("console", console);
         }
 
-        public void serialize(string path) {
-
+        public void serialize(string path)
+        {
             Stream stream = File.Open(path, FileMode.Create);
             BinaryFormatter bformatter = new BinaryFormatter();
             bformatter.Serialize(stream, this);
             stream.Close();
         }
 
-        public void deserialize(string path) {
-
+        public void deserialize(string path)
+        {
             Stream stream = File.Open(path, FileMode.Open);
             BinaryFormatter bformatter = new BinaryFormatter();
-            mainWindow = (MainWindow) bformatter.Deserialize(stream);
+            mainWindow = (MainWindow)bformatter.Deserialize(stream);
             stream.Close();
 
-            if (opening) {
+            if (opening)
+            {
                 opening = false;
 
                 skipFilesWithDifferentOrientationMenuItem.IsChecked = mainWindow.skipFilesWithDifferentOrientation;
@@ -1196,26 +1467,30 @@ namespace ImageComparator2 {
                 tiffMenuItem.IsChecked = mainWindow.tiffMenuItemChecked;
                 icoMenuItem.IsChecked = mainWindow.icoMenuItemChecked;
 
-                if (!mainWindow.sendsToRecycleBin) {
+                if (!mainWindow.sendsToRecycleBin)
+                {
                     sendToRecycleBinMenuItem.IsChecked = false;
                     deletePermanentlyMenuItem.IsChecked = true;
                     sendToRecycleBinMenuItem.IsEnabled = true;
                     deletePermanentlyMenuItem.IsEnabled = false;
                 }
 
-                if (!mainWindow.isEnglish) {
+                if (!mainWindow.isEnglish)
+                {
                     englishMenuItem.IsChecked = false;
                     turkishMenuItem.IsChecked = true;
                     englishMenuItem.IsEnabled = true;
                     turkishMenuItem.IsEnabled = false;
                     convertToTurkish();
                 }
-            } else {
-                this.bindingList1 = mainWindow.bindingList1;
-                this.bindingList2 = mainWindow.bindingList2;
-                this.console = mainWindow.console;
-                this.files = mainWindow.files;
-                this.resolutionArray = mainWindow.resolutionArray;
+            }
+            else
+            {
+                bindingList1 = mainWindow.bindingList1;
+                bindingList2 = mainWindow.bindingList2;
+                console = mainWindow.console;
+                files = mainWindow.files;
+                resolutionArray = mainWindow.resolutionArray;
                 listView1.ItemsSource = bindingList1;
                 listView2.ItemsSource = bindingList2;
                 outputListView.ItemsSource = console;
@@ -1223,8 +1498,8 @@ namespace ImageComparator2 {
             mainWindow = null;
         }
 
-        private void convertToEnglish() {
-
+        private void convertToEnglish()
+        {
             fileMenuItem.Header = "File";
             saveResultsMenuItem.Header = "Save Results...";
             loadResultsMenuItem.Header = "Load Results...";
@@ -1254,8 +1529,8 @@ namespace ImageComparator2 {
             console.Add("Drag-Drop to add folders:");
         }
 
-        private void convertToTurkish() {
-
+        private void convertToTurkish()
+        {
             fileMenuItem.Header = "Dosya";
             saveResultsMenuItem.Header = "Sonuçları Kaydet...";
             loadResultsMenuItem.Header = "Sonuçları Yükle...";
@@ -1285,25 +1560,33 @@ namespace ImageComparator2 {
             console.Add("Klasör eklemek için sürükle-bırak:");
         }
 
-        private Visual GetDescendantByType(Visual element, Type type) {
-
-            if (element == null) {
+        private Visual GetDescendantByType(Visual element, Type type)
+        {
+            if (element == null)
+            {
                 return null;
-            } else if (element.GetType() == type) {
+            }
+            else if (element.GetType() == type)
+            {
                 return element;
-            } else {
+            }
+            else
+            {
                 Visual foundElement = null;
 
-                if (element is FrameworkElement) {
+                if (element is FrameworkElement)
+                {
                     (element as FrameworkElement).ApplyTemplate();
                 }
 
-                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++) {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(element); i++)
+                {
 
                     Visual visual = VisualTreeHelper.GetChild(element, i) as Visual;
                     foundElement = GetDescendantByType(visual, type);
 
-                    if (foundElement != null) {
+                    if (foundElement != null)
+                    {
                         break;
                     }
                 }
@@ -1311,23 +1594,25 @@ namespace ImageComparator2 {
             }
         }
 
-        private void processThreadStart() {
-
+        private void processThreadStart()
+        {
             Bitmap image, resizedImage;
             FastDCT2D fastDCT2D;
             int[,] result;
             double average;
             int i;
 
-            while (processThreadsiAsync < files.Count) {
-
-                lock (myLock) {
+            while (processThreadsiAsync < files.Count)
+            {
+                lock (myLock)
+                {
                     i = processThreadsiAsync;
                     processThreadsiAsync++;
-                    percentage.Value = 100 - (int) Math.Round(100.0 * (files.Count - i) / files.Count);
+                    percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
                 }
 
-                try {
+                try
+                {
                     image = new Bitmap(files[i]);
                     resizedImage = resizeImage(image, 32, 32);
                     fastDCT2D = new FastDCT2D(resizedImage, 32);
@@ -1338,106 +1623,143 @@ namespace ImageComparator2 {
 
                     resolutionArray[i] = image.Size;
 
-                    if (image.Width > image.Height) {
+                    if (image.Width > image.Height)
+                    {
                         orientationArray[i] = Orientation.Horizontal;
-                    } else {
+                    }
+                    else
+                    {
                         orientationArray[i] = Orientation.Vertical;
                     }
 
-                    for (int j = 0; j < 8; j++) {
-                        for (int k = 0; k < 8; k++) {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        for (int k = 0; k < 8; k++)
+                        {
                             average += result[j, k];
                         }
                     }
 
+                    //pHash(Perceptual Hash) Calculation
                     average -= result[0, 0];
                     average /= 63;
 
-                    for (int j = 0; j < 8; j++) {
-                        for (int k = 0; k < 8; k++) {
-
-                            if (result[j, k] < average) {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        for (int k = 0; k < 8; k++)
+                        {
+                            if (result[j, k] < average)
+                            {
                                 pHashArray[i, j * 8 + k] = 0;
-                            } else {
+                            }
+                            else
+                            {
                                 pHashArray[i, j * 8 + k] = 1;
                             }
                         }
                     }
 
-                    for (int j = 0; j < 8; j++) {
-                        for (int k = 0; k < 9; k++) {
-
-                            if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(j + 1, k).R) {
+                    //hdHash(Horizontal Difference Hash) Calculation
+                    for (int j = 0; j < 8; j++)
+                    {
+                        for (int k = 0; k < 9; k++)
+                        {
+                            if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(j + 1, k).R)
+                            {
                                 hdHashArray[i, j * 8 + k] = 0;
-                            } else {
+                            }
+                            else
+                            {
                                 hdHashArray[i, j * 8 + k] = 1;
                             }
                         }
                     }
 
-                    for (int j = 0; j < 9; j++) {
-                        for (int k = 0; k < 8; k++) {
-
-                            if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(k, k + 1).R) {
+                    //vdHash(Vertical Difference Hash) Calculation
+                    for (int j = 0; j < 9; j++)
+                    {
+                        for (int k = 0; k < 8; k++)
+                        {
+                            if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(k, k + 1).R)
+                            {
                                 vdHashArray[i, j * 8 + k] = 0;
-                            } else {
+                            }
+                            else
+                            {
                                 vdHashArray[i, j * 8 + k] = 1;
-                            } 
+                            }
                         }
                     }
 
+                    //aHash(Average Hash) Calculation
                     resizedImage = resizeImage(resizedImage, 8, 8);
                     average = 0;
 
-                    for (int j = 0; j < 8; j++) {
-                        for (int k = 0; k < 8; k++) {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        for (int k = 0; k < 8; k++)
+                        {
                             average += resizedImage.GetPixel(j, k).R;
                         }
                     }
 
                     average /= 64;
 
-                    for (int j = 0; j < 8; j++) {
-                        for (int k = 0; k < 8; k++) {
-
-                            if (resizedImage.GetPixel(j, k).R < average) {
+                    for (int j = 0; j < 8; j++)
+                    {
+                        for (int k = 0; k < 8; k++)
+                        {
+                            if (resizedImage.GetPixel(j, k).R < average)
+                            {
                                 aHashArray[i, j * 8 + k] = 0;
-                            } else {
+                            }
+                            else
+                            {
                                 aHashArray[i, j * 8 + k] = 1;
                             }
                         }
                     }
                     image.Dispose();
                     resizedImage.Dispose();
-                } catch (ArgumentException) {
-                    try {
+                }
+                catch (ArgumentException)
+                {
+                    try
+                    {
                         pHashArray[i, 0] = -1;
-                    } catch {
-
                     }
-                } catch {
+                    catch
+                    {
+                    }
+                }
+                catch
+                {
                 }
             }
         }
-        
-        private void compareResultsThreadStart() {
 
+        private void compareResultsThreadStart()
+        {
             int i, j;
             bool isDuplicate;
 
-            while (compareResultsiAsync < files.Count - 1) {
-
-                lock (myLock) {
+            while (compareResultsiAsync < files.Count - 1)
+            {
+                lock (myLock)
+                {
                     i = compareResultsiAsync;
                     compareResultsiAsync++;
-                    percentage.Value = 100 - (int) Math.Round(100.0 * (files.Count - i) / files.Count);
+                    percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
                 }
 
-                for (j = i + 1; j < files.Count; j++) {
-                    if (!skipFilesWithDifferentOrientation || orientationArray[i] == orientationArray[j]) {
+                for (j = i + 1; j < files.Count; j++)
+                {
+                    if (!skipFilesWithDifferentOrientation || orientationArray[i] == orientationArray[j])
+                    {
                         isDuplicate = findSimilarity(i, j);
 
-                        if (isDuplicate) {
+                        if (isDuplicate)
+                        {
                             break;
                         }
                     }
@@ -1445,9 +1767,10 @@ namespace ImageComparator2 {
             }
         }
 
-        private void run() {
-
-            Action updateUI = delegate () {
+        private void run()
+        {
+            Action updateUI = delegate ()
+            {
                 mergeSort(list1, list2);
                 bindingList1 = new ObservableCollection<ListViewDataItem>(list1);
                 bindingList2 = new ObservableCollection<ListViewDataItem>(list2);
@@ -1457,103 +1780,148 @@ namespace ImageComparator2 {
                 pauseButton.Visibility = Visibility.Collapsed;
                 stopButton.Visibility = Visibility.Collapsed;
 
-                if (englishMenuItem.IsChecked) {
+                if (englishMenuItem.IsChecked)
+                {
                     pauseButton.Content = "Pause";
-                } else {
+                }
+                else
+                {
                     pauseButton.Content = "Duraklat";
                 }
 
-                if (englishMenuItem.IsChecked) {
+                if (englishMenuItem.IsChecked)
+                {
                     console.Add("All done!");
-                } else {
+                }
+                else
+                {
                     console.Add("Tamamlandı!");
                 }
 
                 secondTime = DateTime.Now.ToFileTime();
-                timeDifferenceInSeconds = (int) Math.Ceiling(((secondTime - firstTime - pauseTime) / 10000000.0));
+                timeDifferenceInSeconds = (int)Math.Ceiling(((secondTime - firstTime - pauseTime) / 10000000.0));
 
-                if (timeDifferenceInSeconds >= 3600) {
+                if (timeDifferenceInSeconds >= 3600)
+                {
                     int hours = timeDifferenceInSeconds / 3600;
                     int minutes = (timeDifferenceInSeconds / 60) % 60;
                     int seconds = timeDifferenceInSeconds % 60;
-                    if (englishMenuItem.IsChecked) {
+                    if (englishMenuItem.IsChecked)
+                    {
                         console.Add("Run time is " + hours + " hours " + minutes + " minutes " + seconds + " seconds.");
-                    } else {
+                    }
+                    else
+                    {
                         console.Add("Çalışma süresi: " + hours + " saat " + minutes + " dakika " + seconds + " saniye.");
                     }
-                } else if (timeDifferenceInSeconds >= 60) {
+                }
+                else if (timeDifferenceInSeconds >= 60)
+                {
                     int minutes = timeDifferenceInSeconds / 60;
                     int seconds = timeDifferenceInSeconds % 60;
-                    if (englishMenuItem.IsChecked) {
+                    if (englishMenuItem.IsChecked)
+                    {
                         console.Add("Run time is " + minutes + " minutes " + seconds + " seconds.");
-                    } else {
+                    }
+                    else
+                    {
                         console.Add("Çalışma süresi: " + minutes + " dakika " + seconds + " saniye.");
                     }
-                } else {
-                    if (englishMenuItem.IsChecked) {
+                }
+                else
+                {
+                    if (englishMenuItem.IsChecked)
+                    {
                         console.Add("Run time is " + timeDifferenceInSeconds + " seconds.");
-                    } else {
+                    }
+                    else
+                    {
                         console.Add("Çalışma süresi: " + timeDifferenceInSeconds + " saniye.");
                     }
                 }
 
-                if (englishMenuItem.IsChecked) {
-                    if (duplicateImageCount == 0 && highConfidenceSimilarImageCount == 0 && mediumConfidenceSimilarImageCount == 0 && lowConfidenceSimilarImageCount == 0) {
+                if (englishMenuItem.IsChecked)
+                {
+                    if (duplicateImageCount == 0 && highConfidenceSimilarImageCount == 0 && mediumConfidenceSimilarImageCount == 0 && lowConfidenceSimilarImageCount == 0)
+                    {
                         console.Add("No duplicates found.");
-                    } else {
-                        if (duplicateImageCount > 0) {
+                    }
+                    else
+                    {
+                        if (duplicateImageCount > 0)
+                        {
                             console.Add(duplicateImageCount + " duplicates found.");
                         }
 
-                        if (highConfidenceSimilarImageCount > 0) {
+                        if (highConfidenceSimilarImageCount > 0)
+                        {
                             console.Add(highConfidenceSimilarImageCount + " images found with high similarity.");
                         }
 
-                        if (mediumConfidenceSimilarImageCount > 0) {
+                        if (mediumConfidenceSimilarImageCount > 0)
+                        {
                             console.Add(mediumConfidenceSimilarImageCount + " images found with medium similarity.");
                         }
 
-                        if (lowConfidenceSimilarImageCount > 0) {
+                        if (lowConfidenceSimilarImageCount > 0)
+                        {
                             console.Add(lowConfidenceSimilarImageCount + " images found with low similarity.");
                         }
                     }
-                } else {
-                    if (duplicateImageCount == 0 && highConfidenceSimilarImageCount == 0 && mediumConfidenceSimilarImageCount == 0 && lowConfidenceSimilarImageCount == 0) {
+                }
+                else
+                {
+                    if (duplicateImageCount == 0 && highConfidenceSimilarImageCount == 0 && mediumConfidenceSimilarImageCount == 0 && lowConfidenceSimilarImageCount == 0)
+                    {
                         console.Add("Hiç kopya bulunamadı.");
-                    } else {
-                        if (duplicateImageCount > 0) {
+                    }
+                    else
+                    {
+                        if (duplicateImageCount > 0)
+                        {
                             console.Add(duplicateImageCount + " kopya bulundu.");
                         }
 
-                        if (highConfidenceSimilarImageCount > 0) {
+                        if (highConfidenceSimilarImageCount > 0)
+                        {
                             console.Add(highConfidenceSimilarImageCount + " yüksek benzerlikte resim bulundu.");
                         }
 
-                        if (mediumConfidenceSimilarImageCount > 0) {
+                        if (mediumConfidenceSimilarImageCount > 0)
+                        {
                             console.Add(mediumConfidenceSimilarImageCount + " orta benzerlikte resim bulundu.");
                         }
 
-                        if (lowConfidenceSimilarImageCount > 0) {
+                        if (lowConfidenceSimilarImageCount > 0)
+                        {
                             console.Add(lowConfidenceSimilarImageCount + " düşük benzerlikte resim bulundu.");
                         }
                     }
                 }
             };
 
-            Action updateConsole1 = delegate () {
-                if (englishMenuItem.IsChecked) {
+            Action updateConsole1 = delegate ()
+            {
+                if (englishMenuItem.IsChecked)
+                {
                     console.Add("Paths added successfully. " + files.Count + " images found. Reading files from disk...");
                     console.Add("0% done, processing files...");
-                } else {
+                }
+                else
+                {
                     console.Add("Konumlar başarıyla eklendi. " + files.Count + " resim doysası bulundu. Dosyalar okunuyor...");
                     console.Add("0% tamamlandı, dosyalar işleniyor...");
                 }
             };
 
-            Action updateConsole2 = delegate () {
-                if (englishMenuItem.IsChecked) {
+            Action updateConsole2 = delegate ()
+            {
+                if (englishMenuItem.IsChecked)
+                {
                     console[console.Count - 1] = "All files have been processed. Comparing...";
-                } else {
+                }
+                else
+                {
                     console[console.Count - 1] = "Bütün dosyalar işlendi. Karşılaştırma yapılıyor...";
                 }
             };
@@ -1576,26 +1944,28 @@ namespace ImageComparator2 {
             resolutionArray = new System.Drawing.Size[files.Count];
             threadList = new List<Thread>();
 
-            for (int i = 0; i < Environment.ProcessorCount; i++) {
-
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+            {
                 threadList.Add(new Thread(processThreadStart));
                 threadList.ElementAt(i).Start();
             }
 
-            for (int i = 0; i < Environment.ProcessorCount; i++) {
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+            {
                 threadList.ElementAt(i).Join();
             }
 
             threadList = new List<Thread>();
             comparing = true;
 
-            for (int i = 0; i < Environment.ProcessorCount; i++) {
-
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+            {
                 threadList.Add(new Thread(compareResultsThreadStart));
                 threadList.ElementAt(i).Start();
             }
 
-            for (int i = 0; i < Environment.ProcessorCount; i++) {
+            for (int i = 0; i < Environment.ProcessorCount; i++)
+            {
                 threadList.ElementAt(i).Join();
             }
 
@@ -1604,12 +1974,13 @@ namespace ImageComparator2 {
             Dispatcher.Invoke(DispatcherPriority.Normal, updateUI);
         }
 
-        private void writeToFile(List<string> input) {
-
+        private void writeToFile(List<string> input)
+        {
             streamWriter = new StreamWriter(path + @"\Bin\Directories.imc");
             streamWriter.WriteLine(input.Count);
 
-            for (int i = 0; i < input.Count; i++) {
+            for (int i = 0; i < input.Count; i++)
+            {
                 streamWriter.WriteLine(input.ElementAt(i));
             }
             streamWriter.Close();
@@ -1625,8 +1996,8 @@ namespace ImageComparator2 {
             streamWriter.Close();
         }
 
-        private void addFiles(List<string> directory) {
-
+        private void addFiles(List<string> directory)
+        {
             writeToFile(directory);
             System.Diagnostics.ProcessStartInfo processStartInfo = new System.Diagnostics.ProcessStartInfo(path + (@"\Bin\AddFiles.exe"));
             processStartInfo.RedirectStandardOutput = false;
@@ -1637,35 +2008,38 @@ namespace ImageComparator2 {
             readFromFile();
         }
 
-        private void readFromFile() {
-
+        private void readFromFile()
+        {
             int count;
             streamReader = new StreamReader(path + @"\Bin\Results.imc");
             gotException = bool.Parse(streamReader.ReadLine());
             count = int.Parse(streamReader.ReadLine());
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++)
+            {
                 files.Add(streamReader.ReadLine());
             }
             streamReader.Close();
             File.Delete(path + @"\Bin\Results.imc");
         }
 
-        private Bitmap resizeImage(System.Drawing.Image image, int width, int height) {
-
+        private Bitmap resizeImage(System.Drawing.Image image, int width, int height)
+        {
             Rectangle destRect = new Rectangle(0, 0, width, height);
             Bitmap destImage = new Bitmap(width, height);
 
             destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
-            using (Graphics graphics = Graphics.FromImage(destImage)) {
+            using (Graphics graphics = Graphics.FromImage(destImage))
+            {
                 graphics.CompositingMode = CompositingMode.SourceCopy;
                 graphics.CompositingQuality = CompositingQuality.HighQuality;
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 graphics.SmoothingMode = SmoothingMode.HighQuality;
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-                using (ImageAttributes wrapMode = new ImageAttributes()) {
+                using (ImageAttributes wrapMode = new ImageAttributes())
+                {
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
                 }
@@ -1673,9 +2047,9 @@ namespace ImageComparator2 {
             return destImage;
         }
 
-        private Bitmap convertToGrayscale(Bitmap inputImage) {
-
-            Bitmap cloneImage = (Bitmap) inputImage.Clone();
+        private Bitmap convertToGrayscale(Bitmap inputImage)
+        {
+            Bitmap cloneImage = (Bitmap)inputImage.Clone();
             Graphics graphics = Graphics.FromImage(cloneImage);
             ImageAttributes attributes = new ImageAttributes();
             ColorMatrix colorMatrix = new ColorMatrix(new float[][]{
@@ -1686,103 +2060,127 @@ namespace ImageComparator2 {
                 new float[] {     0,      0,      0, 0, 0}
             });
             attributes.SetColorMatrix(colorMatrix);
-            graphics.DrawImage(cloneImage, new System.Drawing.Rectangle(0, 0, cloneImage.Width, cloneImage.Height), 0, 0, cloneImage.Width, cloneImage.Height, GraphicsUnit.Pixel, attributes);
+            graphics.DrawImage(cloneImage, new Rectangle(0, 0, cloneImage.Width, cloneImage.Height), 0, 0, cloneImage.Width, cloneImage.Height, GraphicsUnit.Pixel, attributes);
             graphics.Dispose();
             return cloneImage;
         }
-        
-        private bool findSimilarity(int i, int j) {
 
-            if (pHashArray[i, 0] != -1 && pHashArray[j, 0] != -1) {
+        private bool findSimilarity(int i, int j)
+        {
+            if (pHashArray[i, 0] != -1 && pHashArray[j, 0] != -1)
+            {
                 int pHashHammingDistance = 0, hdHashHammingDistance = 0, vdHashHammingDistance = 0, aHashHammingDistance = 0;
 
-                if (duplicatesOnly) {
-                    for (int k = 1; k < 64; k++) {
-
-                        if (pHashArray[i, k] != pHashArray[j, k]) {
+                if (duplicatesOnly)
+                {
+                    for (int k = 1; k < 64; k++)
+                    {
+                        if (pHashArray[i, k] != pHashArray[j, k])
+                        {
                             return false;
                         }
                     }
 
-                    for (int k = 0; k < 72; k++) {
-
-                        if (hdHashArray[i, k] != hdHashArray[j, k]) {
+                    for (int k = 0; k < 72; k++)
+                    {
+                        if (hdHashArray[i, k] != hdHashArray[j, k])
+                        {
                             return false;
                         }
                     }
 
-                    for (int k = 0; k < 72; k++) {
-
-                        if (vdHashArray[i, k] != vdHashArray[j, k]) {
+                    for (int k = 0; k < 72; k++)
+                    {
+                        if (vdHashArray[i, k] != vdHashArray[j, k])
+                        {
                             return false;
                         }
                     }
 
-                    for (int k = 0; k < 64; k++) {
-
-                        if (aHashArray[i, k] != aHashArray[j, k]) {
+                    for (int k = 0; k < 64; k++)
+                    {
+                        if (aHashArray[i, k] != aHashArray[j, k])
+                        {
                             return false;
                         }
                     }
 
-                    lock (myLock2) {
-                        list1.Add(new ListViewDataItem(files.ElementAt(i), (int) Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                        list2.Add(new ListViewDataItem(files.ElementAt(j), (int) Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                    lock (myLock2)
+                    {
+                        list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                        list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
                         duplicateImageCount++;
                     }
                     return true;
-                } else {
-                    for (int k = 1; k < 64; k++) {
-
-                        if (pHashArray[i, k] != pHashArray[j, k]) {
+                }
+                else
+                {
+                    for (int k = 1; k < 64; k++)
+                    {
+                        if (pHashArray[i, k] != pHashArray[j, k])
+                        {
                             pHashHammingDistance++;
                         }
                     }
 
-                    for (int k = 0; k < 72; k++) {
-
-                        if (hdHashArray[i, k] != hdHashArray[j, k]) {
+                    for (int k = 0; k < 72; k++)
+                    {
+                        if (hdHashArray[i, k] != hdHashArray[j, k])
+                        {
                             hdHashHammingDistance++;
                         }
                     }
 
-                    for (int k = 0; k < 72; k++) {
-
-                        if (vdHashArray[i, k] != vdHashArray[j, k]) {
+                    for (int k = 0; k < 72; k++)
+                    {
+                        if (vdHashArray[i, k] != vdHashArray[j, k])
+                        {
                             vdHashHammingDistance++;
                         }
                     }
 
-                    for (int k = 0; k < 64; k++) {
-
-                        if (aHashArray[i, k] != aHashArray[j, k]) {
+                    for (int k = 0; k < 64; k++)
+                    {
+                        if (aHashArray[i, k] != aHashArray[j, k])
+                        {
                             aHashHammingDistance++;
                         }
                     }
 
-                    if (pHashHammingDistance < 1 && hdHashHammingDistance < 1 && vdHashHammingDistance < 1 && aHashHammingDistance < 1) {
-                        lock (myLock2) {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int) Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int) Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                    if (pHashHammingDistance < 1 && hdHashHammingDistance < 1 && vdHashHammingDistance < 1 && aHashHammingDistance < 1)
+                    {
+                        lock (myLock2)
+                        {
+                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
                             duplicateImageCount++;
                         }
                         return true;
-                    } else if (pHashHammingDistance < 9 && hdHashHammingDistance < 10 && vdHashHammingDistance < 10 && aHashHammingDistance < 9) {
-                        lock (myLock2) {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int) Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int) Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                    }
+                    else if (pHashHammingDistance < 9 && hdHashHammingDistance < 10 && vdHashHammingDistance < 10 && aHashHammingDistance < 9)
+                    {
+                        lock (myLock2)
+                        {
+                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
                             highConfidenceSimilarImageCount++;
                         }
-                    } else if ((pHashHammingDistance < 9 && hdHashHammingDistance < 13 && vdHashHammingDistance < 13 && aHashHammingDistance < 12) || (hdHashHammingDistance < 10 && pHashHammingDistance < 12 && vdHashHammingDistance < 13 && aHashHammingDistance < 12) || (vdHashHammingDistance < 10 && pHashHammingDistance < 12 && hdHashHammingDistance < 13 && aHashHammingDistance < 12) || (aHashHammingDistance < 9 && pHashHammingDistance < 12 && hdHashHammingDistance < 13 && vdHashHammingDistance < 13)) {
-                        lock (myLock2) {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int) Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int) Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                    }
+                    else if ((pHashHammingDistance < 9 && hdHashHammingDistance < 13 && vdHashHammingDistance < 13 && aHashHammingDistance < 12) || (hdHashHammingDistance < 10 && pHashHammingDistance < 12 && vdHashHammingDistance < 13 && aHashHammingDistance < 12) || (vdHashHammingDistance < 10 && pHashHammingDistance < 12 && hdHashHammingDistance < 13 && aHashHammingDistance < 12) || (aHashHammingDistance < 9 && pHashHammingDistance < 12 && hdHashHammingDistance < 13 && vdHashHammingDistance < 13))
+                    {
+                        lock (myLock2)
+                        {
+                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
                             mediumConfidenceSimilarImageCount++;
                         }
-                    } else if ((pHashHammingDistance < 9 || (hdHashHammingDistance < 10 && vdHashHammingDistance < 13) || (vdHashHammingDistance < 10 && hdHashHammingDistance < 13)) && aHashHammingDistance < 9) {
-                        lock (myLock2) {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int) Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int) Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                    }
+                    else if ((pHashHammingDistance < 9 || (hdHashHammingDistance < 10 && vdHashHammingDistance < 13) || (vdHashHammingDistance < 10 && hdHashHammingDistance < 13)) && aHashHammingDistance < 9)
+                    {
+                        lock (myLock2)
+                        {
+                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
                             lowConfidenceSimilarImageCount++;
                         }
                     }
@@ -1791,52 +2189,58 @@ namespace ImageComparator2 {
             return false;
         }
 
-        private int findDuplicateIndex(ObservableCollection<ListViewDataItem> list, ListViewDataItem item) {
-
-            for (int i = 0; i < list.Count; i++) {
-
-                if (list[i].text.Equals(item.text) && list[i].confidence == (int) Confidence.Duplicate) {
+        private int findDuplicateIndex(ObservableCollection<ListViewDataItem> list, ListViewDataItem item)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].text.Equals(item.text) && list[i].confidence == (int)Confidence.Duplicate)
+                {
                     return i;
                 }
             }
             return -1;
         }
 
-        private bool fileAddedBefore(List<ListViewDataItem> selectedList, ListViewDataItem data) {
-
-            for (int i = 0; i < selectedList.Count; i++) {
-
-                if (selectedList[i].text.Equals(data.text)) {
+        private bool fileAddedBefore(List<ListViewDataItem> selectedList, ListViewDataItem data)
+        {
+            for (int i = 0; i < selectedList.Count; i++)
+            {
+                if (selectedList[i].text.Equals(data.text))
+                {
                     return true;
                 }
             }
             return false;
         }
 
-        private void ResetPanZoom1() {
-
-            var st = (ScaleTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
-            var tt = (TranslateTransform) ((TransformGroup) previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
+        private void ResetPanZoom1()
+        {
+            var st = (ScaleTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var tt = (TranslateTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is TranslateTransform);
             st.ScaleX = st.ScaleY = 1;
             tt.X = tt.Y = 0;
             previewImage1.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
         }
 
-        private void ResetPanZoom2() {
-
-            var st = (ScaleTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
-            var tt = (TranslateTransform) ((TransformGroup) previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
+        private void ResetPanZoom2()
+        {
+            var st = (ScaleTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var tt = (TranslateTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is TranslateTransform);
             st.ScaleX = st.ScaleY = 1;
             tt.X = tt.Y = 0;
             previewImage2.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
         }
 
-        private void ReloadImage1(string path) {
-
-            if (path == null) {
+        private void ReloadImage1(string path)
+        {
+            if (path == null)
+            {
                 previewImage1.Source = null;
-            } else {
-                try {
+            }
+            else
+            {
+                try
+                {
                     ResetPanZoom1();
                     var bitmapImage = new BitmapImage();
                     bitmapImage.BeginInit();
@@ -1844,17 +2248,23 @@ namespace ImageComparator2 {
                     bitmapImage.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
                     bitmapImage.EndInit();
                     previewImage1.Source = bitmapImage;
-                } catch {
+                }
+                catch
+                {
                 }
             }
         }
 
-        private void ReloadImage2(string path) {
-
-            if (path == null) {
+        private void ReloadImage2(string path)
+        {
+            if (path == null)
+            {
                 previewImage2.Source = null;
-            } else {
-                try {
+            }
+            else
+            {
+                try
+                {
                     ResetPanZoom2();
                     var bitmapImage = new BitmapImage();
                     bitmapImage.BeginInit();
@@ -1862,52 +2272,57 @@ namespace ImageComparator2 {
                     bitmapImage.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
                     bitmapImage.EndInit();
                     previewImage2.Source = bitmapImage;
-                } catch {
+                }
+                catch
+                {
                 }
             }
         }
 
-        private void mergeSort(List<ListViewDataItem> list1, List<ListViewDataItem> list2) {
-
-            if (list1.Count < 2) {
+        private void mergeSort(List<ListViewDataItem> list1, List<ListViewDataItem> list2)
+        {
+            if (list1.Count < 2)
+            {
                 return;
             }
 
             int startL, startR, step = 1;
 
-            while (step < list1.Count) {
-
+            while (step < list1.Count)
+            {
                 startL = 0;
                 startR = step;
 
-                while (startR + step <= list1.Count) {
+                while (startR + step <= list1.Count)
+                {
                     mergeLists(list1, list2, startL, startL + step, startR, startR + step);
                     startL = startR + step;
                     startR = startL + step;
                 }
 
-                if (startR < list1.Count) {
+                if (startR < list1.Count)
+                {
                     mergeLists(list1, list2, startL, startL + step, startR, list1.Count);
                 }
                 step *= 2;
             }
         }
 
-        private void mergeLists(List<ListViewDataItem> list1, List<ListViewDataItem> list2, int startL, int stopL, int startR, int stopR) {
-
+        private void mergeLists(List<ListViewDataItem> list1, List<ListViewDataItem> list2, int startL, int stopL, int startR, int stopR)
+        {
             ListViewDataItem[] right1 = new ListViewDataItem[stopR - startR + 1];
             ListViewDataItem[] right2 = new ListViewDataItem[stopR - startR + 1];
             ListViewDataItem[] left1 = new ListViewDataItem[stopL - startL + 1];
             ListViewDataItem[] left2 = new ListViewDataItem[stopL - startL + 1];
 
-            for (int i = 0, k = startR; i < (right1.Length - 1); ++i, ++k) {
-
+            for (int i = 0, k = startR; i < (right1.Length - 1); ++i, ++k)
+            {
                 right1[i] = list1[k];
                 right2[i] = list2[k];
             }
 
-            for (int i = 0, k = startL; i < (left1.Length - 1); ++i, ++k) {
-
+            for (int i = 0, k = startL; i < (left1.Length - 1); ++i, ++k)
+            {
                 left1[i] = list1[k];
                 left2[i] = list2[k];
             }
@@ -1917,13 +2332,16 @@ namespace ImageComparator2 {
             left1[left1.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64);
             left2[left2.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64);
 
-            for (int k = startL, m = 0, n = 0; k < stopR; ++k) {
-
-                if (left1[m].confidence > right1[n].confidence || (left1[m].confidence == right1[n].confidence && left1[m].pHashHammingDistance + left1[m].hdHashHammingDistance + left1[m].vdHashHammingDistance + left1[m].aHashHammingDistance < right1[n].pHashHammingDistance + right1[n].hdHashHammingDistance + right1[n].vdHashHammingDistance + right1[n].aHashHammingDistance)) {
+            for (int k = startL, m = 0, n = 0; k < stopR; ++k)
+            {
+                if (left1[m].confidence > right1[n].confidence || (left1[m].confidence == right1[n].confidence && left1[m].pHashHammingDistance + left1[m].hdHashHammingDistance + left1[m].vdHashHammingDistance + left1[m].aHashHammingDistance < right1[n].pHashHammingDistance + right1[n].hdHashHammingDistance + right1[n].vdHashHammingDistance + right1[n].aHashHammingDistance))
+                {
                     list1[k] = left1[m];
                     list2[k] = left2[m];
                     m++;
-                } else {
+                }
+                else
+                {
                     list1[k] = right1[n];
                     list2[k] = right2[n];
                     n++;
