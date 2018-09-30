@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -47,6 +48,7 @@ namespace ImageComparator2
         System.Drawing.Size[] resolutionArray;
         Orientation[] orientationArray;
         int[,] pHashArray, hdHashArray, vdHashArray, aHashArray;
+        string[] sha256Array;
         Thread processThread;
         MainWindow mainWindow;
         long firstTime, secondTime, pauseTime, pausedFirstTime, pausedSecondTime;
@@ -96,37 +98,13 @@ namespace ImageComparator2
         public class ListViewDataItem : INotifyPropertyChanged
         {
             private bool selected;
-
-            public string text {
-                get;
-                set;
-            }
-
-            public int confidence {
-                get;
-                set;
-            }
-
-            public int pHashHammingDistance {
-                get;
-                set;
-            }
-
-            public int hdHashHammingDistance {
-                get;
-                set;
-            }
-
-            public int vdHashHammingDistance {
-                get;
-                set;
-            }
-
-            public int aHashHammingDistance {
-                get;
-                set;
-            }
-
+            public string text { get; set; }
+            public int confidence { get; set; }
+            public int pHashHammingDistance { get; set; }
+            public int hdHashHammingDistance { get; set; }
+            public int vdHashHammingDistance { get; set; }
+            public int aHashHammingDistance { get; set; }
+            public string sha256Checksum { get; set; }
             public bool isSelected {
                 get {
                     return selected;
@@ -137,7 +115,7 @@ namespace ImageComparator2
                 }
             }
 
-            public ListViewDataItem(string text, int confidence, int pHashHammingDistance, int hdHashHammingDistance, int vdHashHammingDistance, int aHashHammingDistance)
+            public ListViewDataItem(string text, int confidence, int pHashHammingDistance, int hdHashHammingDistance, int vdHashHammingDistance, int aHashHammingDistance, string sha256Checksum)
             {
 
                 this.text = text;
@@ -146,6 +124,7 @@ namespace ImageComparator2
                 this.hdHashHammingDistance = hdHashHammingDistance;
                 this.vdHashHammingDistance = vdHashHammingDistance;
                 this.aHashHammingDistance = aHashHammingDistance;
+                this.sha256Checksum = sha256Checksum;
                 isSelected = false;
             }
 
@@ -603,11 +582,11 @@ namespace ImageComparator2
 
                     if (tempIndex1 > tempIndex2)
                     {
-                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1 - 1].text, bindingList2[tempIndex1 - 1].confidence, bindingList2[tempIndex1 - 1].pHashHammingDistance, bindingList2[tempIndex1 - 1].hdHashHammingDistance, bindingList2[tempIndex1 - 1].vdHashHammingDistance, bindingList2[tempIndex1 - 1].aHashHammingDistance));
+                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1 - 1].text, bindingList2[tempIndex1 - 1].confidence, bindingList2[tempIndex1 - 1].pHashHammingDistance, bindingList2[tempIndex1 - 1].hdHashHammingDistance, bindingList2[tempIndex1 - 1].vdHashHammingDistance, bindingList2[tempIndex1 - 1].aHashHammingDistance, bindingList2[tempIndex1 - 1].sha256Checksum));
                     }
                     else
                     {
-                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList2[tempIndex1].confidence, bindingList2[tempIndex1].pHashHammingDistance, bindingList2[tempIndex1].hdHashHammingDistance, bindingList2[tempIndex1].vdHashHammingDistance, bindingList2[tempIndex1].aHashHammingDistance));
+                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList2[tempIndex1].confidence, bindingList2[tempIndex1].pHashHammingDistance, bindingList2[tempIndex1].hdHashHammingDistance, bindingList2[tempIndex1].vdHashHammingDistance, bindingList2[tempIndex1].aHashHammingDistance, bindingList2[tempIndex1].sha256Checksum));
                     }
 
                     bindingList2.RemoveAt(tempIndex1);
@@ -617,13 +596,13 @@ namespace ImageComparator2
                     {
                         if (bindingList1[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList1.RemoveAt(j + 1);
                         }
 
                         if (bindingList2[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
@@ -634,13 +613,13 @@ namespace ImageComparator2
                     {
                         if (bindingList1[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList1.RemoveAt(j + 1);
                         }
 
                         if (bindingList2[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
@@ -653,13 +632,13 @@ namespace ImageComparator2
                     {
                         if (bindingList1[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList1.RemoveAt(j + 1);
                         }
 
                         if (bindingList2[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
@@ -705,11 +684,11 @@ namespace ImageComparator2
 
                     if (tempIndex1 > tempIndex2)
                     {
-                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1 - 1].text, bindingList2[tempIndex1 - 1].confidence, bindingList2[tempIndex1 - 1].pHashHammingDistance, bindingList2[tempIndex1 - 1].hdHashHammingDistance, bindingList2[tempIndex1 - 1].vdHashHammingDistance, bindingList2[tempIndex1 - 1].aHashHammingDistance));
+                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1 - 1].text, bindingList2[tempIndex1 - 1].confidence, bindingList2[tempIndex1 - 1].pHashHammingDistance, bindingList2[tempIndex1 - 1].hdHashHammingDistance, bindingList2[tempIndex1 - 1].vdHashHammingDistance, bindingList2[tempIndex1 - 1].aHashHammingDistance, bindingList2[tempIndex1 - 1].sha256Checksum));
                     }
                     else
                     {
-                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList2[tempIndex1].confidence, bindingList2[tempIndex1].pHashHammingDistance, bindingList2[tempIndex1].hdHashHammingDistance, bindingList2[tempIndex1].vdHashHammingDistance, bindingList2[tempIndex1].aHashHammingDistance));
+                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList2[tempIndex1].confidence, bindingList2[tempIndex1].pHashHammingDistance, bindingList2[tempIndex1].hdHashHammingDistance, bindingList2[tempIndex1].vdHashHammingDistance, bindingList2[tempIndex1].aHashHammingDistance, bindingList2[tempIndex1].sha256Checksum));
                     }
                     bindingList2.RemoveAt(tempIndex1);
                     bindingList1.RemoveAt(tempIndex1);
@@ -718,13 +697,13 @@ namespace ImageComparator2
                     {
                         if (bindingList1[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex2].text, bindingList2[j].confidence, bindingList2[j].pHashHammingDistance, bindingList2[j].hdHashHammingDistance, bindingList2[j].vdHashHammingDistance, bindingList2[j].aHashHammingDistance));
+                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex2].text, bindingList2[j].confidence, bindingList2[j].pHashHammingDistance, bindingList2[j].hdHashHammingDistance, bindingList2[j].vdHashHammingDistance, bindingList2[j].aHashHammingDistance, bindingList2[j].sha256Checksum));
                             bindingList1.RemoveAt(j + 1);
                         }
 
                         if (bindingList2[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex2].text, bindingList2[j].confidence, bindingList2[j].pHashHammingDistance, bindingList2[j].hdHashHammingDistance, bindingList2[j].vdHashHammingDistance, bindingList2[j].aHashHammingDistance));
+                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex2].text, bindingList2[j].confidence, bindingList2[j].pHashHammingDistance, bindingList2[j].hdHashHammingDistance, bindingList2[j].vdHashHammingDistance, bindingList2[j].aHashHammingDistance, bindingList2[j].sha256Checksum));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
@@ -735,13 +714,13 @@ namespace ImageComparator2
                     {
                         if (bindingList1[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList1.RemoveAt(j + 1);
                         }
 
                         if (bindingList2[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
@@ -754,13 +733,13 @@ namespace ImageComparator2
                     {
                         if (bindingList1[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList1.RemoveAt(j + 1);
                         }
 
                         if (bindingList2[j].text.Equals(tempListViewDataItem.text))
                         {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance));
+                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
                             bindingList2.RemoveAt(j + 1);
                         }
                     }
@@ -1101,7 +1080,7 @@ namespace ImageComparator2
                 bindingList2[listView1.Items.IndexOf(listView1.SelectedItems[listView1.SelectedItems.Count - 1])].isSelected = false;
                 previewLabel.Visibility = Visibility.Collapsed;
                 ReloadImage1(bindingList1.ElementAt(listView1.SelectedIndex).text);
-                informationLabel1.Content = bindingList1.ElementAt(listView1.SelectedIndex).text.Substring(bindingList1.ElementAt(listView1.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView1.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView1.SelectedIndex).text)].Height/* + " pHash: " + bindingList1.ElementAt(listView1.SelectedIndex).pHashHammingDistance + " hdHash: " + bindingList1.ElementAt(listView1.SelectedIndex).hdHashHammingDistance + " vdHash: " + bindingList1.ElementAt(listView1.SelectedIndex).vdHashHammingDistance + " aHash: " + bindingList1.ElementAt(listView1.SelectedIndex).aHashHammingDistance*/;
+                informationLabel1.Content = bindingList1.ElementAt(listView1.SelectedIndex).text.Substring(bindingList1.ElementAt(listView1.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView1.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView1.SelectedIndex).text)].Height + " pHash: " + bindingList1.ElementAt(listView1.SelectedIndex).pHashHammingDistance + " hdHash: " + bindingList1.ElementAt(listView1.SelectedIndex).hdHashHammingDistance + " vdHash: " + bindingList1.ElementAt(listView1.SelectedIndex).vdHashHammingDistance + " aHash: " + bindingList1.ElementAt(listView1.SelectedIndex).aHashHammingDistance;
                 ReloadImage2(bindingList2.ElementAt(listView1.SelectedIndex).text);
                 informationLabel2.Content = bindingList2.ElementAt(listView1.SelectedIndex).text.Substring(bindingList2.ElementAt(listView1.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList2.ElementAt(listView1.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList2.ElementAt(listView1.SelectedIndex).text)].Height;
             }
@@ -1122,7 +1101,7 @@ namespace ImageComparator2
                 bindingList1[listView2.Items.IndexOf(listView2.SelectedItems[listView2.SelectedItems.Count - 1])].isSelected = false;
                 previewLabel.Visibility = Visibility.Collapsed;
                 ReloadImage1(bindingList1.ElementAt(listView2.SelectedIndex).text);
-                informationLabel1.Content = bindingList1.ElementAt(listView2.SelectedIndex).text.Substring(bindingList1.ElementAt(listView2.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView2.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView2.SelectedIndex).text)].Height/* + " pHash: " + bindingList1.ElementAt(listView2.SelectedIndex).pHashHammingDistance + " hdHash: " + bindingList1.ElementAt(listView2.SelectedIndex).hdHashHammingDistance + " vdHash: " + bindingList1.ElementAt(listView2.SelectedIndex).vdHashHammingDistance + " aHash: " + bindingList1.ElementAt(listView2.SelectedIndex).aHashHammingDistance*/;
+                informationLabel1.Content = bindingList1.ElementAt(listView2.SelectedIndex).text.Substring(bindingList1.ElementAt(listView2.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView2.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView2.SelectedIndex).text)].Height + " pHash: " + bindingList1.ElementAt(listView2.SelectedIndex).pHashHammingDistance + " hdHash: " + bindingList1.ElementAt(listView2.SelectedIndex).hdHashHammingDistance + " vdHash: " + bindingList1.ElementAt(listView2.SelectedIndex).vdHashHammingDistance + " aHash: " + bindingList1.ElementAt(listView2.SelectedIndex).aHashHammingDistance;
                 ReloadImage2(bindingList2.ElementAt(listView2.SelectedIndex).text);
                 informationLabel2.Content = bindingList2.ElementAt(listView2.SelectedIndex).text.Substring(bindingList2.ElementAt(listView2.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList2.ElementAt(listView2.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList2.ElementAt(listView2.SelectedIndex).text)].Height;
             }
@@ -1598,6 +1577,7 @@ namespace ImageComparator2
         {
             Bitmap image, resizedImage;
             FastDCT2D fastDCT2D;
+            SHA256Managed sha;
             int[,] result;
             double average;
             int i;
@@ -1616,6 +1596,7 @@ namespace ImageComparator2
                     image = new Bitmap(files[i]);
                     resizedImage = resizeImage(image, 32, 32);
                     fastDCT2D = new FastDCT2D(resizedImage, 32);
+                    sha = new SHA256Managed();
                     result = fastDCT2D.FastDCT();
                     resizedImage = resizeImage(resizedImage, 9, 9);
                     resizedImage = convertToGrayscale(resizedImage);
@@ -1632,6 +1613,13 @@ namespace ImageComparator2
                         orientationArray[i] = Orientation.Vertical;
                     }
 
+                    //SHA256 Calculation
+                    using (FileStream stream = File.OpenRead(files[i]))
+                    {
+                        sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
+                    }
+
+                    //pHash(Perceptual Hash) Calculation
                     for (int j = 0; j < 8; j++)
                     {
                         for (int k = 0; k < 8; k++)
@@ -1640,7 +1628,6 @@ namespace ImageComparator2
                         }
                     }
 
-                    //pHash(Perceptual Hash) Calculation
                     average -= result[0, 0];
                     average /= 63;
 
@@ -1940,6 +1927,7 @@ namespace ImageComparator2
             hdHashArray = new int[files.Count, 72];
             vdHashArray = new int[files.Count, 72];
             aHashArray = new int[files.Count, 64];
+            sha256Array = new string[files.Count];
             orientationArray = new Orientation[files.Count];
             resolutionArray = new System.Drawing.Size[files.Count];
             threadList = new List<Thread>();
@@ -2105,10 +2093,15 @@ namespace ImageComparator2
                         }
                     }
 
+                    if (sha256Array[i] != sha256Array[j])
+                    {
+                        return false;
+                    }
+
                     lock (myLock2)
                     {
-                        list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                        list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                        list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
+                        list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
                         duplicateImageCount++;
                     }
                     return true;
@@ -2147,12 +2140,12 @@ namespace ImageComparator2
                         }
                     }
 
-                    if (pHashHammingDistance < 1 && hdHashHammingDistance < 1 && vdHashHammingDistance < 1 && aHashHammingDistance < 1)
+                    if (pHashHammingDistance < 1 && hdHashHammingDistance < 1 && vdHashHammingDistance < 1 && aHashHammingDistance < 1 && sha256Array[i] == sha256Array[j])
                     {
                         lock (myLock2)
                         {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
+                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
                             duplicateImageCount++;
                         }
                         return true;
@@ -2161,8 +2154,8 @@ namespace ImageComparator2
                     {
                         lock (myLock2)
                         {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
+                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
                             highConfidenceSimilarImageCount++;
                         }
                     }
@@ -2170,17 +2163,17 @@ namespace ImageComparator2
                     {
                         lock (myLock2)
                         {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
+                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
                             mediumConfidenceSimilarImageCount++;
                         }
                     }
-                    else if ((pHashHammingDistance < 9 || (hdHashHammingDistance < 10 && vdHashHammingDistance < 13) || (vdHashHammingDistance < 10 && hdHashHammingDistance < 13)) && aHashHammingDistance < 9)
+                    else if ((pHashHammingDistance < 9 || hdHashHammingDistance < 10 || vdHashHammingDistance < 10) && aHashHammingDistance < 9 && pHashHammingDistance < 21 && hdHashHammingDistance < 18 && vdHashHammingDistance < 18)
                     {
                         lock (myLock2)
                         {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance));
+                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
+                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
                             lowConfidenceSimilarImageCount++;
                         }
                     }
@@ -2327,10 +2320,10 @@ namespace ImageComparator2
                 left2[i] = list2[k];
             }
 
-            right1[right1.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64);
-            right2[right2.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64);
-            left1[left1.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64);
-            left2[left2.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64);
+            right1[right1.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64, "");
+            right2[right2.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64, "");
+            left1[left1.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64, "");
+            left2[left2.Length - 1] = new ListViewDataItem("", -1, 64, 64, 64, 64, "");
 
             for (int k = startL, m = 0, n = 0; k < stopR; ++k)
             {
