@@ -16,6 +16,7 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -33,9 +34,11 @@ namespace ImageComparator2
         VistaOpenFileDialog openFileDialog;
         List<string> directories = new List<string>();
         List<string> files = new List<string>();
+        List<string> falsePositiveList1 = new List<string>();
+        List<string> falsePositiveList2 = new List<string>();
         ObservableCollection<string> console = new ObservableCollection<string>();
-        ObservableCollection<ListViewDataItem> bindingList1 = new ObservableCollection<ListViewDataItem>();
-        ObservableCollection<ListViewDataItem> bindingList2 = new ObservableCollection<ListViewDataItem>();
+        public ObservableCollection<ListViewDataItem> bindingList1 = new ObservableCollection<ListViewDataItem>();
+        public ObservableCollection<ListViewDataItem> bindingList2 = new ObservableCollection<ListViewDataItem>();
         List<ListViewDataItem> list1 = new List<ListViewDataItem>();
         List<ListViewDataItem> list2 = new List<ListViewDataItem>();
         List<Thread> threadList;
@@ -53,7 +56,7 @@ namespace ImageComparator2
         MainWindow mainWindow;
         long firstTime, secondTime, pauseTime, pausedFirstTime, pausedSecondTime;
         int processThreadsiAsync, compareResultsiAsync, timeDifferenceInSeconds, duplicateImageCount, highConfidenceSimilarImageCount, mediumConfidenceSimilarImageCount, lowConfidenceSimilarImageCount;
-        bool gotException = false, skipFilesWithDifferentOrientation = true, duplicatesOnly = false, comparing = false, includeSubfolders, jpegMenuItemChecked, gifMenuItemChecked, pngMenuItemChecked, bmpMenuItemChecked, tiffMenuItemChecked, icoMenuItemChecked, isEnglish, sendsToRecycleBin, opening = true;
+        public bool gotException = false, skipFilesWithDifferentOrientation = true, duplicatesOnly = false, comparing = false, includeSubfolders, jpegMenuItemChecked, gifMenuItemChecked, pngMenuItemChecked, bmpMenuItemChecked, tiffMenuItemChecked, icoMenuItemChecked, isEnglish = true, sendsToRecycleBin, opening = true, deleteMarkedItems = false;
         string path;
 
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
@@ -92,12 +95,22 @@ namespace ImageComparator2
             High,
             Duplicate
         }
+
+        public enum State
+        {
+            Normal,
+            MarkedForDeletion,
+            MarkedAsFalsePositive
+        }
         #endregion
 
         [Serializable]
         public class ListViewDataItem : INotifyPropertyChanged
         {
             private bool selected;
+            private int pState;
+            private bool pIsChecked;
+            private bool pCheckboxEnabled;
             public string text { get; set; }
             public int confidence { get; set; }
             public int pHashHammingDistance { get; set; }
@@ -105,6 +118,7 @@ namespace ImageComparator2
             public int vdHashHammingDistance { get; set; }
             public int aHashHammingDistance { get; set; }
             public string sha256Checksum { get; set; }
+
             public bool isSelected {
                 get {
                     return selected;
@@ -112,6 +126,36 @@ namespace ImageComparator2
                 set {
                     selected = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("isSelected"));
+                }
+            }
+
+            public int state {
+                get {
+                    return pState;
+                }
+                set {
+                    pState = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("state"));
+                }
+            }
+
+            public bool isChecked {
+                get {
+                    return pIsChecked;
+                }
+                set {
+                    pIsChecked = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("isChecked"));
+                }
+            }
+
+            public bool CheckboxEnabled {
+                get {
+                    return pCheckboxEnabled;
+                }
+                set {
+                    pCheckboxEnabled = value;
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CheckboxEnabled"));
                 }
             }
 
@@ -126,6 +170,9 @@ namespace ImageComparator2
                 this.aHashHammingDistance = aHashHammingDistance;
                 this.sha256Checksum = sha256Checksum;
                 isSelected = false;
+                state = (int)State.Normal;
+                isChecked = false;
+                CheckboxEnabled = true;
             }
 
             [field: NonSerialized]
@@ -135,7 +182,7 @@ namespace ImageComparator2
         public MainWindow()
         {
             InitializeComponent();
-            percentage.OnChange += percentageChanged;
+            percentage.OnChange += PercentageChanged;
             path = Environment.GetCommandLineArgs().ElementAt(0).Substring(0, Environment.GetCommandLineArgs().ElementAt(0).LastIndexOf("\\"));
             folderBrowserDialog = new VistaFolderBrowserDialog();
             folderBrowserDialog.RootFolder = Environment.SpecialFolder.MyPictures;
@@ -170,7 +217,11 @@ namespace ImageComparator2
 
             try
             {
-                deserialize(path + @"\Bin\Image Comparator.imc");
+                Deserialize(path + @"\Bin\Image Comparator.imc");
+            }
+            catch (OutOfMemoryException)
+            {
+                throw;
             }
             catch
             {
@@ -188,7 +239,11 @@ namespace ImageComparator2
         {
             try
             {
-                serialize(path + @"\Bin\Image Comparator.imc");
+                Serialize(path + @"\Bin\Image Comparator.imc");
+            }
+            catch (OutOfMemoryException)
+            {
+                throw;
             }
             catch
             {
@@ -198,6 +253,10 @@ namespace ImageComparator2
             {
                 process.Kill();
             }
+            catch (OutOfMemoryException)
+            {
+                throw;
+            }
             catch
             {
             }
@@ -205,6 +264,10 @@ namespace ImageComparator2
             try
             {
                 File.Delete(path + @"\Bin\Results.imc");
+            }
+            catch (OutOfMemoryException)
+            {
+                throw;
             }
             catch
             {
@@ -214,6 +277,10 @@ namespace ImageComparator2
             {
                 File.Delete(path + @"\Bin\Directories.imc");
             }
+            catch (OutOfMemoryException)
+            {
+                throw;
+            }
             catch
             {
             }
@@ -222,13 +289,22 @@ namespace ImageComparator2
             {
                 File.Delete(path + @"\Bin\Filters.imc");
             }
+            catch (OutOfMemoryException)
+            {
+                throw;
+            }
             catch
             {
             }
             Environment.Exit(0);
         }
 
-        private void saveResultsMenuItem_Click(object sender, RoutedEventArgs e)
+        private void SaveResultsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SaveResults();
+        }
+
+        public bool SaveResults()
         {
             if (englishMenuItem.IsChecked)
             {
@@ -239,9 +315,9 @@ namespace ImageComparator2
                 saveFileDialog.Title = "Sonuçları Kaydet";
             }
 
-            if ((bool)saveFileDialog.ShowDialog())
+            if (saveFileDialog.ShowDialog().Value)
             {
-                serialize(saveFileDialog.FileName);
+                Serialize(saveFileDialog.FileName);
 
                 if (englishMenuItem.IsChecked)
                 {
@@ -251,10 +327,15 @@ namespace ImageComparator2
                 {
                     console.Add("Oturum " + saveFileDialog.FileName + " konumuna kaydedildi.");
                 }
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 
-        private void loadResultsMenuItem_Click(object sender, RoutedEventArgs e)
+        private void LoadResultsMenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (englishMenuItem.IsChecked)
             {
@@ -265,18 +346,18 @@ namespace ImageComparator2
                 openFileDialog.Title = "Sonuçları Yükle";
             }
 
-            if ((bool)openFileDialog.ShowDialog())
+            if (openFileDialog.ShowDialog().Value)
             {
-                deserialize(openFileDialog.FileName);
+                Deserialize(openFileDialog.FileName);
             }
         }
 
-        private void exitMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
-        private void sendToRecycleBinMenuItem_Click(object sender, RoutedEventArgs e)
+        private void SendToRecycleBinMenuItem_Click(object sender, RoutedEventArgs e)
         {
             sendToRecycleBinMenuItem.IsChecked = true;
             deletePermanentlyMenuItem.IsChecked = false;
@@ -284,7 +365,7 @@ namespace ImageComparator2
             deletePermanentlyMenuItem.IsEnabled = true;
         }
 
-        private void deletePermanentlyMenuItem_Click(object sender, RoutedEventArgs e)
+        private void DeletePermanentlyMenuItem_Click(object sender, RoutedEventArgs e)
         {
             sendToRecycleBinMenuItem.IsChecked = false;
             deletePermanentlyMenuItem.IsChecked = true;
@@ -292,25 +373,43 @@ namespace ImageComparator2
             deletePermanentlyMenuItem.IsEnabled = false;
         }
 
-        private void englishMenuItem_Click(object sender, RoutedEventArgs e)
+        private void EnglishMenuItem_Click(object sender, RoutedEventArgs e)
         {
             englishMenuItem.IsChecked = true;
             turkishMenuItem.IsChecked = false;
             englishMenuItem.IsEnabled = false;
             turkishMenuItem.IsEnabled = true;
-            convertToEnglish();
+            ConvertToEnglish();
         }
 
-        private void turkishMenuItem_Click(object sender, RoutedEventArgs e)
+        private void TurkishMenuItem_Click(object sender, RoutedEventArgs e)
         {
             englishMenuItem.IsChecked = false;
             turkishMenuItem.IsChecked = true;
             englishMenuItem.IsEnabled = true;
             turkishMenuItem.IsEnabled = false;
-            convertToTurkish();
+            ConvertToTurkish();
         }
 
-        private void resetToDefaultsMenuItem_Click(object sender, RoutedEventArgs e)
+        private void ClearFalsePositiveDatabaseButton_Click(object sender, RoutedEventArgs e)
+        {
+            falsePositiveList1.Clear();
+            falsePositiveList2.Clear();
+
+            try
+            {
+                Serialize(path + @"\Bin\Image Comparator.imc");
+            }
+            catch (OutOfMemoryException)
+            {
+                throw;
+            }
+            catch
+            {
+            }
+        }
+
+        private void ResetToDefaultsMenuItem_Click(object sender, RoutedEventArgs e)
         {
             jpegMenuItem.IsChecked = true;
             bmpMenuItem.IsChecked = true;
@@ -327,17 +426,17 @@ namespace ImageComparator2
             findExactDuplicatesOnlyMenuItem.IsChecked = false;
         }
 
-        private void howToUseMenuItem_Click(object sender, RoutedEventArgs e)
+        private void HowToUseMenuItem_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void aboutMenuItem_Click(object sender, RoutedEventArgs e)
+        private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void addFolderButton_Click(object sender, RoutedEventArgs e)
+        private void AddFolderButton_Click(object sender, RoutedEventArgs e)
         {
             if (englishMenuItem.IsChecked)
             {
@@ -380,7 +479,7 @@ namespace ImageComparator2
             }
         }
 
-        private void findDuplicatesButton_Click(object sender, RoutedEventArgs e)
+        private void FindDuplicatesButton_Click(object sender, RoutedEventArgs e)
         {
             if (directories.Count > 0)
             {
@@ -440,7 +539,7 @@ namespace ImageComparator2
                 bmpMenuItemChecked = bmpMenuItem.IsChecked;
                 tiffMenuItemChecked = tiffMenuItem.IsChecked;
                 icoMenuItemChecked = icoMenuItem.IsChecked;
-                processThread = new Thread(run);
+                processThread = new Thread(Run);
                 processThread.Start();
             }
             else
@@ -456,7 +555,7 @@ namespace ImageComparator2
             }
         }
 
-        private void findDuplicatesButton_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void FindDuplicatesButton_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (findDuplicatesButton.Visibility == Visibility.Visible)
             {
@@ -468,18 +567,20 @@ namespace ImageComparator2
                 gifMenuItem.IsEnabled = true;
                 tiffMenuItem.IsEnabled = true;
                 icoMenuItem.IsEnabled = true;
-                sendToRecycleBinMenuItem.IsEnabled = !sendToRecycleBinMenuItem.IsChecked;
-                deletePermanentlyMenuItem.IsEnabled = !deletePermanentlyMenuItem.IsChecked;
                 englishMenuItem.IsEnabled = !englishMenuItem.IsChecked;
                 turkishMenuItem.IsEnabled = !turkishMenuItem.IsChecked;
                 includeSubfoldersMenuItem.IsEnabled = true;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = true;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = true;
+                clearFalsePositiveDatabaseButton.IsEnabled = true;
                 resetToDefaultsMenuItem.IsEnabled = true;
                 addFolderButton.IsEnabled = true;
-                deleteSelectedButton.IsEnabled = true;
-                removeFromListButton.IsEnabled = true;
+                deleteSelectedButton.IsEnabled = false;
+                removeFromListButton.IsEnabled = false;
                 clearButton.IsEnabled = true;
+                markForDeletionButton.IsEnabled = false;
+                markAsFalsePositiveButton.IsEnabled = false;
+                removeMarkButton.IsEnabled = false;
             }
             else
             {
@@ -491,29 +592,26 @@ namespace ImageComparator2
                 gifMenuItem.IsEnabled = false;
                 tiffMenuItem.IsEnabled = false;
                 icoMenuItem.IsEnabled = false;
-                sendToRecycleBinMenuItem.IsEnabled = false;
-                deletePermanentlyMenuItem.IsEnabled = false;
                 englishMenuItem.IsEnabled = false;
                 turkishMenuItem.IsEnabled = false;
                 includeSubfoldersMenuItem.IsEnabled = false;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = false;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = false;
+                clearFalsePositiveDatabaseButton.IsEnabled = false;
                 resetToDefaultsMenuItem.IsEnabled = false;
                 addFolderButton.IsEnabled = false;
-                deleteSelectedButton.IsEnabled = false;
-                removeFromListButton.IsEnabled = false;
                 clearButton.IsEnabled = false;
             }
         }
 
-        private void deleteSelectedButton_Click(object sender, RoutedEventArgs e)
+        private void DeleteSelectedButton_Click(object sender, RoutedEventArgs e)
         {
             List<ListViewDataItem> selectedItems1 = new List<ListViewDataItem>();
             List<ListViewDataItem> selectedItems2 = new List<ListViewDataItem>();
 
             for (int i = 0; i < bindingList1.Count; i++)
             {
-                if (bindingList1[i].isSelected && !fileAddedBefore(selectedItems1, bindingList1[i]) && !fileAddedBefore(selectedItems2, bindingList1[i]))
+                if (((deleteMarkedItems && bindingList1[i].state == (int)State.MarkedForDeletion) || (!deleteMarkedItems && bindingList1[i].isChecked)) && !FileAddedBefore(selectedItems1, bindingList1[i]) && !FileAddedBefore(selectedItems2, bindingList1[i]))
                 {
                     try
                     {
@@ -526,6 +624,10 @@ namespace ImageComparator2
                             FileSystem.DeleteFile(bindingList1[i].text, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         }
                     }
+                    catch (OutOfMemoryException)
+                    {
+                        throw;
+                    }
                     catch
                     {
                     }
@@ -535,7 +637,7 @@ namespace ImageComparator2
 
             for (int i = 0; i < bindingList2.Count; i++)
             {
-                if (bindingList2[i].isSelected && !fileAddedBefore(selectedItems1, bindingList2[i]) && !fileAddedBefore(selectedItems2, bindingList2[i]))
+                if (((deleteMarkedItems && bindingList2[i].state == (int)State.MarkedForDeletion) || (!deleteMarkedItems && bindingList2[i].isChecked)) && !FileAddedBefore(selectedItems1, bindingList2[i]) && !FileAddedBefore(selectedItems2, bindingList2[i]))
                 {
                     try
                     {
@@ -547,6 +649,10 @@ namespace ImageComparator2
                         {
                             FileSystem.DeleteFile(bindingList2[i].text, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         }
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        throw;
                     }
                     catch
                     {
@@ -561,8 +667,8 @@ namespace ImageComparator2
             for (int i = 0; i < selectedItems1.Count; i++)
             {
                 tempListViewDataItem = selectedItems1[i];
-                tempIndex1 = findDuplicateIndex(bindingList1, tempListViewDataItem);
-                tempIndex2 = findDuplicateIndex(bindingList2, tempListViewDataItem);
+                tempIndex1 = FindDuplicateIndex(bindingList1, tempListViewDataItem);
+                tempIndex2 = FindDuplicateIndex(bindingList2, tempListViewDataItem);
 
                 if (tempIndex1 == -1 && tempIndex2 == -1)
                 {
@@ -663,8 +769,8 @@ namespace ImageComparator2
             for (int i = 0; i < selectedItems2.Count; i++)
             {
                 tempListViewDataItem = selectedItems2[i];
-                tempIndex1 = findDuplicateIndex(bindingList1, tempListViewDataItem);
-                tempIndex2 = findDuplicateIndex(bindingList2, tempListViewDataItem);
+                tempIndex1 = FindDuplicateIndex(bindingList1, tempListViewDataItem);
+                tempIndex2 = FindDuplicateIndex(bindingList2, tempListViewDataItem);
 
                 if (tempIndex1 == -1 && tempIndex2 == -1)
                 {
@@ -761,37 +867,40 @@ namespace ImageComparator2
                 }
             }
 
-            if (sendToRecycleBinMenuItem.IsChecked)
+            if (selectedItems1.Count + selectedItems2.Count > 0)
             {
-                if (englishMenuItem.IsChecked)
+                if (sendToRecycleBinMenuItem.IsChecked)
                 {
-                    console.Add((selectedItems1.Count + selectedItems2.Count) + " file(s) have been sent to recycle bin.");
+                    if (englishMenuItem.IsChecked)
+                    {
+                        console.Add((selectedItems1.Count + selectedItems2.Count) + " file(s) have been sent to recycle bin.");
+                    }
+                    else
+                    {
+                        console.Add((selectedItems1.Count + selectedItems2.Count) + " dosya geri dönüşüm kutusuna gönderildi.");
+                    }
                 }
                 else
                 {
-                    console.Add((selectedItems1.Count + selectedItems2.Count) + " dosya geri dönüşüm kutusuna gönderildi.");
-                }
-            }
-            else
-            {
-                if (englishMenuItem.IsChecked)
-                {
-                    console.Add((selectedItems1.Count + selectedItems2.Count) + " file(s) have been deleted.");
-                }
-                else
-                {
-                    console.Add((selectedItems1.Count + selectedItems2.Count) + " dosya silindi.");
+                    if (englishMenuItem.IsChecked)
+                    {
+                        console.Add((selectedItems1.Count + selectedItems2.Count) + " file(s) have been deleted.");
+                    }
+                    else
+                    {
+                        console.Add((selectedItems1.Count + selectedItems2.Count) + " dosya silindi.");
+                    }
                 }
             }
         }
 
-        private void removeFromListButton_Click(object sender, RoutedEventArgs e)
+        private void RemoveFromListButton_Click(object sender, RoutedEventArgs e)
         {
             List<int> selectedIndices = new List<int>();
 
             for (int i = 0; i < bindingList1.Count; i++)
             {
-                if (bindingList1[i].isSelected)
+                if (bindingList1[i].isChecked)
                 {
                     selectedIndices.Add(i);
                 }
@@ -799,7 +908,7 @@ namespace ImageComparator2
 
             for (int i = 0; i < bindingList2.Count; i++)
             {
-                if (bindingList2[i].isSelected)
+                if (bindingList2[i].isChecked)
                 {
                     selectedIndices.Add(i);
                 }
@@ -814,28 +923,119 @@ namespace ImageComparator2
             }
         }
 
-        private void clearButton_Click(object sender, RoutedEventArgs e)
+        private void ClearButton_Click(object sender, RoutedEventArgs e)
         {
-            directories.Clear();
-            files.Clear();
-            console.Clear();
-            bindingList1.Clear();
-            bindingList2.Clear();
-            list1.Clear();
-            list2.Clear();
-            percentage.Value = 0;
-
-            if (englishMenuItem.IsChecked)
+            if (bindingList1 != null && bindingList1.Any())
             {
-                console.Add("Drag-Drop to add folders:");
+                ClearPopupWindow clearPopupWindow = new ClearPopupWindow(this);
+                clearPopupWindow.ShowDialog();
             }
             else
             {
-                console.Add("Klasör eklemek için sürükle-bırak:");
+                Clear();
             }
         }
 
-        private void pauseButton_Click(object sender, RoutedEventArgs e)
+        private void ApplyButton_Click(object sender, RoutedEventArgs e)
+        {
+            int deleteItemCount = bindingList1.Count(x => x.state == (int)State.MarkedForDeletion) + bindingList2.Count(x => x.state == (int)State.MarkedForDeletion);
+            int markAsFalsePositiveItemCount = bindingList1.Count(x => x.state == (int)State.MarkedAsFalsePositive);
+
+            if (deleteItemCount > 0 || markAsFalsePositiveItemCount > 0)
+            {
+                ApplyPopupWindow applyPopupWindow = new ApplyPopupWindow(this, deleteItemCount, markAsFalsePositiveItemCount);
+                applyPopupWindow.ShowDialog();
+            }
+        }
+
+        private void MarkForDeletionButton_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < bindingList1.Count; i++)
+            {
+                if (bindingList1[i].isChecked)
+                {
+                    if (bindingList2[i].state != (int)State.MarkedForDeletion)
+                    {
+                        bindingList1[i].state = (int)State.MarkedForDeletion;
+                    }
+                    bindingList1[i].isChecked = false;
+                }
+            }
+
+            for (int i = 0; i < bindingList2.Count; i++)
+            {
+                if (bindingList2[i].isChecked)
+                {
+                    if (bindingList1[i].state != (int)State.MarkedForDeletion)
+                    {
+                        bindingList2[i].state = (int)State.MarkedForDeletion;
+                    }
+                    bindingList2[i].isChecked = false;
+                }
+            }
+        }
+
+        private void MarkAsFalsePositiveButton_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < bindingList1.Count; i++)
+            {
+                if (bindingList1[i].isChecked)
+                {
+                    bindingList1[i].state = (int)State.MarkedAsFalsePositive;
+                    bindingList2[i].state = (int)State.MarkedAsFalsePositive;
+                    bindingList1[i].isChecked = false;
+                }
+            }
+
+            for (int i = 0; i < bindingList2.Count; i++)
+            {
+                if (bindingList2[i].isChecked)
+                {
+                    bindingList1[i].state = (int)State.MarkedAsFalsePositive;
+                    bindingList2[i].state = (int)State.MarkedAsFalsePositive;
+                    bindingList2[i].isChecked = false;
+                }
+            }
+        }
+
+        private void RemoveMarkButton_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < bindingList1.Count; i++)
+            {
+                if (bindingList1[i].isChecked)
+                {
+                    if (bindingList1[i].state == (int)State.MarkedForDeletion)
+                    {
+                        bindingList1[i].state = (int)State.Normal;
+                    }
+                    else if (bindingList1[i].state == (int)State.MarkedAsFalsePositive)
+                    {
+                        bindingList1[i].state = (int)State.Normal;
+                        bindingList2[i].state = (int)State.Normal;
+                    }
+                    bindingList1[i].isChecked = false;
+                }
+            }
+
+            for (int i = 0; i < bindingList2.Count; i++)
+            {
+                if (bindingList2[i].isChecked)
+                {
+                    if (bindingList2[i].state == (int)State.MarkedForDeletion)
+                    {
+                        bindingList2[i].state = (int)State.Normal;
+                    }
+                    else if (bindingList2[i].state == (int)State.MarkedAsFalsePositive)
+                    {
+                        bindingList1[i].state = (int)State.Normal;
+                        bindingList2[i].state = (int)State.Normal;
+                    }
+                    bindingList2[i].isChecked = false;
+                }
+            }
+        }
+
+        private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
             if (pauseButton.Tag.Equals("0"))
             {
@@ -904,7 +1104,7 @@ namespace ImageComparator2
             }
         }
 
-        private void stopButton_Click(object sender, RoutedEventArgs e)
+        private void StopButton_Click(object sender, RoutedEventArgs e)
         {
             findDuplicatesButton.Visibility = Visibility.Visible;
             pauseButton.Visibility = Visibility.Collapsed;
@@ -920,6 +1120,10 @@ namespace ImageComparator2
                     }
                 }
             }
+            catch (OutOfMemoryException)
+            {
+                throw;
+            }
             catch
             {
             }
@@ -932,10 +1136,18 @@ namespace ImageComparator2
                     {
                         threadList.ElementAt(i).Abort();
                     }
+                    catch (OutOfMemoryException)
+                    {
+                        throw;
+                    }
                     catch
                     {
                     }
                 }
+            }
+            catch (OutOfMemoryException)
+            {
+                throw;
             }
             catch
             {
@@ -983,13 +1195,17 @@ namespace ImageComparator2
             }
         }
 
-        private void listView1_KeyDown(object sender, KeyEventArgs e)
+        private void ListView1_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && listView1.SelectedIndex != -1)
             {
                 try
                 {
                     System.Diagnostics.Process.Start(bindingList1[listView1.SelectedIndex].text);
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
                 }
                 catch
                 {
@@ -1004,13 +1220,17 @@ namespace ImageComparator2
             }
         }
 
-        private void listView2_KeyDown(object sender, KeyEventArgs e)
+        private void ListView2_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter && listView2.SelectedIndex != -1)
             {
                 try
                 {
                     System.Diagnostics.Process.Start(bindingList2[listView2.SelectedIndex].text);
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
                 }
                 catch
                 {
@@ -1025,7 +1245,7 @@ namespace ImageComparator2
             }
         }
 
-        private void listView1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void ListView1_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ListViewDataItem item = ((FrameworkElement)e.OriginalSource).DataContext as ListViewDataItem;
 
@@ -1037,6 +1257,10 @@ namespace ImageComparator2
                     {
                         System.Diagnostics.Process.Start(bindingList1[listView1.SelectedIndex].text);
                     }
+                    catch (OutOfMemoryException)
+                    {
+                        throw;
+                    }
                     catch
                     {
                         Console.WriteLine("Oops1");
@@ -1045,7 +1269,7 @@ namespace ImageComparator2
             }
         }
 
-        private void listView2_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void ListView2_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ListViewDataItem item = ((FrameworkElement)e.OriginalSource).DataContext as ListViewDataItem;
 
@@ -1057,6 +1281,10 @@ namespace ImageComparator2
                     {
                         System.Diagnostics.Process.Start(bindingList2[listView2.SelectedIndex].text);
                     }
+                    catch (OutOfMemoryException)
+                    {
+                        throw;
+                    }
                     catch
                     {
                         Console.WriteLine("Oops2");
@@ -1065,7 +1293,7 @@ namespace ImageComparator2
             }
         }
 
-        private void listView1_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ListView1_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (listView1.SelectedIndex == -1)
             {
@@ -1080,13 +1308,13 @@ namespace ImageComparator2
                 bindingList2[listView1.Items.IndexOf(listView1.SelectedItems[listView1.SelectedItems.Count - 1])].isSelected = false;
                 previewLabel.Visibility = Visibility.Collapsed;
                 ReloadImage1(bindingList1.ElementAt(listView1.SelectedIndex).text);
-                informationLabel1.Content = bindingList1.ElementAt(listView1.SelectedIndex).text.Substring(bindingList1.ElementAt(listView1.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView1.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView1.SelectedIndex).text)].Height + " pHash: " + bindingList1.ElementAt(listView1.SelectedIndex).pHashHammingDistance + " hdHash: " + bindingList1.ElementAt(listView1.SelectedIndex).hdHashHammingDistance + " vdHash: " + bindingList1.ElementAt(listView1.SelectedIndex).vdHashHammingDistance + " aHash: " + bindingList1.ElementAt(listView1.SelectedIndex).aHashHammingDistance;
+                informationLabel1.Content = bindingList1.ElementAt(listView1.SelectedIndex).text.Substring(bindingList1.ElementAt(listView1.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView1.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView1.SelectedIndex).text)].Height/* + " pHash: " + bindingList1.ElementAt(listView1.SelectedIndex).pHashHammingDistance + " hdHash: " + bindingList1.ElementAt(listView1.SelectedIndex).hdHashHammingDistance + " vdHash: " + bindingList1.ElementAt(listView1.SelectedIndex).vdHashHammingDistance + " aHash: " + bindingList1.ElementAt(listView1.SelectedIndex).aHashHammingDistance*/;
                 ReloadImage2(bindingList2.ElementAt(listView1.SelectedIndex).text);
                 informationLabel2.Content = bindingList2.ElementAt(listView1.SelectedIndex).text.Substring(bindingList2.ElementAt(listView1.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList2.ElementAt(listView1.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList2.ElementAt(listView1.SelectedIndex).text)].Height;
             }
         }
 
-        private void listView2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void ListView2_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (listView2.SelectedIndex == -1)
             {
@@ -1101,27 +1329,129 @@ namespace ImageComparator2
                 bindingList1[listView2.Items.IndexOf(listView2.SelectedItems[listView2.SelectedItems.Count - 1])].isSelected = false;
                 previewLabel.Visibility = Visibility.Collapsed;
                 ReloadImage1(bindingList1.ElementAt(listView2.SelectedIndex).text);
-                informationLabel1.Content = bindingList1.ElementAt(listView2.SelectedIndex).text.Substring(bindingList1.ElementAt(listView2.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView2.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView2.SelectedIndex).text)].Height + " pHash: " + bindingList1.ElementAt(listView2.SelectedIndex).pHashHammingDistance + " hdHash: " + bindingList1.ElementAt(listView2.SelectedIndex).hdHashHammingDistance + " vdHash: " + bindingList1.ElementAt(listView2.SelectedIndex).vdHashHammingDistance + " aHash: " + bindingList1.ElementAt(listView2.SelectedIndex).aHashHammingDistance;
+                informationLabel1.Content = bindingList1.ElementAt(listView2.SelectedIndex).text.Substring(bindingList1.ElementAt(listView2.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView2.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList1.ElementAt(listView2.SelectedIndex).text)].Height/* + " pHash: " + bindingList1.ElementAt(listView2.SelectedIndex).pHashHammingDistance + " hdHash: " + bindingList1.ElementAt(listView2.SelectedIndex).hdHashHammingDistance + " vdHash: " + bindingList1.ElementAt(listView2.SelectedIndex).vdHashHammingDistance + " aHash: " + bindingList1.ElementAt(listView2.SelectedIndex).aHashHammingDistance*/;
                 ReloadImage2(bindingList2.ElementAt(listView2.SelectedIndex).text);
                 informationLabel2.Content = bindingList2.ElementAt(listView2.SelectedIndex).text.Substring(bindingList2.ElementAt(listView2.SelectedIndex).text.LastIndexOf("\\") + 1) + " - " + resolutionArray[files.IndexOf(bindingList2.ElementAt(listView2.SelectedIndex).text)].Width + "x" + resolutionArray[files.IndexOf(bindingList2.ElementAt(listView2.SelectedIndex).text)].Height;
             }
         }
 
-        private void listView1_ScrollChanged(object sender, RoutedEventArgs e)
+        private void ListView1_ScrollChanged(object sender, RoutedEventArgs e)
         {
             ScrollViewer listView1ScrollViewer = GetDescendantByType(listView1, typeof(ScrollViewer)) as ScrollViewer;
             ScrollViewer listView2ScrollViewer = GetDescendantByType(listView2, typeof(ScrollViewer)) as ScrollViewer;
             listView2ScrollViewer.ScrollToVerticalOffset(listView1ScrollViewer.VerticalOffset);
         }
 
-        private void listView2_ScrollChanged(object sender, RoutedEventArgs e)
+        private void ListView2_ScrollChanged(object sender, RoutedEventArgs e)
         {
             ScrollViewer listView1ScrollViewer = GetDescendantByType(listView1, typeof(ScrollViewer)) as ScrollViewer;
             ScrollViewer listView2ScrollViewer = GetDescendantByType(listView2, typeof(ScrollViewer)) as ScrollViewer;
             listView1ScrollViewer.ScrollToVerticalOffset(listView2ScrollViewer.VerticalOffset);
         }
 
-        private void outputListView_DragEnter(object sender, DragEventArgs e)
+        private void ListView1_ListItemCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            ListViewDataItem selectedItem = (ListViewDataItem)((CheckBox)sender).DataContext;
+            bindingList2[bindingList1.IndexOf(selectedItem)].CheckboxEnabled = false;
+        }
+
+        private void ListView1_ListItemCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ListViewDataItem selectedItem = (ListViewDataItem)((CheckBox)sender).DataContext;
+            bindingList2[bindingList1.IndexOf(selectedItem)].CheckboxEnabled = true;
+        }
+
+        private void ListView2_ListItemCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            ListViewDataItem selectedItem = (ListViewDataItem)((CheckBox)sender).DataContext;
+            bindingList1[bindingList2.IndexOf(selectedItem)].CheckboxEnabled = false;
+        }
+
+        private void ListView2_ListItemCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ListViewDataItem selectedItem = (ListViewDataItem)((CheckBox)sender).DataContext;
+            bindingList1[bindingList2.IndexOf(selectedItem)].CheckboxEnabled = true;
+        }
+
+        private void ListView1_OpenMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (listView1.SelectedIndex != -1)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(bindingList1[listView1.SelectedIndex].text);
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch
+                {
+                    Console.WriteLine("Oops1");
+                }
+            }
+        }
+
+        private void ListView1_OpenFileLocationMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (listView1.SelectedIndex != -1)
+            {
+                try
+                {
+                    string filePath = bindingList1[listView1.SelectedIndex].text;
+                    System.Diagnostics.Process.Start(filePath.Substring(0, filePath.LastIndexOf("\\")));
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch
+                {
+                    Console.WriteLine("Oops1");
+                }
+            }
+        }
+
+        private void ListView2_OpenMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (listView2.SelectedIndex != -1)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(bindingList2[listView2.SelectedIndex].text);
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch
+                {
+                    Console.WriteLine("Oops1");
+                }
+            }
+        }
+
+        private void ListView2_OpenFileLocationMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (listView2.SelectedIndex != -1)
+            {
+                try
+                {
+                    string filePath = bindingList2[listView2.SelectedIndex].text;
+                    System.Diagnostics.Process.Start(filePath.Substring(0, filePath.LastIndexOf("\\")));
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch
+                {
+                    Console.WriteLine("Oops1");
+                }
+            }
+        }
+
+        private void OutputListView_DragEnter(object sender, DragEventArgs e)
         {
             if (e.Data.GetDataPresent(DataFormats.FileDrop) && findDuplicatesButton.Visibility == Visibility.Visible)
             {
@@ -1133,7 +1463,7 @@ namespace ImageComparator2
             }
         }
 
-        private void outputListView_Drop(object sender, DragEventArgs e)
+        private void OutputListView_Drop(object sender, DragEventArgs e)
         {
             if (findDuplicatesButton.Visibility == Visibility.Visible)
             {
@@ -1188,7 +1518,7 @@ namespace ImageComparator2
             }
         }
 
-        private void percentageChanged(object sender, EventArgs e)
+        private void PercentageChanged(object sender, EventArgs e)
         {
             Action<int> updateProgressBar = delegate (int value)
             {
@@ -1227,7 +1557,7 @@ namespace ImageComparator2
             }
         }
 
-        private void previewImageBorder_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+        private void PreviewImageBorder_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
             var st1 = (ScaleTransform)((TransformGroup)previewImage1.RenderTransform).Children.First(tr => tr is ScaleTransform);
             var st2 = (ScaleTransform)((TransformGroup)previewImage2.RenderTransform).Children.First(tr => tr is ScaleTransform);
@@ -1244,7 +1574,7 @@ namespace ImageComparator2
             tt2.Y += e.DeltaManipulation.Translation.Y;
         }
 
-        private void previewImage_MouseWheel(object sender, MouseWheelEventArgs e)
+        private void PreviewImage_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             var zoom = e.Delta > 0 ? .2 : -.2;
             var position = e.GetPosition(previewImage1);
@@ -1263,7 +1593,7 @@ namespace ImageComparator2
             st2.ScaleY += zoom;
         }
 
-        private void previewImage1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void PreviewImage1_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
             {
@@ -1282,7 +1612,7 @@ namespace ImageComparator2
             }
         }
 
-        private void zoomInButton_Click(object sender, RoutedEventArgs e)
+        private void ZoomInButton_Click(object sender, RoutedEventArgs e)
         {
             var zoom = .2;
             previewImage1.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
@@ -1300,7 +1630,7 @@ namespace ImageComparator2
             st2.ScaleY += zoom;
         }
 
-        private void zoomOutButton_Click(object sender, RoutedEventArgs e)
+        private void ZoomOutButton_Click(object sender, RoutedEventArgs e)
         {
             var zoom = -.2;
             previewImage1.RenderTransformOrigin = new System.Windows.Point(0.5, 0.5);
@@ -1318,7 +1648,7 @@ namespace ImageComparator2
             st2.ScaleY += zoom;
         }
 
-        private void previewImage2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void PreviewImage2_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
             {
@@ -1337,7 +1667,7 @@ namespace ImageComparator2
             }
         }
 
-        private void previewImage1_MouseMove(object sender, MouseEventArgs e)
+        private void PreviewImage1_MouseMove(object sender, MouseEventArgs e)
         {
             if (previewImage1.IsMouseCaptured)
             {
@@ -1352,7 +1682,7 @@ namespace ImageComparator2
             }
         }
 
-        private void previewImage2_MouseMove(object sender, MouseEventArgs e)
+        private void PreviewImage2_MouseMove(object sender, MouseEventArgs e)
         {
             if (previewImage2.IsMouseCaptured)
             {
@@ -1367,12 +1697,12 @@ namespace ImageComparator2
             }
         }
 
-        private void previewImage1_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void PreviewImage1_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             previewImage1.ReleaseMouseCapture();
         }
 
-        private void previewImage2_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void PreviewImage2_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             previewImage2.ReleaseMouseCapture();
         }
@@ -1391,6 +1721,8 @@ namespace ImageComparator2
             skipFilesWithDifferentOrientation = (bool)info.GetValue("skipFilesWithDifferentOrientation", typeof(bool));
             duplicatesOnly = (bool)info.GetValue("duplicatesOnly", typeof(bool));
             files = (List<string>)info.GetValue("files", typeof(List<string>));
+            falsePositiveList1 = (List<string>)info.GetValue("falsePositiveList1", typeof(List<string>));
+            falsePositiveList2 = (List<string>)info.GetValue("falsePositiveList2", typeof(List<string>));
             resolutionArray = (System.Drawing.Size[])info.GetValue("resolutionArray", typeof(System.Drawing.Size[]));
             bindingList1 = (ObservableCollection<ListViewDataItem>)info.GetValue("bindingList1", typeof(ObservableCollection<ListViewDataItem>));
             bindingList2 = (ObservableCollection<ListViewDataItem>)info.GetValue("bindingList2", typeof(ObservableCollection<ListViewDataItem>));
@@ -1411,13 +1743,15 @@ namespace ImageComparator2
             info.AddValue("skipFilesWithDifferentOrientation", skipFilesWithDifferentOrientationMenuItem.IsChecked);
             info.AddValue("duplicatesOnly", findExactDuplicatesOnlyMenuItem.IsChecked);
             info.AddValue("files", files);
+            info.AddValue("falsePositiveList1", falsePositiveList1);
+            info.AddValue("falsePositiveList2", falsePositiveList2);
             info.AddValue("resolutionArray", resolutionArray);
             info.AddValue("bindingList1", bindingList1);
             info.AddValue("bindingList2", bindingList2);
             info.AddValue("console", console);
         }
 
-        public void serialize(string path)
+        public void Serialize(string path)
         {
             Stream stream = File.Open(path, FileMode.Create);
             BinaryFormatter bformatter = new BinaryFormatter();
@@ -1425,7 +1759,7 @@ namespace ImageComparator2
             stream.Close();
         }
 
-        public void deserialize(string path)
+        public void Deserialize(string path)
         {
             Stream stream = File.Open(path, FileMode.Open);
             BinaryFormatter bformatter = new BinaryFormatter();
@@ -1445,6 +1779,8 @@ namespace ImageComparator2
                 bmpMenuItem.IsChecked = mainWindow.bmpMenuItemChecked;
                 tiffMenuItem.IsChecked = mainWindow.tiffMenuItemChecked;
                 icoMenuItem.IsChecked = mainWindow.icoMenuItemChecked;
+                falsePositiveList1 = mainWindow.falsePositiveList1;
+                falsePositiveList2 = mainWindow.falsePositiveList2;
 
                 if (!mainWindow.sendsToRecycleBin)
                 {
@@ -1460,7 +1796,7 @@ namespace ImageComparator2
                     turkishMenuItem.IsChecked = true;
                     englishMenuItem.IsEnabled = true;
                     turkishMenuItem.IsEnabled = false;
-                    convertToTurkish();
+                    ConvertToTurkish();
                 }
             }
             else
@@ -1473,11 +1809,21 @@ namespace ImageComparator2
                 listView1.ItemsSource = bindingList1;
                 listView2.ItemsSource = bindingList2;
                 outputListView.ItemsSource = console;
+                addFolderButton.Visibility = Visibility.Hidden;
+                findDuplicatesButton.Visibility = Visibility.Hidden;
+                clearResultsButton.Visibility = Visibility.Visible;
+                applyButton.Visibility = Visibility.Visible;
+                deleteSelectedButton.IsEnabled = true;
+                removeFromListButton.IsEnabled = true;
+                markForDeletionButton.IsEnabled = true;
+                markAsFalsePositiveButton.IsEnabled = true;
+                removeMarkButton.IsEnabled = true;
+                saveResultsMenuItem.IsEnabled = true;
             }
             mainWindow = null;
         }
 
-        private void convertToEnglish()
+        private void ConvertToEnglish()
         {
             fileMenuItem.Header = "File";
             saveResultsMenuItem.Header = "Save Results...";
@@ -1492,6 +1838,7 @@ namespace ImageComparator2
             includeSubfoldersMenuItem.Header = "Include Subfolders";
             skipFilesWithDifferentOrientationMenuItem.Header = "Skip Files With Different Orientation";
             findExactDuplicatesOnlyMenuItem.Header = "Find Exact Duplicates Only";
+            clearFalsePositiveDatabaseButton.Header = "Clear False Positive Database";
             resetToDefaultsMenuItem.Header = "Reset To Defaults";
             helpMenuItem.Header = "Help";
             howToUseMenuItem.Header = "How To Use";
@@ -1500,15 +1847,21 @@ namespace ImageComparator2
             findDuplicatesButton.Content = "Find Duplicates";
             pauseButton.Content = "Pause";
             stopButton.Content = "Stop";
+            clearResultsButton.Content = "Clear Results";
+            applyButton.Content = "Apply";
             deleteSelectedButton.Content = "Delete Selected";
             removeFromListButton.Content = "Remove From List";
             clearButton.Content = "Clear";
+            markForDeletionButton.Content = "Mark For Deletion";
+            markAsFalsePositiveButton.Content = "Mark As False Positive";
+            removeMarkButton.Content = "Remove Mark";
             previewLabel.Content = "Select a file to preview:";
             console.Clear();
             console.Add("Drag-Drop to add folders:");
+            isEnglish = true;
         }
 
-        private void convertToTurkish()
+        private void ConvertToTurkish()
         {
             fileMenuItem.Header = "Dosya";
             saveResultsMenuItem.Header = "Sonuçları Kaydet...";
@@ -1523,6 +1876,7 @@ namespace ImageComparator2
             includeSubfoldersMenuItem.Header = "Alt Klasörlerde Ara";
             skipFilesWithDifferentOrientationMenuItem.Header = "Farklı Oryantasyondaki Dosyaları Geç";
             findExactDuplicatesOnlyMenuItem.Header = "Sadece Kopyaları Bul";
+            clearFalsePositiveDatabaseButton.Header = "Hatalı Sonuç Veritabanını Temizle";
             resetToDefaultsMenuItem.Header = "Varsayılan Ayarlara Dön";
             helpMenuItem.Header = "Yardım";
             howToUseMenuItem.Header = "Nasıl Kullanılır";
@@ -1531,12 +1885,97 @@ namespace ImageComparator2
             findDuplicatesButton.Content = "Kopyaları Bul";
             pauseButton.Content = "Duraklat";
             stopButton.Content = "Durdur";
+            clearResultsButton.Content = "Sonuçları Temizle";
+            applyButton.Content = "Uygula";
             deleteSelectedButton.Content = "Seçilenleri Sil";
             removeFromListButton.Content = "Listeden Kaldır";
             clearButton.Content = "Temizle";
+            markForDeletionButton.Content = "Silinecek Olarak İşaretle";
+            markAsFalsePositiveButton.Content = "Hatalı Sonuç Olarak İşaretle";
+            removeMarkButton.Content = "İşareti Kaldır";
             previewLabel.Content = "Görüntülemek için bir dosya seçin:";
             console.Clear();
             console.Add("Klasör eklemek için sürükle-bırak:");
+            isEnglish = false;
+        }
+
+        public void Clear()
+        {
+            clearResultsButton.Visibility = Visibility.Hidden;
+            applyButton.Visibility = Visibility.Hidden;
+            addFolderButton.Visibility = Visibility.Visible;
+            findDuplicatesButton.Visibility = Visibility.Visible;
+            directories.Clear();
+            files.Clear();
+            console.Clear();
+            bindingList1.Clear();
+            bindingList2.Clear();
+            list1.Clear();
+            list2.Clear();
+            percentage.Value = 0;
+
+            if (englishMenuItem.IsChecked)
+            {
+                console.Add("Drag-Drop to add folders:");
+            }
+            else
+            {
+                console.Add("Klasör eklemek için sürükle-bırak:");
+            }
+        }
+
+        public void Apply(int deleteItemCount, int markAsFalsePositiveItemCount)
+        {
+            if (deleteItemCount > 0)
+            {
+                deleteMarkedItems = true;
+                DeleteSelectedButton_Click(this, null);
+                deleteMarkedItems = false;
+            }
+
+            if (markAsFalsePositiveItemCount > 0)
+            {
+                List<int> falsePositiveIndices = new List<int>();
+
+                for (int i = 0; i < bindingList1.Count; i++)
+                {
+                    if (bindingList1[i].state == (int)State.MarkedAsFalsePositive)
+                    {
+                        falsePositiveList1.Add(bindingList1[i].sha256Checksum);
+                        falsePositiveList2.Add(bindingList2[i].sha256Checksum);
+                        falsePositiveIndices.Add(i);
+                    }
+                }
+
+                falsePositiveIndices.Sort();
+
+                for (int i = falsePositiveIndices.Count - 1; i > -1; i--)
+                {
+                    bindingList1.RemoveAt(falsePositiveIndices[i]);
+                    bindingList2.RemoveAt(falsePositiveIndices[i]);
+                }
+
+                try
+                {
+                    Serialize(path + @"\Bin\Image Comparator.imc");
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch
+                {
+                }
+
+                if (englishMenuItem.IsChecked)
+                {
+                    console.Add(markAsFalsePositiveItemCount + " file(s) have been marked as false positive.");
+                }
+                else
+                {
+                    console.Add(markAsFalsePositiveItemCount + " dosya hatalı sonuç olarak işaretlendi.");
+                }
+            }
         }
 
         private Visual GetDescendantByType(Visual element, Type type)
@@ -1573,11 +2012,11 @@ namespace ImageComparator2
             }
         }
 
-        private void processThreadStart()
+        private void ProcessThreadStart()
         {
             Bitmap image, resizedImage;
             FastDCT2D fastDCT2D;
-            SHA256Managed sha;
+            SHA256Managed sha = new SHA256Managed();
             int[,] result;
             double average;
             int i;
@@ -1593,121 +2032,144 @@ namespace ImageComparator2
 
                 try
                 {
-                    image = new Bitmap(files[i]);
-                    resizedImage = resizeImage(image, 32, 32);
-                    fastDCT2D = new FastDCT2D(resizedImage, 32);
-                    sha = new SHA256Managed();
-                    result = fastDCT2D.FastDCT();
-                    resizedImage = resizeImage(resizedImage, 9, 9);
-                    resizedImage = convertToGrayscale(resizedImage);
-                    average = 0;
-
-                    resolutionArray[i] = image.Size;
-
-                    if (image.Width > image.Height)
+                    if (duplicatesOnly)
                     {
-                        orientationArray[i] = Orientation.Horizontal;
+                        image = new Bitmap(files[i]);
+                        resolutionArray[i] = image.Size;
+
+                        if (image.Width > image.Height)
+                        {
+                            orientationArray[i] = Orientation.Horizontal;
+                        }
+                        else
+                        {
+                            orientationArray[i] = Orientation.Vertical;
+                        }
+
+                        //SHA256 Calculation
+                        using (FileStream stream = File.OpenRead(files[i]))
+                        {
+                            sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
+                        }
+                        image.Dispose();
                     }
                     else
                     {
-                        orientationArray[i] = Orientation.Vertical;
-                    }
+                        image = new Bitmap(files[i]);
+                        resizedImage = ResizeImage(image, 32, 32);
+                        fastDCT2D = new FastDCT2D(resizedImage, 32);
+                        result = fastDCT2D.FastDCT();
+                        resizedImage = ResizeImage(resizedImage, 9, 9);
+                        resizedImage = ConvertToGrayscale(resizedImage);
+                        average = 0;
 
-                    //SHA256 Calculation
-                    using (FileStream stream = File.OpenRead(files[i]))
-                    {
-                        sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
-                    }
+                        resolutionArray[i] = image.Size;
 
-                    //pHash(Perceptual Hash) Calculation
-                    for (int j = 0; j < 8; j++)
-                    {
-                        for (int k = 0; k < 8; k++)
+                        if (image.Width > image.Height)
                         {
-                            average += result[j, k];
+                            orientationArray[i] = Orientation.Horizontal;
                         }
-                    }
-
-                    average -= result[0, 0];
-                    average /= 63;
-
-                    for (int j = 0; j < 8; j++)
-                    {
-                        for (int k = 0; k < 8; k++)
+                        else
                         {
-                            if (result[j, k] < average)
-                            {
-                                pHashArray[i, j * 8 + k] = 0;
-                            }
-                            else
-                            {
-                                pHashArray[i, j * 8 + k] = 1;
-                            }
+                            orientationArray[i] = Orientation.Vertical;
                         }
-                    }
 
-                    //hdHash(Horizontal Difference Hash) Calculation
-                    for (int j = 0; j < 8; j++)
-                    {
-                        for (int k = 0; k < 9; k++)
+                        //SHA256 Calculation
+                        using (FileStream stream = File.OpenRead(files[i]))
                         {
-                            if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(j + 1, k).R)
+                            sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
+                        }
+
+                        //pHash(Perceptual Hash) Calculation
+                        for (int j = 0; j < 8; j++)
+                        {
+                            for (int k = 0; k < 8; k++)
                             {
-                                hdHashArray[i, j * 8 + k] = 0;
-                            }
-                            else
-                            {
-                                hdHashArray[i, j * 8 + k] = 1;
+                                average += result[j, k];
                             }
                         }
-                    }
 
-                    //vdHash(Vertical Difference Hash) Calculation
-                    for (int j = 0; j < 9; j++)
-                    {
-                        for (int k = 0; k < 8; k++)
+                        average -= result[0, 0];
+                        average /= 63;
+
+                        for (int j = 0; j < 8; j++)
                         {
-                            if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(k, k + 1).R)
+                            for (int k = 0; k < 8; k++)
                             {
-                                vdHashArray[i, j * 8 + k] = 0;
-                            }
-                            else
-                            {
-                                vdHashArray[i, j * 8 + k] = 1;
+                                if (result[j, k] < average)
+                                {
+                                    pHashArray[i, j * 8 + k] = 0;
+                                }
+                                else
+                                {
+                                    pHashArray[i, j * 8 + k] = 1;
+                                }
                             }
                         }
-                    }
 
-                    //aHash(Average Hash) Calculation
-                    resizedImage = resizeImage(resizedImage, 8, 8);
-                    average = 0;
-
-                    for (int j = 0; j < 8; j++)
-                    {
-                        for (int k = 0; k < 8; k++)
+                        //hdHash(Horizontal Difference Hash) Calculation
+                        for (int j = 0; j < 8; j++)
                         {
-                            average += resizedImage.GetPixel(j, k).R;
-                        }
-                    }
-
-                    average /= 64;
-
-                    for (int j = 0; j < 8; j++)
-                    {
-                        for (int k = 0; k < 8; k++)
-                        {
-                            if (resizedImage.GetPixel(j, k).R < average)
+                            for (int k = 0; k < 9; k++)
                             {
-                                aHashArray[i, j * 8 + k] = 0;
-                            }
-                            else
-                            {
-                                aHashArray[i, j * 8 + k] = 1;
+                                if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(j + 1, k).R)
+                                {
+                                    hdHashArray[i, j * 8 + k] = 0;
+                                }
+                                else
+                                {
+                                    hdHashArray[i, j * 8 + k] = 1;
+                                }
                             }
                         }
+
+                        //vdHash(Vertical Difference Hash) Calculation
+                        for (int j = 0; j < 9; j++)
+                        {
+                            for (int k = 0; k < 8; k++)
+                            {
+                                if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(k, k + 1).R)
+                                {
+                                    vdHashArray[i, j * 8 + k] = 0;
+                                }
+                                else
+                                {
+                                    vdHashArray[i, j * 8 + k] = 1;
+                                }
+                            }
+                        }
+
+                        //aHash(Average Hash) Calculation
+                        resizedImage = ResizeImage(resizedImage, 8, 8);
+                        average = 0;
+
+                        for (int j = 0; j < 8; j++)
+                        {
+                            for (int k = 0; k < 8; k++)
+                            {
+                                average += resizedImage.GetPixel(j, k).R;
+                            }
+                        }
+
+                        average /= 64;
+
+                        for (int j = 0; j < 8; j++)
+                        {
+                            for (int k = 0; k < 8; k++)
+                            {
+                                if (resizedImage.GetPixel(j, k).R < average)
+                                {
+                                    aHashArray[i, j * 8 + k] = 0;
+                                }
+                                else
+                                {
+                                    aHashArray[i, j * 8 + k] = 1;
+                                }
+                            }
+                        }
+                        image.Dispose();
+                        resizedImage.Dispose();
                     }
-                    image.Dispose();
-                    resizedImage.Dispose();
                 }
                 catch (ArgumentException)
                 {
@@ -1715,9 +2177,17 @@ namespace ImageComparator2
                     {
                         pHashArray[i, 0] = -1;
                     }
+                    catch (OutOfMemoryException)
+                    {
+                        throw;
+                    }
                     catch
                     {
                     }
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
                 }
                 catch
                 {
@@ -1725,7 +2195,7 @@ namespace ImageComparator2
             }
         }
 
-        private void compareResultsThreadStart()
+        private void CompareResultsThreadStart()
         {
             int i, j;
             bool isDuplicate;
@@ -1743,7 +2213,7 @@ namespace ImageComparator2
                 {
                     if (!skipFilesWithDifferentOrientation || orientationArray[i] == orientationArray[j])
                     {
-                        isDuplicate = findSimilarity(i, j);
+                        isDuplicate = FindSimilarity(i, j);
 
                         if (isDuplicate)
                         {
@@ -1754,18 +2224,55 @@ namespace ImageComparator2
             }
         }
 
-        private void run()
+        private void Run()
         {
             Action updateUI = delegate ()
             {
-                mergeSort(list1, list2);
+                for (int i = 0; i < list1.Count; i++)
+                {
+                    for (int j = 0; j < falsePositiveList1.Count; j++)
+                    {
+                        if ((list1[i].sha256Checksum == falsePositiveList1[j] && list2[i].sha256Checksum == falsePositiveList2[j]) || (list1[i].sha256Checksum == falsePositiveList2[j] && list2[i].sha256Checksum == falsePositiveList1[j]))
+                        {
+                            list1.RemoveAt(i);
+                            list2.RemoveAt(i);
+
+                            if (list1[i].confidence == (int)Confidence.Low)
+                            {
+                                lowConfidenceSimilarImageCount--;
+                            }
+                            else if (list1[i].confidence == (int)Confidence.Medium)
+                            {
+                                mediumConfidenceSimilarImageCount--;
+                            }
+                            else if (list1[i].confidence == (int)Confidence.High)
+                            {
+                                highConfidenceSimilarImageCount--;
+                            }
+                            else
+                            {
+                                duplicateImageCount--;
+                            }
+                        }
+                    }
+                }
+
+                MergeSort(list1, list2);
                 bindingList1 = new ObservableCollection<ListViewDataItem>(list1);
                 bindingList2 = new ObservableCollection<ListViewDataItem>(list2);
                 listView1.ItemsSource = bindingList1;
                 listView2.ItemsSource = bindingList2;
-                findDuplicatesButton.Visibility = Visibility.Visible;
+                addFolderButton.Visibility = Visibility.Collapsed;
                 pauseButton.Visibility = Visibility.Collapsed;
                 stopButton.Visibility = Visibility.Collapsed;
+                clearResultsButton.Visibility = Visibility.Visible;
+                applyButton.Visibility = Visibility.Visible;
+                deleteSelectedButton.IsEnabled = true;
+                removeFromListButton.IsEnabled = true;
+                markForDeletionButton.IsEnabled = true;
+                markAsFalsePositiveButton.IsEnabled = true;
+                removeMarkButton.IsEnabled = true;
+                saveResultsMenuItem.IsEnabled = true;
 
                 if (englishMenuItem.IsChecked)
                 {
@@ -1913,7 +2420,7 @@ namespace ImageComparator2
                 }
             };
 
-            addFiles(directories);
+            AddFiles(directories);
             directories.Clear();
             Dispatcher.Invoke(DispatcherPriority.Normal, updateConsole1);
 
@@ -1934,7 +2441,7 @@ namespace ImageComparator2
 
             for (int i = 0; i < Environment.ProcessorCount; i++)
             {
-                threadList.Add(new Thread(processThreadStart));
+                threadList.Add(new Thread(ProcessThreadStart));
                 threadList.ElementAt(i).Start();
             }
 
@@ -1948,7 +2455,7 @@ namespace ImageComparator2
 
             for (int i = 0; i < Environment.ProcessorCount; i++)
             {
-                threadList.Add(new Thread(compareResultsThreadStart));
+                threadList.Add(new Thread(CompareResultsThreadStart));
                 threadList.ElementAt(i).Start();
             }
 
@@ -1962,7 +2469,7 @@ namespace ImageComparator2
             Dispatcher.Invoke(DispatcherPriority.Normal, updateUI);
         }
 
-        private void writeToFile(List<string> input)
+        private void WriteToFile(List<string> input)
         {
             streamWriter = new StreamWriter(path + @"\Bin\Directories.imc");
             streamWriter.WriteLine(input.Count);
@@ -1984,19 +2491,19 @@ namespace ImageComparator2
             streamWriter.Close();
         }
 
-        private void addFiles(List<string> directory)
+        private void AddFiles(List<string> directory)
         {
-            writeToFile(directory);
+            WriteToFile(directory);
             System.Diagnostics.ProcessStartInfo processStartInfo = new System.Diagnostics.ProcessStartInfo(path + (@"\Bin\AddFiles.exe"));
             processStartInfo.RedirectStandardOutput = false;
             processStartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             processStartInfo.UseShellExecute = true;
             process = System.Diagnostics.Process.Start(processStartInfo);
             process.WaitForExit();
-            readFromFile();
+            ReadFromFile();
         }
 
-        private void readFromFile()
+        private void ReadFromFile()
         {
             int count;
             streamReader = new StreamReader(path + @"\Bin\Results.imc");
@@ -2011,7 +2518,7 @@ namespace ImageComparator2
             File.Delete(path + @"\Bin\Results.imc");
         }
 
-        private Bitmap resizeImage(System.Drawing.Image image, int width, int height)
+        private Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
         {
             Rectangle destRect = new Rectangle(0, 0, width, height);
             Bitmap destImage = new Bitmap(width, height);
@@ -2035,7 +2542,7 @@ namespace ImageComparator2
             return destImage;
         }
 
-        private Bitmap convertToGrayscale(Bitmap inputImage)
+        private Bitmap ConvertToGrayscale(Bitmap inputImage)
         {
             Bitmap cloneImage = (Bitmap)inputImage.Clone();
             Graphics graphics = Graphics.FromImage(cloneImage);
@@ -2053,7 +2560,7 @@ namespace ImageComparator2
             return cloneImage;
         }
 
-        private bool findSimilarity(int i, int j)
+        private bool FindSimilarity(int i, int j)
         {
             if (pHashArray[i, 0] != -1 && pHashArray[j, 0] != -1)
             {
@@ -2061,38 +2568,6 @@ namespace ImageComparator2
 
                 if (duplicatesOnly)
                 {
-                    for (int k = 1; k < 64; k++)
-                    {
-                        if (pHashArray[i, k] != pHashArray[j, k])
-                        {
-                            return false;
-                        }
-                    }
-
-                    for (int k = 0; k < 72; k++)
-                    {
-                        if (hdHashArray[i, k] != hdHashArray[j, k])
-                        {
-                            return false;
-                        }
-                    }
-
-                    for (int k = 0; k < 72; k++)
-                    {
-                        if (vdHashArray[i, k] != vdHashArray[j, k])
-                        {
-                            return false;
-                        }
-                    }
-
-                    for (int k = 0; k < 64; k++)
-                    {
-                        if (aHashArray[i, k] != aHashArray[j, k])
-                        {
-                            return false;
-                        }
-                    }
-
                     if (sha256Array[i] != sha256Array[j])
                     {
                         return false;
@@ -2140,7 +2615,7 @@ namespace ImageComparator2
                         }
                     }
 
-                    if (pHashHammingDistance < 1 && hdHashHammingDistance < 1 && vdHashHammingDistance < 1 && aHashHammingDistance < 1 && sha256Array[i] == sha256Array[j])
+                    if (sha256Array[i] == sha256Array[j] && pHashHammingDistance < 1 && hdHashHammingDistance < 1 && vdHashHammingDistance < 1 && aHashHammingDistance < 1)
                     {
                         lock (myLock2)
                         {
@@ -2182,7 +2657,7 @@ namespace ImageComparator2
             return false;
         }
 
-        private int findDuplicateIndex(ObservableCollection<ListViewDataItem> list, ListViewDataItem item)
+        private int FindDuplicateIndex(ObservableCollection<ListViewDataItem> list, ListViewDataItem item)
         {
             for (int i = 0; i < list.Count; i++)
             {
@@ -2194,7 +2669,7 @@ namespace ImageComparator2
             return -1;
         }
 
-        private bool fileAddedBefore(List<ListViewDataItem> selectedList, ListViewDataItem data)
+        private bool FileAddedBefore(List<ListViewDataItem> selectedList, ListViewDataItem data)
         {
             for (int i = 0; i < selectedList.Count; i++)
             {
@@ -2241,6 +2716,11 @@ namespace ImageComparator2
                     bitmapImage.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
                     bitmapImage.EndInit();
                     previewImage1.Source = bitmapImage;
+                    GC.Collect();
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
                 }
                 catch
                 {
@@ -2265,6 +2745,11 @@ namespace ImageComparator2
                     bitmapImage.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
                     bitmapImage.EndInit();
                     previewImage2.Source = bitmapImage;
+                    GC.Collect();
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
                 }
                 catch
                 {
@@ -2272,7 +2757,7 @@ namespace ImageComparator2
             }
         }
 
-        private void mergeSort(List<ListViewDataItem> list1, List<ListViewDataItem> list2)
+        private void MergeSort(List<ListViewDataItem> list1, List<ListViewDataItem> list2)
         {
             if (list1.Count < 2)
             {
@@ -2288,20 +2773,20 @@ namespace ImageComparator2
 
                 while (startR + step <= list1.Count)
                 {
-                    mergeLists(list1, list2, startL, startL + step, startR, startR + step);
+                    MergeLists(list1, list2, startL, startL + step, startR, startR + step);
                     startL = startR + step;
                     startR = startL + step;
                 }
 
                 if (startR < list1.Count)
                 {
-                    mergeLists(list1, list2, startL, startL + step, startR, list1.Count);
+                    MergeLists(list1, list2, startL, startL + step, startR, list1.Count);
                 }
                 step *= 2;
             }
         }
 
-        private void mergeLists(List<ListViewDataItem> list1, List<ListViewDataItem> list2, int startL, int stopL, int startR, int stopR)
+        private void MergeLists(List<ListViewDataItem> list1, List<ListViewDataItem> list2, int startL, int stopL, int startR, int stopR)
         {
             ListViewDataItem[] right1 = new ListViewDataItem[stopR - startR + 1];
             ListViewDataItem[] right2 = new ListViewDataItem[stopR - startR + 1];

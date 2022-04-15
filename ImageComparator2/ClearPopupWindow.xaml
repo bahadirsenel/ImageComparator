@@ -1,0 +1,33 @@
+﻿<Window x:Class="ImageComparator2.ClearPopupWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ImageComparator2"
+        mc:Ignorable="d"
+        Title="Warning" Height="150" Width="320" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Grid>
+        <Border Grid.Row="1" Grid.Column="2" Margin="5,5,5,5" BorderThickness="1" BorderBrush="#FFABADB3">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Name="warningTextBlock" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center">
+                    Are you sure you want to discard current results? You can save them to continue working on them later.
+                </TextBlock>
+
+                <Button Name="saveResultsButton" Content="Save" Grid.Row="1" Grid.Column="0" Margin="5" Height="22" Click="saveResultsButton_Click"/>
+                <Button Name="discardResultsButton" Content="Discard" Grid.Row="1" Grid.Column="1" Margin="5" Height="22" Click="discardResultsButton_Click"/>
+                <Button Name="cancelResultsButton" Content="Cancel" Grid.Row="1" Grid.Column="2" Margin="5" Height="22" Click="cancelResultsButton_Click"/>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

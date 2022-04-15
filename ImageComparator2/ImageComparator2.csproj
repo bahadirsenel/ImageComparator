@@ -105,6 +105,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="ApplyPopupWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ClearPopupWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -112,6 +120,12 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ApplyPopupWindow.xaml.cs">
+      <DependentUpon>ApplyPopupWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ClearPopupWindow.xaml.cs">
+      <DependentUpon>ClearPopupWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\DiscreteCosineTransform2D.cs" />
     <Compile Include="MainWindow.xaml.cs">

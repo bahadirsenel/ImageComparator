@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageComparator2"
         mc:Ignorable="d"
-        Title="Image Comparator" Width="1005" Height="600" MinWidth="365" MinHeight="400" Closing="Window_Closing">
+        Title="Image Comparator" Width="1005" Height="600" MinWidth="365" MinHeight="400" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -21,18 +21,18 @@
 
         <Menu Grid.Row="0" Grid.ColumnSpan="3">
             <MenuItem Name="fileMenuItem" Header="File">
-                <MenuItem Name="saveResultsMenuItem" Header="Save Results..." Click="saveResultsMenuItem_Click">
+                <MenuItem Name="saveResultsMenuItem" Header="Save Results..." Click="SaveResultsMenuItem_Click">
                     <MenuItem.Icon>
                         <Image Source="Resources/save_32.png" Width="24" Height="24"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Name="loadResultsMenuItem" Header="Load Results..." Click="loadResultsMenuItem_Click">
+                <MenuItem Name="loadResultsMenuItem" Header="Load Results..." Click="LoadResultsMenuItem_Click">
                     <MenuItem.Icon>
                         <Image Source="Resources/folder_32.png" Width="24" Height="24"/>
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator />
-                <MenuItem Name="exitMenuItem" Header="Exit" Click="exitMenuItem_Click">
+                <MenuItem Name="exitMenuItem" Header="Exit" Click="ExitMenuItem_Click">
                     <MenuItem.Icon>
                         <Image Source="Resources/close_32.png" Width="24" Height="24"/>
                     </MenuItem.Icon>
@@ -50,13 +50,13 @@
                 </MenuItem>
 
                 <MenuItem Name="deletionMethodMenuItem" Header="Deletion Method">
-                    <MenuItem Name="sendToRecycleBinMenuItem" Header="Send To Recycle Bin" IsCheckable="True" IsChecked="True" IsEnabled="False" Click="sendToRecycleBinMenuItem_Click"/>
-                    <MenuItem Name="deletePermanentlyMenuItem" Header="Delete Permanently" IsCheckable="True" IsChecked="False" Click="deletePermanentlyMenuItem_Click"/>
+                    <MenuItem Name="sendToRecycleBinMenuItem" Header="Send To Recycle Bin" IsCheckable="True" IsChecked="True" IsEnabled="False" Click="SendToRecycleBinMenuItem_Click"/>
+                    <MenuItem Name="deletePermanentlyMenuItem" Header="Delete Permanently" IsCheckable="True" IsChecked="False" Click="DeletePermanentlyMenuItem_Click"/>
                 </MenuItem>
 
                 <MenuItem Name="languageMenuItem" Header="Language">
-                    <MenuItem Name="englishMenuItem" Header="English" IsCheckable="True" IsChecked="True" IsEnabled="False" Click="englishMenuItem_Click"/>
-                    <MenuItem Name="turkishMenuItem" Header="Türkçe" IsCheckable="True" IsChecked="False" Click="turkishMenuItem_Click"/>
+                    <MenuItem Name="englishMenuItem" Header="English" IsCheckable="True" IsChecked="True" IsEnabled="False" Click="EnglishMenuItem_Click"/>
+                    <MenuItem Name="turkishMenuItem" Header="Türkçe" IsCheckable="True" IsChecked="False" Click="TurkishMenuItem_Click"/>
                 </MenuItem>
 
                 <Separator />
@@ -67,16 +67,17 @@
 
                 <Separator />
 
-                <MenuItem Name="resetToDefaultsMenuItem" Header="Reset To Defaults" Click="resetToDefaultsMenuItem_Click"/>
+                <MenuItem Name="clearFalsePositiveDatabaseButton" Header="Clear False Positive Database" Click="ClearFalsePositiveDatabaseButton_Click"/>
+                <MenuItem Name="resetToDefaultsMenuItem" Header="Reset To Defaults" Click="ResetToDefaultsMenuItem_Click"/>
             </MenuItem>
 
             <MenuItem Name="helpMenuItem" Header="Help">
-                <MenuItem Name="howToUseMenuItem" Header="How To Use" Click="howToUseMenuItem_Click">
+                <MenuItem Name="howToUseMenuItem" Header="How To Use" Click="HowToUseMenuItem_Click">
                     <MenuItem.Icon>
                         <Image Source="Resources/lightbulb_32.png" Width="24" Height="24"/>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Name="aboutMenuItem" Header="About" Click="aboutMenuItem_Click">
+                <MenuItem Name="aboutMenuItem" Header="About" Click="AboutMenuItem_Click">
                     <MenuItem.Icon>
                         <Image Source="Resources/info_button_32.png" Width="24" Height="24"/>
                     </MenuItem.Icon>
@@ -88,6 +89,7 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="2*"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -106,11 +108,14 @@
                 <ColumnDefinition Width="82*"/>
             </Grid.ColumnDefinitions>
 
-            <Button Name="addFolderButton" Content="Add Folder" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Margin="5,5,0,0" Click="addFolderButton_Click" Height="22" VerticalAlignment="Top"/>
-            <Button Name="findDuplicatesButton" Content="Find Duplicates" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="4" Margin="5,5,5,0" Click="findDuplicatesButton_Click" IsVisibleChanged="findDuplicatesButton_IsVisibleChanged"/>
-            <Button Name="pauseButton" Content="Pause" Tag="0" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="5,5,0,0" Click="pauseButton_Click"/>
-            <Button Name="stopButton" Content="Stop" Grid.Row="0" Grid.Column="8" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="5,5,5,0" Click="stopButton_Click"/>
-            <ListView Name="listView1" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" Margin="5,5,0,0" ItemsSource="{Binding}" KeyDown="listView1_KeyDown" MouseDoubleClick="listView1_MouseDoubleClick" SelectionChanged="listView1_SelectionChanged" ScrollViewer.ScrollChanged="listView1_ScrollChanged">
+            <Button Name="addFolderButton" Content="Add Folder" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Margin="5,5,0,0" Click="AddFolderButton_Click" Height="22"/>
+            <Button Name="findDuplicatesButton" Content="Find Duplicates" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="4" Margin="5,5,5,0" Click="FindDuplicatesButton_Click" IsVisibleChanged="FindDuplicatesButton_IsVisibleChanged"/>
+            <Button Name="pauseButton" Content="Pause" Tag="0" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="5,5,0,0" Click="PauseButton_Click"/>
+            <Button Name="stopButton" Content="Stop" Grid.Row="0" Grid.Column="8" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="5,5,5,0" Click="StopButton_Click"/>
+            <Button Name="clearResultsButton" Content="Clear Results" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Visibility="Collapsed" Margin="5,5,0,0" Click="ClearButton_Click"/>
+            <Button Name="applyButton" Content="Apply" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="4" Visibility="Collapsed" Margin="5,5,0,0" Click="ApplyButton_Click"/>
+
+            <ListView Name="listView1" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" Margin="5,5,0,0" ItemsSource="{Binding}" KeyDown="ListView1_KeyDown" MouseDoubleClick="ListView1_MouseDoubleClick" SelectionChanged="ListView1_SelectionChanged" ScrollViewer.ScrollChanged="ListView1_ScrollChanged">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -118,7 +123,14 @@
                                 <BulletDecorator.Bullet>
                                     <Ellipse x:Name="Bullet" Height="10" Width="10"/>
                                 </BulletDecorator.Bullet>
-                                <TextBlock Text="{Binding text}" Margin="3,0,0,0"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox x:Name="ListItemCheckBox" Grid.Column="0" IsChecked="{Binding isChecked, Mode=TwoWay}" IsEnabled="{Binding CheckboxEnabled, Mode=TwoWay}" Checked="ListView1_ListItemCheckBox_Checked" Unchecked="ListView1_ListItemCheckBox_Unchecked"></CheckBox>
+                                    <TextBlock x:Name="ListItem" Grid.Column="1" Text="{Binding text}" Margin="3,0,0,0"/>
+                                </Grid>
                             </BulletDecorator>
                         </Grid>
 
@@ -138,9 +150,31 @@
                             <DataTrigger Binding="{Binding confidence}" Value="3">
                                 <Setter TargetName="Bullet" Property="Fill" Value="Blue"/>
                             </DataTrigger>
+
+                            <DataTrigger Binding="{Binding state}" Value="0">
+                                <Setter TargetName="ListItem" Property="Background" Value="Transparent"/>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding state}" Value="1">
+                                <Setter TargetName="ListItem" Property="Background" Value="Red"/>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding state}" Value="2">
+                                <Setter TargetName="ListItem" Property="Background" Value="#FBC342"/>
+                            </DataTrigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListView.ItemTemplate>
+
+                <ListView.ContextMenu>
+                    <ContextMenu StaysOpen="true">
+                        <ContextMenu.BitmapEffect>
+                            <BitmapEffectGroup/>
+                        </ContextMenu.BitmapEffect>
+                        <MenuItem Header="Open" Click="ListView1_OpenMenuItem_Click"/>
+                        <MenuItem Header="Open File Location" Click="ListView1_OpenFileLocationMenuItem_Click"/>
+                    </ContextMenu>
+                </ListView.ContextMenu>
 
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
@@ -149,7 +183,7 @@
                 </ListView.ItemContainerStyle>
             </ListView>
 
-            <ListView Name="listView2" Grid.Row="1" Grid.Column="6" Grid.ColumnSpan="4" Margin="5,5,5,0" ItemsSource="{Binding}" KeyDown="listView2_KeyDown" MouseDoubleClick="listView2_MouseDoubleClick" SelectionChanged="listView2_SelectionChanged" ScrollViewer.ScrollChanged="listView2_ScrollChanged">
+            <ListView Name="listView2" Grid.Row="1" Grid.Column="6" Grid.ColumnSpan="4" Margin="5,5,5,0" ItemsSource="{Binding}" KeyDown="ListView2_KeyDown" MouseDoubleClick="ListView2_MouseDoubleClick" SelectionChanged="ListView2_SelectionChanged" ScrollViewer.ScrollChanged="ListView2_ScrollChanged">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -157,7 +191,14 @@
                                 <BulletDecorator.Bullet>
                                     <Ellipse x:Name="Bullet" Height="10" Width="10"/>
                                 </BulletDecorator.Bullet>
-                                <TextBlock Text="{Binding text}" Margin="3,0,0,0"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <CheckBox x:Name="ListItemCheckBox" Grid.Column="0" IsChecked="{Binding isChecked, Mode=TwoWay}" IsEnabled="{Binding CheckboxEnabled, Mode=TwoWay}" Checked="ListView2_ListItemCheckBox_Checked" Unchecked="ListView2_ListItemCheckBox_Unchecked"></CheckBox>
+                                    <TextBlock x:Name="ListItem" Grid.Column="1" Text="{Binding text}" Margin="3,0,0,0"/>
+                                </Grid>
                             </BulletDecorator>
                         </Grid>
 
@@ -177,9 +218,31 @@
                             <DataTrigger Binding="{Binding confidence}" Value="3">
                                 <Setter TargetName="Bullet" Property="Fill" Value="Blue"/>
                             </DataTrigger>
+
+                            <DataTrigger Binding="{Binding state}" Value="0">
+                                <Setter TargetName="ListItem" Property="Background" Value="Transparent"/>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding state}" Value="1">
+                                <Setter TargetName="ListItem" Property="Background" Value="Red"/>
+                            </DataTrigger>
+
+                            <DataTrigger Binding="{Binding state}" Value="2">
+                                <Setter TargetName="ListItem" Property="Background" Value="#FBC342"/>
+                            </DataTrigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>
                 </ListView.ItemTemplate>
+
+                <ListView.ContextMenu>
+                    <ContextMenu StaysOpen="true">
+                        <ContextMenu.BitmapEffect>
+                            <BitmapEffectGroup/>
+                        </ContextMenu.BitmapEffect>
+                        <MenuItem Header="Open" Click="ListView2_OpenMenuItem_Click"/>
+                        <MenuItem Header="Open File Location" Click="ListView2_OpenFileLocationMenuItem_Click"/>
+                    </ContextMenu>
+                </ListView.ContextMenu>
 
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
@@ -188,11 +251,14 @@
                 </ListView.ItemContainerStyle>
             </ListView>
 
-            <Button Name="deleteSelectedButton" Content="Delete Selected" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,5,0,0" Click="deleteSelectedButton_Click"/>
-            <Button Name="removeFromListButton" Content="Remove From List" Grid.Row="2" Grid.Column="5" Grid.ColumnSpan="2" Margin="5,5,0,0" Click="removeFromListButton_Click"/>
-            <Button Name="clearButton" Content="Clear" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="3" Margin="5,5,5,0" Click="clearButton_Click"/>
-            <ProgressBar Name="progressBar" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="10" Margin="5,5,5,0" Height="20"/>
-            <ListView Name="outputListView" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="10" Margin="5,5,5,5" AllowDrop="True" DragEnter="outputListView_DragEnter" Drop="outputListView_Drop"/>
+            <Button Name="deleteSelectedButton" Content="Delete Selected" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,5,0,0" IsEnabled="False" Click="DeleteSelectedButton_Click"/>
+            <Button Name="removeFromListButton" Content="Remove From List" Grid.Row="2" Grid.Column="5" Grid.ColumnSpan="2" Margin="5,5,0,0" IsEnabled="False" Click="RemoveFromListButton_Click"/>
+            <Button Name="clearButton" Content="Clear" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="3" Margin="5,5,5,0" Click="ClearButton_Click"/>
+            <Button Name="markForDeletionButton" Content="Mark For Deletion" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,5,0,0" IsEnabled="False" Click='MarkForDeletionButton_Click'/>
+            <Button Name="markAsFalsePositiveButton" Content="Mark As False Positive" Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="2" Margin="5,5,0,0" IsEnabled="False" Click='MarkAsFalsePositiveButton_Click'/>
+            <Button Name="removeMarkButton" Content="Remove Mark" Grid.Row="3" Grid.Column="7" Grid.ColumnSpan="3" Margin="5,5,5,0" IsEnabled="False" Click='RemoveMarkButton_Click'/>
+            <ProgressBar Name="progressBar" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="10" Margin="5,5,5,0" Height="20"/>
+            <ListView Name="outputListView" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="10" Margin="5,5,5,5" AllowDrop="True" DragEnter="OutputListView_DragEnter" Drop="OutputListView_Drop"/>
         </Grid>
 
         <GridSplitter Grid.Row="1" Grid.Column="1" Width="5" ResizeBehavior="PreviousAndNext"/>
@@ -217,8 +283,8 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Border Name="previewImageBorder1" Grid.Row="0" Margin="5,5,5,0" IsManipulationEnabled="True" ClipToBounds="True" ManipulationDelta="previewImageBorder_ManipulationDelta">
-                            <Image Name="previewImage1" RenderTransformOrigin="0.5,0.5" MouseWheel="previewImage_MouseWheel" MouseLeftButtonDown="previewImage1_MouseLeftButtonDown" MouseMove="previewImage1_MouseMove" MouseLeftButtonUp="previewImage1_MouseLeftButtonUp"/>
+                        <Border Name="previewImageBorder1" Grid.Row="0" Margin="5,5,5,0" IsManipulationEnabled="True" ClipToBounds="True" ManipulationDelta="PreviewImageBorder_ManipulationDelta">
+                            <Image Name="previewImage1" RenderTransformOrigin="0.5,0.5" MouseWheel="PreviewImage_MouseWheel" MouseLeftButtonDown="PreviewImage1_MouseLeftButtonDown" MouseMove="PreviewImage1_MouseMove" MouseLeftButtonUp="PreviewImage1_MouseLeftButtonUp"/>
                         </Border>
                         <Label Name="informationLabel1" Grid.Row="1" HorizontalAlignment="Center"/>
                     </Grid>
@@ -231,8 +297,8 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Border Name="previewImageBorder2" Grid.Row="0" Margin="5,0,5,5" IsManipulationEnabled="True" ClipToBounds="True" ManipulationDelta="previewImageBorder_ManipulationDelta">
-                            <Image Name="previewImage2" RenderTransformOrigin="0.5,0.5" MouseWheel="previewImage_MouseWheel"  MouseLeftButtonDown="previewImage2_MouseLeftButtonDown"  MouseMove="previewImage2_MouseMove"  MouseLeftButtonUp="previewImage2_MouseLeftButtonUp"/>
+                        <Border Name="previewImageBorder2" Grid.Row="0" Margin="5,0,5,5" IsManipulationEnabled="True" ClipToBounds="True" ManipulationDelta="PreviewImageBorder_ManipulationDelta">
+                            <Image Name="previewImage2" RenderTransformOrigin="0.5,0.5" MouseWheel="PreviewImage_MouseWheel"  MouseLeftButtonDown="PreviewImage2_MouseLeftButtonDown"  MouseMove="PreviewImage2_MouseMove"  MouseLeftButtonUp="PreviewImage2_MouseLeftButtonUp"/>
                         </Border>
                         <Label Name="informationLabel2" Grid.Row="1" HorizontalAlignment="Center"/>
                     </Grid>
@@ -247,7 +313,7 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <Button Name="zoomInButton" Content="+" Grid.Row="0" Margin="5,5,5,5" Width="25" Height="25" Opacity="0.5" Click="zoomInButton_Click">
+                        <Button Name="zoomInButton" Content="+" Grid.Row="0" Margin="5,5,5,5" Width="25" Height="25" Opacity="0.5" Click="ZoomInButton_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
                                     <Grid>
@@ -258,7 +324,7 @@
                             </Button.Template>
                         </Button>
 
-                        <Button Name="zoomOutButton" Content="-" Grid.Row="1" Margin="5,5,5,5" Width="25" Height="25" Opacity="0.5" Click="zoomOutButton_Click">
+                        <Button Name="zoomOutButton" Content="-" Grid.Row="1" Margin="5,5,5,5" Width="25" Height="25" Opacity="0.5" Click="ZoomOutButton_Click">
                             <Button.Template>
                                 <ControlTemplate TargetType="{x:Type Button}">
                                     <Grid>
