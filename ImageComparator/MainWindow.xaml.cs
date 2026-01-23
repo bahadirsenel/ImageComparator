@@ -1660,7 +1660,8 @@ namespace ImageComparator
                     turkishMenuItem.IsChecked = true;
                     englishMenuItem.IsEnabled = true;
                     turkishMenuItem.IsEnabled = false;
-                    ConvertToTurkish();
+                    LocalizationManager.SetLanguage("tr-TR");
+                    UpdateUI();
                 }
             }
             else

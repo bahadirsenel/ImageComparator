@@ -8,6 +8,19 @@ namespace ImageComparator
 {
     /// <summary>
     /// Manages application localization by loading language strings from JSON files.
+    /// 
+    /// How to add a new language:
+    /// 1. Create a new JSON file in the Resources folder (e.g., "de-DE.json" for German)
+    /// 2. Copy the structure from en-US.json and translate all the values
+    /// 3. Add the JSON file to the .csproj as a Content item with CopyToOutputDirectory set to PreserveNewest
+    /// 4. Add a new MenuItem in MainWindow.xaml for the new language
+    /// 5. In the MenuItem's Click handler, call LocalizationManager.SetLanguage("de-DE")
+    /// 
+    /// The localization system will automatically:
+    /// - Load the new language file
+    /// - Update all UI strings
+    /// - Raise the LanguageChanged event
+    /// - Update the isEnglish flag for backward compatibility
     /// </summary>
     public static class LocalizationManager
     {
