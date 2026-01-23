@@ -22,7 +22,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
-namespace ImageComparator2
+namespace ImageComparator
 {
     [Serializable]
     public partial class MainWindow : Window, ISerializable

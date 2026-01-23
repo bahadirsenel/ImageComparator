@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 
-namespace ImageComparator2
+namespace ImageComparator
 {
     public partial class ApplyPopupWindow : Window
     {

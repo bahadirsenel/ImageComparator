@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace ImageComparator2 {
+namespace ImageComparator {
 
     public partial class App : Application {
 

@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio Version 18
+VisualStudioVersion = 18.2.11415.280 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageComparator2", "ImageComparator2\ImageComparator2.csproj", "{9803EFCC-4A75-4720-974F-49BB2D5C6F93}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageComparator", "ImageComparator\ImageComparator.csproj", "{9803EFCC-4A75-4720-974F-49BB2D5C6F93}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

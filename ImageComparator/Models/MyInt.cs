@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace ImageComparator2
+namespace ImageComparator
 {
     public class MyInt
     {
