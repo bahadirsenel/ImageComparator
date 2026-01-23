@@ -10,11 +10,14 @@ namespace ImageComparator
     /// </summary>
     public partial class AboutWindow : Window
     {
+        private readonly bool _isEnglish;
+
         public AboutWindow(bool isEnglish)
         {
             InitializeComponent();
+            _isEnglish = isEnglish;
             
-            if (isEnglish)
+            if (_isEnglish)
             {
                 // English
                 Title = "About";
@@ -58,7 +61,11 @@ namespace ImageComparator
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Could not open link: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                string errorTitle = _isEnglish ? "Error" : "Hata";
+                string errorMessage = _isEnglish 
+                    ? $"Could not open link: {ex.Message}" 
+                    : $"Link açılamadı: {ex.Message}";
+                MessageBox.Show(errorMessage, errorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
