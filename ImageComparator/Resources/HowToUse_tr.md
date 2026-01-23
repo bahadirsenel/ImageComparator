@@ -19,9 +19,9 @@ Image Comparator'e hoş geldiniz! Bu uygulama klasörlerinizdeki kopya görselle
    • Kopya çiftleri yan yana iki listede gösterilir
    • Renk kodlu göstergeler güven seviyelerini gösterir:
      - Mavi: Mükerrer
-     - Kırmızı: Yüksek benzer
-     - Sarı: Orta benzer
-     - Yeşil: Düşük benzer
+     - Kırmızı: Yüksek benzerlik güveni
+     - Sarı: Orta benzerlik güveni
+     - Yeşil: Düşük benzerlik güveni
    • Herhangi bir dosyaya tıklayarak orta panelde önizlemesini görebilirsiniz
 
 ## 4. ARAMA FORMATLARI

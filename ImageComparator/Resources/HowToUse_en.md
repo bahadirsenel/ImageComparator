@@ -19,9 +19,9 @@ Welcome to Image Comparator! This application helps you find and manage duplicat
    • Duplicate pairs are shown in two side-by-side lists
    • Color-coded indicators show confidence levels:
      - Blue: Duplicate
-     - Kırmızı: High similarity
-     - Sarı: Medium similarity
-     - Yeşil: Low similarity
+     - Red: High confidence of similarity
+     - Yellow: Medium confidence of similarity
+     - Green: Low confidence of similarity
    • Click on any file to preview it in the center panel
 
 ## 4. SEARCH FORMATS
