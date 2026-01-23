@@ -65,6 +65,7 @@
   
   "Console.SessionSaved": "Session has been saved to {0}",
   "Console.SessionLoaded": "Session has been loaded from {0}",
+  "Console.FalsePositiveDatabaseCleared": "False positive database has been cleared.",
   
   "Dialog.SaveTitle": "Save Results",
   "Dialog.LoadTitle": "Load Results",

@@ -398,6 +398,7 @@ namespace ImageComparator
 
         private void ClearFalsePositiveDatabaseButton_Click(object sender, RoutedEventArgs e)
         {
+            int count = falsePositiveList1.Count;
             falsePositiveList1.Clear();
             falsePositiveList2.Clear();
 
@@ -411,6 +412,11 @@ namespace ImageComparator
             }
             catch
             {
+            }
+
+            if (count > 0)
+            {
+                console.Add(LocalizationManager.GetString("Console.FalsePositiveDatabaseCleared"));
             }
         }
 
@@ -2089,24 +2095,27 @@ namespace ImageComparator
         {
             Action updateUI = delegate ()
             {
-                for (int i = 0; i < list1.Count; i++)
+                for (int i = list1.Count - 1; i >= 0; i--)
                 {
                     for (int j = 0; j < falsePositiveList1.Count; j++)
                     {
                         if ((list1[i].sha256Checksum == falsePositiveList1[j] && list2[i].sha256Checksum == falsePositiveList2[j]) || (list1[i].sha256Checksum == falsePositiveList2[j] && list2[i].sha256Checksum == falsePositiveList1[j]))
                         {
+                            // Save confidence before removing the item
+                            int confidence = list1[i].confidence;
+                            
                             list1.RemoveAt(i);
                             list2.RemoveAt(i);
 
-                            if (list1[i].confidence == (int)Confidence.Low)
+                            if (confidence == (int)Confidence.Low)
                             {
                                 lowConfidenceSimilarImageCount--;
                             }
-                            else if (list1[i].confidence == (int)Confidence.Medium)
+                            else if (confidence == (int)Confidence.Medium)
                             {
                                 mediumConfidenceSimilarImageCount--;
                             }
-                            else if (list1[i].confidence == (int)Confidence.High)
+                            else if (confidence == (int)Confidence.High)
                             {
                                 highConfidenceSimilarImageCount--;
                             }
@@ -2114,6 +2123,9 @@ namespace ImageComparator
                             {
                                 duplicateImageCount--;
                             }
+                            
+                            // Break out of inner loop since we found a match
+                            break;
                         }
                     }
                 }
