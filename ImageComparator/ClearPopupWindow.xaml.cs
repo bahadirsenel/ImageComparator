@@ -10,23 +10,16 @@ namespace ImageComparator
         {
             InitializeComponent();
             this.mainWindow = mainWindow;
+            LoadLocalization();
+        }
 
-            if (mainWindow.isEnglish)
-            {
-                saveResultsButton.Content = "Save";
-                discardResultsButton.Content = "Discard";
-                cancelResultsButton.Content = "Cancel";
-                warningTextBlock.Text = "Are you sure you want to discard current results? You can save them to continue working on them later.";
-                Title = "Warning";
-            }
-            else
-            {
-                saveResultsButton.Content = "Kaydet";
-                discardResultsButton.Content = "Temizle";
-                cancelResultsButton.Content = "İptal";
-                warningTextBlock.Text = "Sonuçları temizlemek istediğinize emin misiniz? Sonuçlarınızı kaydedip daha sonra üzerlerinde çalışmaya devam edebilirsiniz.";
-                Title = "Uyarı";
-            }
+        private void LoadLocalization()
+        {
+            saveResultsButton.Content = LocalizationManager.GetString("Dialog.SaveButton");
+            discardResultsButton.Content = LocalizationManager.GetString("Dialog.DiscardButton");
+            cancelResultsButton.Content = LocalizationManager.GetString("Dialog.CancelButton");
+            warningTextBlock.Text = LocalizationManager.GetString("Dialog.ClearMessage");
+            Title = LocalizationManager.GetString("Dialog.ClearTitle");
         }
 
         private void saveResultsButton_Click(object sender, RoutedEventArgs e)

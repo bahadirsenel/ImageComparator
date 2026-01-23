@@ -15,44 +15,28 @@ namespace ImageComparator
             this.deleteItemCount = deleteItemCount;
             this.markAsFalsePositiveItemCount = markAsFalsePositiveItemCount;
 
-            if (mainWindow.isEnglish)
+            LoadLocalization();
+        }
+
+        private void LoadLocalization()
+        {
+            yesButton.Content = LocalizationManager.GetString("Dialog.YesButton");
+            noButton.Content = LocalizationManager.GetString("Dialog.NoButton");
+            Title = LocalizationManager.GetString("Dialog.ApplyTitle");
+
+            warningTextBlock.Text = "";
+
+            if (deleteItemCount > 0)
             {
-                yesButton.Content = "Yes";
-                noButton.Content = "No";
-                warningTextBlock.Text = "";
-
-                if (deleteItemCount > 0)
-                {
-                    warningTextBlock.Text += deleteItemCount + " file(s) will be deleted.\r\n";
-                }
-
-                if (markAsFalsePositiveItemCount > 0)
-                {
-                    warningTextBlock.Text += markAsFalsePositiveItemCount + " result(s) will be marked as false positive and won't be shown in future results.\r\n";
-                }
-
-                warningTextBlock.Text += "Do you want to continue?";
-                Title = "Warning";
+                warningTextBlock.Text += LocalizationManager.GetString("Dialog.FilesWillBeDeleted", deleteItemCount);
             }
-            else
+
+            if (markAsFalsePositiveItemCount > 0)
             {
-                yesButton.Content = "Evet";
-                noButton.Content = "Hayır";
-                warningTextBlock.Text = "";
-
-                if (deleteItemCount > 0)
-                {
-                    warningTextBlock.Text += deleteItemCount + " dosya silinecek.\r\n";
-                }
-
-                if (markAsFalsePositiveItemCount > 0)
-                {
-                    warningTextBlock.Text += markAsFalsePositiveItemCount + " sonuç hatalı olarak işaretlenecek ve daha sonraki aramalarınızda gösterilmeyecek.\r\n";
-                }
-
-                warningTextBlock.Text += "Devam etmek istiyor musunuz?";
-                Title = "Uyarı";
+                warningTextBlock.Text += LocalizationManager.GetString("Dialog.ResultsMarkedFalsePositive", markAsFalsePositiveItemCount);
             }
+
+            warningTextBlock.Text += LocalizationManager.GetString("Dialog.ContinueConfirmation");
         }
 
         private void yesButton_Click(object sender, RoutedEventArgs e)

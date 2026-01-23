@@ -6,22 +6,20 @@ namespace ImageComparator
 {
     public partial class HowToUseWindow : Window
     {
-        public HowToUseWindow(bool isEnglish)
+        public HowToUseWindow()
         {
             InitializeComponent();
+            LoadLocalization();
+        }
 
-            if (isEnglish)
-            {
-                Title = "How To Use";
-                closeButton.Content = "Close";
-                contentTextBlock.Text = LoadContentFromFile("HowToUse_en.md");
-            }
-            else
-            {
-                Title = "Nasıl Kullanılır";
-                closeButton.Content = "Kapat";
-                contentTextBlock.Text = LoadContentFromFile("HowToUse_tr.md");
-            }
+        private void LoadLocalization()
+        {
+            Title = LocalizationManager.GetString("Dialog.HowToUseTitle");
+            closeButton.Content = LocalizationManager.GetString("Dialog.HowToUseCloseButton");
+            
+            // Load content based on current language
+            string fileName = LocalizationManager.CurrentLanguage == "en-US" ? "HowToUse_en.md" : "HowToUse_tr.md";
+            contentTextBlock.Text = LoadContentFromFile(fileName);
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -42,12 +40,12 @@ namespace ImageComparator
                 }
                 else
                 {
-                    return $"Error: Could not find help file at {filePath}";
+                    return LocalizationManager.GetString("Dialog.HelpFileNotFound", filePath);
                 }
             }
             catch (Exception ex)
             {
-                return $"Error loading help content: {ex.Message}";
+                return LocalizationManager.GetString("Dialog.ErrorLoadingHelp", ex.Message);
             }
         }
     }

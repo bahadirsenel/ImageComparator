@@ -10,37 +10,21 @@ namespace ImageComparator
     /// </summary>
     public partial class AboutWindow : Window
     {
-        private readonly bool _isEnglish;
-
-        public AboutWindow(bool isEnglish)
+        public AboutWindow()
         {
             InitializeComponent();
-            _isEnglish = isEnglish;
-            
-            if (_isEnglish)
-            {
-                // English
-                Title = "About";
-                versionLabel.Text = "Version:";
-                licenseLabel.Text = "License:";
-                copyrightText.Text = "Copyright © 2026";
-                descriptionText.Text = "Image Comparator is a powerful tool for comparing and analyzing images. " +
-                                      "It helps you identify similar or duplicate images in your collection.";
-                developerText.Text = "Developed by Mustafa Bahadır Şenel";
-                closeButton.Content = "Close";
-            }
-            else
-            {
-                // Turkish
-                Title = "Hakkında";
-                versionLabel.Text = "Sürüm:";
-                licenseLabel.Text = "Lisans:";
-                copyrightText.Text = "Telif Hakkı © 2026";
-                descriptionText.Text = "Image Comparator, görselleri karşılaştırmak ve analiz etmek için güçlü bir araçtır. " +
-                                      "Koleksiyonunuzdaki benzer veya yinelenen görselleri belirlemenize yardımcı olur.";
-                developerText.Text = "Geliştirici: Mustafa Bahadır Şenel";
-                closeButton.Content = "Kapat";
-            }
+            LoadLocalization();
+        }
+
+        private void LoadLocalization()
+        {
+            Title = LocalizationManager.GetString("Dialog.AboutTitle");
+            versionLabel.Text = LocalizationManager.GetString("Dialog.Version");
+            licenseLabel.Text = LocalizationManager.GetString("Dialog.License");
+            copyrightText.Text = LocalizationManager.GetString("Dialog.Copyright");
+            descriptionText.Text = LocalizationManager.GetString("Dialog.Description");
+            developerText.Text = LocalizationManager.GetString("Dialog.Developer");
+            closeButton.Content = LocalizationManager.GetString("Dialog.CloseButton");
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -61,10 +45,8 @@ namespace ImageComparator
             }
             catch (Exception ex)
             {
-                string errorTitle = _isEnglish ? "Error" : "Hata";
-                string errorMessage = _isEnglish 
-                    ? $"Could not open link: {ex.Message}" 
-                    : $"Link açılamadı: {ex.Message}";
+                string errorTitle = LocalizationManager.GetString("Dialog.Error");
+                string errorMessage = LocalizationManager.GetString("Dialog.CouldNotOpenLink", ex.Message);
                 MessageBox.Show(errorMessage, errorTitle, MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
