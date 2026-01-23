@@ -18,10 +18,10 @@ namespace ImageComparator
                 Title = "About";
                 versionLabel.Text = "Version:";
                 licenseLabel.Text = "License:";
-                copyrightText.Text = "Copyright © 2016";
+                copyrightText.Text = "Copyright © 2026";
                 descriptionText.Text = "Image Comparator is a powerful tool for comparing and analyzing images. " +
                                       "It helps you identify similar or duplicate images in your collection.";
-                developerText.Text = "Developed by Bahadır Şenel\nGitHub: github.com/bahadirsenel/ImageComparator";
+                developerText.Text = "Developed by Mustafa Bahadır Şenel\nGitHub: github.com/bahadirsenel/ImageComparator";
                 closeButton.Content = "Close";
             }
             else
@@ -30,10 +30,10 @@ namespace ImageComparator
                 Title = "Hakkında";
                 versionLabel.Text = "Sürüm:";
                 licenseLabel.Text = "Lisans:";
-                copyrightText.Text = "Telif Hakkı © 2016";
+                copyrightText.Text = "Telif Hakkı © 2026";
                 descriptionText.Text = "Image Comparator, görselleri karşılaştırmak ve analiz etmek için güçlü bir araçtır. " +
                                       "Koleksiyonunuzdaki benzer veya yinelenen görselleri belirlemenize yardımcı olur.";
-                developerText.Text = "Geliştirici: Bahadır Şenel\nGitHub: github.com/bahadirsenel/ImageComparator";
+                developerText.Text = "Geliştirici: Mustafa Bahadır Şenel\nGitHub: github.com/bahadirsenel/ImageComparator";
                 closeButton.Content = "Kapat";
             }
         }
