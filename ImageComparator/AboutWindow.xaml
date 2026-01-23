@@ -40,7 +40,15 @@
         <TextBlock Grid.Row="4" Name="descriptionText" TextWrapping="Wrap" FontSize="13" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,15,0,0" MaxWidth="420"/>
 
         <!-- Developer Info -->
-        <TextBlock Grid.Row="5" Name="developerText" TextWrapping="Wrap" FontSize="12" Foreground="Gray" HorizontalAlignment="Center" TextAlignment="Center" VerticalAlignment="Center" Margin="0,15,0,0"/>
+        <StackPanel Grid.Row="5" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,15,0,0">
+            <TextBlock Name="developerText" TextWrapping="Wrap" FontSize="12" Foreground="Gray" HorizontalAlignment="Center" TextAlignment="Center"/>
+            <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="0,5,0,0">
+                <Run Text="GitHub: " FontSize="12" Foreground="Gray"/>
+                <Hyperlink Name="githubLink" NavigateUri="https://github.com/bahadirsenel/ImageComparator" RequestNavigate="GithubLink_RequestNavigate" FontSize="12">
+                    <Run Text="github.com/bahadirsenel/ImageComparator"/>
+                </Hyperlink>
+            </TextBlock>
+        </StackPanel>
 
         <!-- Close Button -->
         <Button Name="closeButton" Content="Close" Grid.Row="6" Margin="0,20,0,0" Height="35" Width="120" HorizontalAlignment="Center" Click="CloseButton_Click" FontSize="14"/>
