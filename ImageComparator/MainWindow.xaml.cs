@@ -16,7 +16,6 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -62,20 +61,26 @@ namespace ImageComparator
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
         public static DependencyProperty ImagePathProperty2 = DependencyProperty.Register("ImagePath2", typeof(string), typeof(MainWindow), null);
 
-        public string ImagePath1 {
-            get {
+        public string ImagePath1
+        {
+            get
+            {
                 return (string)GetValue(ImagePathProperty1);
             }
-            set {
+            set
+            {
                 SetValue(ImagePathProperty1, value);
             }
         }
 
-        public string ImagePath2 {
-            get {
+        public string ImagePath2
+        {
+            get
+            {
                 return (string)GetValue(ImagePathProperty2);
             }
-            set {
+            set
+            {
                 SetValue(ImagePathProperty2, value);
             }
         }
@@ -119,41 +124,53 @@ namespace ImageComparator
             public int aHashHammingDistance { get; set; }
             public string sha256Checksum { get; set; }
 
-            public bool isSelected {
-                get {
+            public bool isSelected
+            {
+                get
+                {
                     return selected;
                 }
-                set {
+                set
+                {
                     selected = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("isSelected"));
                 }
             }
 
-            public int state {
-                get {
+            public int state
+            {
+                get
+                {
                     return pState;
                 }
-                set {
+                set
+                {
                     pState = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("state"));
                 }
             }
 
-            public bool isChecked {
-                get {
+            public bool isChecked
+            {
+                get
+                {
                     return pIsChecked;
                 }
-                set {
+                set
+                {
                     pIsChecked = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("isChecked"));
                 }
             }
 
-            public bool CheckboxEnabled {
-                get {
+            public bool CheckboxEnabled
+            {
+                get
+                {
                     return pCheckboxEnabled;
                 }
-                set {
+                set
+                {
                     pCheckboxEnabled = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CheckboxEnabled"));
                 }
@@ -258,7 +275,7 @@ namespace ImageComparator
 
             try
             {
-                process.Kill();
+                process?.Kill();
             }
             catch (OutOfMemoryException)
             {
@@ -1618,6 +1635,13 @@ namespace ImageComparator
 
         public void Serialize(string path)
         {
+            // Klasör yolunu al ve oluştur
+            string directory = System.IO.Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
             Stream stream = File.Open(path, FileMode.Create);
             BinaryFormatter bformatter = new BinaryFormatter();
             bformatter.Serialize(stream, this);
@@ -1626,6 +1650,20 @@ namespace ImageComparator
 
         public void Deserialize(string path)
         {
+            // Klasör yolunu al ve oluştur
+            string directory = System.IO.Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            // Dosya yoksa hiçbir şey yapma (ilk kez açılıyorsa)
+            if (!File.Exists(path))
+            {
+                opening = false;
+                return;
+            }
+
             Stream stream = File.Open(path, FileMode.Open);
             BinaryFormatter bformatter = new BinaryFormatter();
             mainWindow = (MainWindow)bformatter.Deserialize(stream);
