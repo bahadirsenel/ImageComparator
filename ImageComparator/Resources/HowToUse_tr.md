@@ -1,6 +1,6 @@
-# GÖRÜNTÜ KARŞILAŞTIRICI - KULLANICI KILAVUZU
+# IMAGE COMPARATOR - KULLANICI KILAVUZU
 
-Görüntü Karşılaştırıcı'ya hoş geldiniz! Bu uygulama klasörlerinizdeki kopya görselleri bulmanıza ve yönetmenize yardımcı olur.
+Image Comparator'e hoş geldiniz! Bu uygulama klasörlerinizdeki kopya görselleri bulmanıza ve yönetmenize yardımcı olur.
 
 ═══════════════════════════════════════════════════════════
 
@@ -18,10 +18,10 @@ Görüntü Karşılaştırıcı'ya hoş geldiniz! Bu uygulama klasörlerinizdeki
 ## 3. SONUÇLARI ANLAMA
    • Kopya çiftleri yan yana iki listede gösterilir
    • Renk kodlu göstergeler güven seviyelerini gösterir:
-     - Yeşil: Tam kopyalar (%100 eşleşme)
-     - Sarı: Çok benzer (yüksek güven)
-     - Kırmızı: Benzer (orta güven)
-     - Mavi: Kullanıcı tarafından hatalı olarak işaretlenmiş
+     - Mavi: Mükerrer
+     - Kırmızı: Yüksek benzer
+     - Sarı: Orta benzer
+     - Yeşil: Düşük benzer
    • Herhangi bir dosyaya tıklayarak orta panelde önizlemesini görebilirsiniz
 
 ## 4. ARAMA FORMATLARI
@@ -51,8 +51,8 @@ Görüntü Karşılaştırıcı'ya hoş geldiniz! Bu uygulama klasörlerinizdeki
 
 ## 9. EK SEÇENEKLER
    • "Alt Klasörlerde Ara": Seçilen klasörlerdeki tüm alt klasörleri tarar
-   • "Farklı Oryantasyondaki Dosyaları Geç": Portre ve manzara eşleşmelerini yok sayar
-   • "Sadece Kopyaları Bul": Yalnızca özdeş içeriğe sahip dosyaları gösterir
+   • "Farklı Oryantasyondaki Dosyaları Geç": Dikey ve yatay oryantasyonlu görselleri karşılaştırmaz
+   • "Sadece Kopyaları Bul": Yalnızca mükerrer dosyaları bulur, benzer dosyalar gösterilmez
 
 ## 10. SONUÇLARI KAYDETME VE YÜKLEME
     • Dosya > Sonuçları Kaydet: Mevcut bulgularınızı daha sonra devam etmek için kaydeder

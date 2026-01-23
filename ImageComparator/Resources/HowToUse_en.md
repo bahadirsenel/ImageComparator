@@ -18,10 +18,10 @@ Welcome to Image Comparator! This application helps you find and manage duplicat
 ## 3. UNDERSTANDING RESULTS
    • Duplicate pairs are shown in two side-by-side lists
    • Color-coded indicators show confidence levels:
-     - Green: Exact duplicates (100% match)
-     - Yellow: Very similar (high confidence)
-     - Red: Similar (medium confidence)
-     - Blue: False positive marked by user
+     - Blue: Duplicate
+     - Kırmızı: High similarity
+     - Sarı: Medium similarity
+     - Yeşil: Low similarity
    • Click on any file to preview it in the center panel
 
 ## 4. SEARCH FORMATS
@@ -52,7 +52,7 @@ Welcome to Image Comparator! This application helps you find and manage duplicat
 ## 9. ADDITIONAL OPTIONS
    • "Include Subfolders": Scans all subfolders within selected folders
    • "Skip Files With Different Orientation": Ignores portrait vs landscape matches
-   • "Find Exact Duplicates Only": Only shows files with identical content
+   • "Find Exact Duplicates Only": Only finds exact duplicate files, similar files won't be shown
 
 ## 10. SAVING AND LOADING RESULTS
     • File > Save Results: Saves your current findings to continue later
