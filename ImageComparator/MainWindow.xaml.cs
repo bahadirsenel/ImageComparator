@@ -16,7 +16,6 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -62,20 +61,26 @@ namespace ImageComparator
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
         public static DependencyProperty ImagePathProperty2 = DependencyProperty.Register("ImagePath2", typeof(string), typeof(MainWindow), null);
 
-        public string ImagePath1 {
-            get {
+        public string ImagePath1
+        {
+            get
+            {
                 return (string)GetValue(ImagePathProperty1);
             }
-            set {
+            set
+            {
                 SetValue(ImagePathProperty1, value);
             }
         }
 
-        public string ImagePath2 {
-            get {
+        public string ImagePath2
+        {
+            get
+            {
                 return (string)GetValue(ImagePathProperty2);
             }
-            set {
+            set
+            {
                 SetValue(ImagePathProperty2, value);
             }
         }
@@ -119,41 +124,53 @@ namespace ImageComparator
             public int aHashHammingDistance { get; set; }
             public string sha256Checksum { get; set; }
 
-            public bool isSelected {
-                get {
+            public bool isSelected
+            {
+                get
+                {
                     return selected;
                 }
-                set {
+                set
+                {
                     selected = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("isSelected"));
                 }
             }
 
-            public int state {
-                get {
+            public int state
+            {
+                get
+                {
                     return pState;
                 }
-                set {
+                set
+                {
                     pState = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("state"));
                 }
             }
 
-            public bool isChecked {
-                get {
+            public bool isChecked
+            {
+                get
+                {
                     return pIsChecked;
                 }
-                set {
+                set
+                {
                     pIsChecked = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("isChecked"));
                 }
             }
 
-            public bool CheckboxEnabled {
-                get {
+            public bool CheckboxEnabled
+            {
+                get
+                {
                     return pCheckboxEnabled;
                 }
-                set {
+                set
+                {
                     pCheckboxEnabled = value;
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CheckboxEnabled"));
                 }
@@ -228,10 +245,17 @@ namespace ImageComparator
                 opening = false;
             }
 
-            if (englishMenuItem.IsChecked)
+            // Initialize localization based on menu selection
+            if (turkishMenuItem.IsChecked)
             {
-                console.Add("Drag-Drop to add folders:");
+                LocalizationManager.SetLanguage("tr-TR");
             }
+            else
+            {
+                LocalizationManager.SetLanguage("en-US");
+            }
+
+            UpdateUI();
             outputListView.ItemsSource = console;
         }
 
@@ -251,7 +275,7 @@ namespace ImageComparator
 
             try
             {
-                process.Kill();
+                process?.Kill();
             }
             catch (OutOfMemoryException)
             {
@@ -306,27 +330,12 @@ namespace ImageComparator
 
         public bool SaveResults()
         {
-            if (englishMenuItem.IsChecked)
-            {
-                saveFileDialog.Title = "Save Results";
-            }
-            else
-            {
-                saveFileDialog.Title = "Sonuçları Kaydet";
-            }
+            saveFileDialog.Title = LocalizationManager.GetString("Dialog.SaveTitle");
 
             if (saveFileDialog.ShowDialog().Value)
             {
                 Serialize(saveFileDialog.FileName);
-
-                if (englishMenuItem.IsChecked)
-                {
-                    console.Add("Session have been saved to " + saveFileDialog.FileName);
-                }
-                else
-                {
-                    console.Add("Oturum " + saveFileDialog.FileName + " konumuna kaydedildi.");
-                }
+                console.Add(LocalizationManager.GetString("Console.SessionSaved", saveFileDialog.FileName));
                 return true;
             }
             else
@@ -337,18 +346,12 @@ namespace ImageComparator
 
         private void LoadResultsMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (englishMenuItem.IsChecked)
-            {
-                openFileDialog.Title = "Load Results";
-            }
-            else
-            {
-                openFileDialog.Title = "Sonuçları Yükle";
-            }
+            openFileDialog.Title = LocalizationManager.GetString("Dialog.LoadTitle");
 
             if (openFileDialog.ShowDialog().Value)
             {
                 Deserialize(openFileDialog.FileName);
+                console.Add(LocalizationManager.GetString("Console.SessionLoaded", openFileDialog.FileName));
             }
         }
 
@@ -379,7 +382,8 @@ namespace ImageComparator
             turkishMenuItem.IsChecked = false;
             englishMenuItem.IsEnabled = false;
             turkishMenuItem.IsEnabled = true;
-            ConvertToEnglish();
+            LocalizationManager.SetLanguage("en-US");
+            UpdateUI();
         }
 
         private void TurkishMenuItem_Click(object sender, RoutedEventArgs e)
@@ -388,7 +392,8 @@ namespace ImageComparator
             turkishMenuItem.IsChecked = true;
             englishMenuItem.IsEnabled = true;
             turkishMenuItem.IsEnabled = false;
-            ConvertToTurkish();
+            LocalizationManager.SetLanguage("tr-TR");
+            UpdateUI();
         }
 
         private void ClearFalsePositiveDatabaseButton_Click(object sender, RoutedEventArgs e)
@@ -428,55 +433,32 @@ namespace ImageComparator
 
         private void HowToUseMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            HowToUseWindow howToUseWindow = new HowToUseWindow(isEnglish);
+            HowToUseWindow howToUseWindow = new HowToUseWindow();
             howToUseWindow.ShowDialog();
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            AboutWindow aboutWindow = new AboutWindow(isEnglish);
+            AboutWindow aboutWindow = new AboutWindow();
             aboutWindow.ShowDialog();
         }
 
         private void AddFolderButton_Click(object sender, RoutedEventArgs e)
         {
-            if (englishMenuItem.IsChecked)
-            {
-                folderBrowserDialog.Description = "Add Folder";
-            }
-            else
-            {
-                folderBrowserDialog.Description = "Klasör Ekle";
-            }
+            folderBrowserDialog.Description = LocalizationManager.GetString("Dialog.AddFolderTitle");
 
             if ((bool)folderBrowserDialog.ShowDialog())
             {
                 if (directories.Count == 0)
                 {
                     console.Clear();
-
-                    if (englishMenuItem.IsChecked)
-                    {
-                        console.Add("Drag-Drop to add folders:");
-                    }
-                    else
-                    {
-                        console.Add("Klasör eklemek için sürükle-bırak:");
-                    }
+                    console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
                 }
 
                 if (!directories.Contains(folderBrowserDialog.SelectedPath))
                 {
                     directories.Add(folderBrowserDialog.SelectedPath);
-
-                    if (englishMenuItem.IsChecked)
-                    {
-                        console.Insert(console.Count - 1, "Added " + folderBrowserDialog.SelectedPath);
-                    }
-                    else
-                    {
-                        console.Insert(console.Count - 1, "Klasör eklendi: " + folderBrowserDialog.SelectedPath);
-                    }
+                    console.Insert(console.Count - 1, LocalizationManager.GetString("Console.DirectoryAdded", folderBrowserDialog.SelectedPath));
                 }
             }
         }
@@ -513,25 +495,11 @@ namespace ImageComparator
                 {
                     if (includeSubfoldersMenuItem.IsChecked)
                     {
-                        if (englishMenuItem.IsChecked)
-                        {
-                            console.Add("Comparing images from " + directories[i] + " and its subdirectories.");
-                        }
-                        else
-                        {
-                            console.Add(directories[i] + " konumundaki ve alt klasörlerindeki resimler karşılaştırılıyor.");
-                        }
+                        console.Add(LocalizationManager.GetString("Console.ComparingWithSubdirs", directories[i]));
                     }
                     else
                     {
-                        if (englishMenuItem.IsChecked)
-                        {
-                            console.Add("Comparing images from " + directories[i] + ".");
-                        }
-                        else
-                        {
-                            console.Add(directories[i] + " konumundaki resimler karşılaştırılıyor.");
-                        }
+                        console.Add(LocalizationManager.GetString("Console.ComparingWithoutSubdirs", directories[i]));
                     }
                 }
                 includeSubfolders = includeSubfoldersMenuItem.IsChecked;
@@ -546,14 +514,7 @@ namespace ImageComparator
             }
             else
             {
-                if (englishMenuItem.IsChecked)
-                {
-                    console.Add("No directories added.");
-                }
-                else
-                {
-                    console.Add("Klasör eklenmedi.");
-                }
+                console.Add(LocalizationManager.GetString("Console.NoDirectoriesAdded"));
             }
         }
 
@@ -873,25 +834,11 @@ namespace ImageComparator
             {
                 if (sendToRecycleBinMenuItem.IsChecked)
                 {
-                    if (englishMenuItem.IsChecked)
-                    {
-                        console.Add((selectedItems1.Count + selectedItems2.Count) + " file(s) have been sent to recycle bin.");
-                    }
-                    else
-                    {
-                        console.Add((selectedItems1.Count + selectedItems2.Count) + " dosya geri dönüşüm kutusuna gönderildi.");
-                    }
+                    console.Add(LocalizationManager.GetString("Console.SentToRecycleBin", selectedItems1.Count + selectedItems2.Count));
                 }
                 else
                 {
-                    if (englishMenuItem.IsChecked)
-                    {
-                        console.Add((selectedItems1.Count + selectedItems2.Count) + " file(s) have been deleted.");
-                    }
-                    else
-                    {
-                        console.Add((selectedItems1.Count + selectedItems2.Count) + " dosya silindi.");
-                    }
+                    console.Add(LocalizationManager.GetString("Console.FilesDeleted", selectedItems1.Count + selectedItems2.Count));
                 }
             }
         }
@@ -1042,17 +989,8 @@ namespace ImageComparator
             if (pauseButton.Tag.Equals("0"))
             {
                 pauseButton.Tag = "1";
-
-                if (englishMenuItem.IsChecked)
-                {
-                    pauseButton.Content = "Resume";
-                    console.Add("Paused.");
-                }
-                else
-                {
-                    pauseButton.Content = "Devam Et";
-                    console.Add("Duraklatıldı.");
-                }
+                pauseButton.Content = LocalizationManager.GetString("Button.Resume");
+                console.Add(LocalizationManager.GetString("Console.Paused"));
 
                 pausedFirstTime = DateTime.Now.ToFileTime();
 
@@ -1075,15 +1013,7 @@ namespace ImageComparator
             else
             {
                 pauseButton.Tag = "0";
-
-                if (englishMenuItem.IsChecked)
-                {
-                    pauseButton.Content = "Pause";
-                }
-                else
-                {
-                    pauseButton.Content = "Duraklat";
-                }
+                pauseButton.Content = LocalizationManager.GetString("Button.Pause");
 
                 console.RemoveAt(console.Count - 1);
                 pausedSecondTime = DateTime.Now.ToFileTime();
@@ -1164,14 +1094,7 @@ namespace ImageComparator
                 processThread.Resume();
             }
 
-            if (englishMenuItem.IsChecked)
-            {
-                pauseButton.Content = "Pause";
-            }
-            else
-            {
-                pauseButton.Content = "Duraklat";
-            }
+            pauseButton.Content = LocalizationManager.GetString("Button.Pause");
 
             if (pauseButton.Tag.Equals("1"))
             {
@@ -1187,14 +1110,7 @@ namespace ImageComparator
             list1.Clear();
             list2.Clear();
 
-            if (englishMenuItem.IsChecked)
-            {
-                console[console.Count - 1] = "Interrupted by user.";
-            }
-            else
-            {
-                console[console.Count - 1] = "Kullanıcı tarafından durduruldu.";
-            }
+            console[console.Count - 1] = LocalizationManager.GetString("Console.InterruptedByUser");
         }
 
         private void ListView1_KeyDown(object sender, KeyEventArgs e)
@@ -1475,15 +1391,7 @@ namespace ImageComparator
                 if (directories.Count == 0)
                 {
                     console.Clear();
-
-                    if (englishMenuItem.IsChecked)
-                    {
-                        console.Add("Drag-Drop to add folders:");
-                    }
-                    else
-                    {
-                        console.Add("Klasör eklemek için sürükle-bırak:");
-                    }
+                    console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
                 }
 
                 for (int i = 0; i < dragDrop.Length; i++)
@@ -1495,25 +1403,11 @@ namespace ImageComparator
                         if (directoryInfo.Exists)
                         {
                             directories.Add(dragDrop[i]);
-                            if (englishMenuItem.IsChecked)
-                            {
-                                console.Insert(console.Count - 1, "Added " + dragDrop[i]);
-                            }
-                            else
-                            {
-                                console.Insert(console.Count - 1, "Klasör eklendi: " + dragDrop[i]);
-                            }
+                            console.Insert(console.Count - 1, LocalizationManager.GetString("Console.DirectoryAdded", dragDrop[i]));
                         }
                         else
                         {
-                            if (englishMenuItem.IsChecked)
-                            {
-                                console.Insert(console.Count - 1, "Directories only.");
-                            }
-                            else
-                            {
-                                console.Insert(console.Count - 1, "Sadece klasörler eklenebilir.");
-                            }
+                            console.Insert(console.Count - 1, LocalizationManager.GetString("Console.DirectoriesOnly"));
                         }
                     }
                 }
@@ -1530,25 +1424,11 @@ namespace ImageComparator
                 {
                     if (comparing)
                     {
-                        if (englishMenuItem.IsChecked)
-                        {
-                            console[console.Count - 1] = value + "% done, comparing results...";
-                        }
-                        else
-                        {
-                            console[console.Count - 1] = value + "% tamamlandı, karşılaştırma yapılıyor...";
-                        }
+                        console[console.Count - 1] = LocalizationManager.GetString("Console.ComparingResults", value);
                     }
                     else
                     {
-                        if (englishMenuItem.IsChecked)
-                        {
-                            console[console.Count - 1] = value + "% done, processing files...";
-                        }
-                        else
-                        {
-                            console[console.Count - 1] = value + "% tamamlandı, dosyalar işleniyor...";
-                        }
+                        console[console.Count - 1] = LocalizationManager.GetString("Console.ProcessingFiles", value);
                     }
                 }
             };
@@ -1755,6 +1635,13 @@ namespace ImageComparator
 
         public void Serialize(string path)
         {
+            // Klasör yolunu al ve oluştur
+            string directory = System.IO.Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
             Stream stream = File.Open(path, FileMode.Create);
             BinaryFormatter bformatter = new BinaryFormatter();
             bformatter.Serialize(stream, this);
@@ -1763,6 +1650,20 @@ namespace ImageComparator
 
         public void Deserialize(string path)
         {
+            // Klasör yolunu al ve oluştur
+            string directory = System.IO.Path.GetDirectoryName(path);
+            if (!Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            // Dosya yoksa hiçbir şey yapma (ilk kez açılıyorsa)
+            if (!File.Exists(path))
+            {
+                opening = false;
+                return;
+            }
+
             Stream stream = File.Open(path, FileMode.Open);
             BinaryFormatter bformatter = new BinaryFormatter();
             mainWindow = (MainWindow)bformatter.Deserialize(stream);
@@ -1798,7 +1699,8 @@ namespace ImageComparator
                     turkishMenuItem.IsChecked = true;
                     englishMenuItem.IsEnabled = true;
                     turkishMenuItem.IsEnabled = false;
-                    ConvertToTurkish();
+                    LocalizationManager.SetLanguage("tr-TR");
+                    UpdateUI();
                 }
             }
             else
@@ -1825,80 +1727,51 @@ namespace ImageComparator
             mainWindow = null;
         }
 
-        private void ConvertToEnglish()
+        private void UpdateUI()
         {
-            fileMenuItem.Header = "File";
-            saveResultsMenuItem.Header = "Save Results...";
-            loadResultsMenuItem.Header = "Load Results...";
-            exitMenuItem.Header = "Exit";
-            optionsMenuItem.Header = "Options";
-            searchFormatsMenuItem.Header = "Search Formats";
-            deletionMethodMenuItem.Header = "Deletion Method";
-            sendToRecycleBinMenuItem.Header = "Send To Recycle Bin";
-            deletePermanentlyMenuItem.Header = "Delete Permanently";
-            languageMenuItem.Header = "Language";
-            includeSubfoldersMenuItem.Header = "Include Subfolders";
-            skipFilesWithDifferentOrientationMenuItem.Header = "Skip Files With Different Orientation";
-            findExactDuplicatesOnlyMenuItem.Header = "Find Exact Duplicates Only";
-            clearFalsePositiveDatabaseButton.Header = "Clear False Positive Database";
-            resetToDefaultsMenuItem.Header = "Reset To Defaults";
-            helpMenuItem.Header = "Help";
-            howToUseMenuItem.Header = "How To Use";
-            aboutMenuItem.Header = "About";
-            addFolderButton.Content = "Add Folder";
-            findDuplicatesButton.Content = "Find Duplicates";
-            pauseButton.Content = "Pause";
-            stopButton.Content = "Stop";
-            clearResultsButton.Content = "Clear Results";
-            applyButton.Content = "Apply";
-            deleteSelectedButton.Content = "Delete Selected";
-            removeFromListButton.Content = "Remove From List";
-            clearButton.Content = "Clear";
-            markForDeletionButton.Content = "Mark For Deletion";
-            markAsFalsePositiveButton.Content = "Mark As False Positive";
-            removeMarkButton.Content = "Remove Mark";
-            previewLabel.Content = "Select a file to preview:";
-            console.Clear();
-            console.Add("Drag-Drop to add folders:");
-            isEnglish = true;
-        }
+            // Update menu items
+            fileMenuItem.Header = LocalizationManager.GetString("Menu.File");
+            saveResultsMenuItem.Header = LocalizationManager.GetString("Menu.SaveResults");
+            loadResultsMenuItem.Header = LocalizationManager.GetString("Menu.LoadResults");
+            exitMenuItem.Header = LocalizationManager.GetString("Menu.Exit");
+            optionsMenuItem.Header = LocalizationManager.GetString("Menu.Options");
+            searchFormatsMenuItem.Header = LocalizationManager.GetString("Menu.SearchFormats");
+            deletionMethodMenuItem.Header = LocalizationManager.GetString("Menu.DeletionMethod");
+            sendToRecycleBinMenuItem.Header = LocalizationManager.GetString("Menu.SendToRecycleBin");
+            deletePermanentlyMenuItem.Header = LocalizationManager.GetString("Menu.DeletePermanently");
+            languageMenuItem.Header = LocalizationManager.GetString("Menu.Language");
+            includeSubfoldersMenuItem.Header = LocalizationManager.GetString("Menu.IncludeSubfolders");
+            skipFilesWithDifferentOrientationMenuItem.Header = LocalizationManager.GetString("Menu.SkipDifferentOrientation");
+            findExactDuplicatesOnlyMenuItem.Header = LocalizationManager.GetString("Menu.FindExactDuplicatesOnly");
+            clearFalsePositiveDatabaseButton.Header = LocalizationManager.GetString("Menu.ClearFalsePositiveDB");
+            resetToDefaultsMenuItem.Header = LocalizationManager.GetString("Menu.ResetToDefaults");
+            helpMenuItem.Header = LocalizationManager.GetString("Menu.Help");
+            howToUseMenuItem.Header = LocalizationManager.GetString("Menu.HowToUse");
+            aboutMenuItem.Header = LocalizationManager.GetString("Menu.About");
 
-        private void ConvertToTurkish()
-        {
-            fileMenuItem.Header = "Dosya";
-            saveResultsMenuItem.Header = "Sonuçları Kaydet...";
-            loadResultsMenuItem.Header = "Sonuçları Yükle...";
-            exitMenuItem.Header = "Çıkış";
-            optionsMenuItem.Header = "Seçenekler";
-            searchFormatsMenuItem.Header = "Aranacak Formatlar";
-            deletionMethodMenuItem.Header = "Silme Yöntemi";
-            sendToRecycleBinMenuItem.Header = "Geri Dönüşüm Kutusuna Gönder";
-            deletePermanentlyMenuItem.Header = "Kalıcı Olarak Sil";
-            languageMenuItem.Header = "Dil";
-            includeSubfoldersMenuItem.Header = "Alt Klasörlerde Ara";
-            skipFilesWithDifferentOrientationMenuItem.Header = "Farklı Oryantasyondaki Dosyaları Geç";
-            findExactDuplicatesOnlyMenuItem.Header = "Sadece Kopyaları Bul";
-            clearFalsePositiveDatabaseButton.Header = "Hatalı Sonuç Veritabanını Temizle";
-            resetToDefaultsMenuItem.Header = "Varsayılan Ayarlara Dön";
-            helpMenuItem.Header = "Yardım";
-            howToUseMenuItem.Header = "Nasıl Kullanılır";
-            aboutMenuItem.Header = "Hakkında";
-            addFolderButton.Content = "Klasör Ekle";
-            findDuplicatesButton.Content = "Kopyaları Bul";
-            pauseButton.Content = "Duraklat";
-            stopButton.Content = "Durdur";
-            clearResultsButton.Content = "Sonuçları Temizle";
-            applyButton.Content = "Uygula";
-            deleteSelectedButton.Content = "Seçilenleri Sil";
-            removeFromListButton.Content = "Listeden Kaldır";
-            clearButton.Content = "Temizle";
-            markForDeletionButton.Content = "Silinecek Olarak İşaretle";
-            markAsFalsePositiveButton.Content = "Hatalı Sonuç Olarak İşaretle";
-            removeMarkButton.Content = "İşareti Kaldır";
-            previewLabel.Content = "Görüntülemek için bir dosya seçin:";
+            // Update buttons
+            addFolderButton.Content = LocalizationManager.GetString("Button.AddFolder");
+            findDuplicatesButton.Content = LocalizationManager.GetString("Button.FindDuplicates");
+            pauseButton.Content = LocalizationManager.GetString("Button.Pause");
+            stopButton.Content = LocalizationManager.GetString("Button.Stop");
+            clearResultsButton.Content = LocalizationManager.GetString("Button.ClearResults");
+            applyButton.Content = LocalizationManager.GetString("Button.Apply");
+            deleteSelectedButton.Content = LocalizationManager.GetString("Button.DeleteSelected");
+            removeFromListButton.Content = LocalizationManager.GetString("Button.RemoveFromList");
+            clearButton.Content = LocalizationManager.GetString("Button.Clear");
+            markForDeletionButton.Content = LocalizationManager.GetString("Button.MarkForDeletion");
+            markAsFalsePositiveButton.Content = LocalizationManager.GetString("Button.MarkAsFalsePositive");
+            removeMarkButton.Content = LocalizationManager.GetString("Button.RemoveMark");
+
+            // Update labels
+            previewLabel.Content = LocalizationManager.GetString("Label.PreviewSelect");
+
+            // Update console
             console.Clear();
-            console.Add("Klasör eklemek için sürükle-bırak:");
-            isEnglish = false;
+            console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
+
+            // Update isEnglish flag for backward compatibility
+            isEnglish = LocalizationManager.CurrentLanguage == "en-US";
         }
 
         public void Clear()
@@ -1916,14 +1789,7 @@ namespace ImageComparator
             list2.Clear();
             percentage.Value = 0;
 
-            if (englishMenuItem.IsChecked)
-            {
-                console.Add("Drag-Drop to add folders:");
-            }
-            else
-            {
-                console.Add("Klasör eklemek için sürükle-bırak:");
-            }
+            console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
         }
 
         public void Apply(int deleteItemCount, int markAsFalsePositiveItemCount)
@@ -1969,14 +1835,7 @@ namespace ImageComparator
                 {
                 }
 
-                if (englishMenuItem.IsChecked)
-                {
-                    console.Add(markAsFalsePositiveItemCount + " file(s) have been marked as false positive.");
-                }
-                else
-                {
-                    console.Add(markAsFalsePositiveItemCount + " dosya hatalı sonuç olarak işaretlendi.");
-                }
+                console.Add(LocalizationManager.GetString("Console.MarkedAsFalsePositive", markAsFalsePositiveItemCount));
             }
         }
 
@@ -2276,23 +2135,9 @@ namespace ImageComparator
                 removeMarkButton.IsEnabled = true;
                 saveResultsMenuItem.IsEnabled = true;
 
-                if (englishMenuItem.IsChecked)
-                {
-                    pauseButton.Content = "Pause";
-                }
-                else
-                {
-                    pauseButton.Content = "Duraklat";
-                }
+                pauseButton.Content = LocalizationManager.GetString("Button.Pause");
 
-                if (englishMenuItem.IsChecked)
-                {
-                    console.Add("All done!");
-                }
-                else
-                {
-                    console.Add("Tamamlandı!");
-                }
+                console.Add(LocalizationManager.GetString("Console.AllDone"));
 
                 secondTime = DateTime.Now.ToFileTime();
                 timeDifferenceInSeconds = (int)Math.Ceiling(((secondTime - firstTime - pauseTime) / 10000000.0));
@@ -2302,124 +2147,56 @@ namespace ImageComparator
                     int hours = timeDifferenceInSeconds / 3600;
                     int minutes = (timeDifferenceInSeconds / 60) % 60;
                     int seconds = timeDifferenceInSeconds % 60;
-                    if (englishMenuItem.IsChecked)
-                    {
-                        console.Add("Run time is " + hours + " hours " + minutes + " minutes " + seconds + " seconds.");
-                    }
-                    else
-                    {
-                        console.Add("Çalışma süresi: " + hours + " saat " + minutes + " dakika " + seconds + " saniye.");
-                    }
+                    console.Add(LocalizationManager.GetString("Console.RunTimeHours", hours, minutes, seconds));
                 }
                 else if (timeDifferenceInSeconds >= 60)
                 {
                     int minutes = timeDifferenceInSeconds / 60;
                     int seconds = timeDifferenceInSeconds % 60;
-                    if (englishMenuItem.IsChecked)
-                    {
-                        console.Add("Run time is " + minutes + " minutes " + seconds + " seconds.");
-                    }
-                    else
-                    {
-                        console.Add("Çalışma süresi: " + minutes + " dakika " + seconds + " saniye.");
-                    }
+                    console.Add(LocalizationManager.GetString("Console.RunTimeMinutes", minutes, seconds));
                 }
                 else
                 {
-                    if (englishMenuItem.IsChecked)
-                    {
-                        console.Add("Run time is " + timeDifferenceInSeconds + " seconds.");
-                    }
-                    else
-                    {
-                        console.Add("Çalışma süresi: " + timeDifferenceInSeconds + " saniye.");
-                    }
+                    console.Add(LocalizationManager.GetString("Console.RunTimeSeconds", timeDifferenceInSeconds));
                 }
 
-                if (englishMenuItem.IsChecked)
+                if (duplicateImageCount == 0 && highConfidenceSimilarImageCount == 0 && mediumConfidenceSimilarImageCount == 0 && lowConfidenceSimilarImageCount == 0)
                 {
-                    if (duplicateImageCount == 0 && highConfidenceSimilarImageCount == 0 && mediumConfidenceSimilarImageCount == 0 && lowConfidenceSimilarImageCount == 0)
-                    {
-                        console.Add("No duplicates found.");
-                    }
-                    else
-                    {
-                        if (duplicateImageCount > 0)
-                        {
-                            console.Add(duplicateImageCount + " duplicates found.");
-                        }
-
-                        if (highConfidenceSimilarImageCount > 0)
-                        {
-                            console.Add(highConfidenceSimilarImageCount + " images found with high similarity.");
-                        }
-
-                        if (mediumConfidenceSimilarImageCount > 0)
-                        {
-                            console.Add(mediumConfidenceSimilarImageCount + " images found with medium similarity.");
-                        }
-
-                        if (lowConfidenceSimilarImageCount > 0)
-                        {
-                            console.Add(lowConfidenceSimilarImageCount + " images found with low similarity.");
-                        }
-                    }
+                    console.Add(LocalizationManager.GetString("Console.NoDuplicatesFound"));
                 }
                 else
                 {
-                    if (duplicateImageCount == 0 && highConfidenceSimilarImageCount == 0 && mediumConfidenceSimilarImageCount == 0 && lowConfidenceSimilarImageCount == 0)
+                    if (duplicateImageCount > 0)
                     {
-                        console.Add("Hiç kopya bulunamadı.");
+                        console.Add(LocalizationManager.GetString("Console.DuplicatesFound", duplicateImageCount));
                     }
-                    else
+
+                    if (highConfidenceSimilarImageCount > 0)
                     {
-                        if (duplicateImageCount > 0)
-                        {
-                            console.Add(duplicateImageCount + " kopya bulundu.");
-                        }
+                        console.Add(LocalizationManager.GetString("Console.HighSimilarity", highConfidenceSimilarImageCount));
+                    }
 
-                        if (highConfidenceSimilarImageCount > 0)
-                        {
-                            console.Add(highConfidenceSimilarImageCount + " yüksek benzerlikte resim bulundu.");
-                        }
+                    if (mediumConfidenceSimilarImageCount > 0)
+                    {
+                        console.Add(LocalizationManager.GetString("Console.MediumSimilarity", mediumConfidenceSimilarImageCount));
+                    }
 
-                        if (mediumConfidenceSimilarImageCount > 0)
-                        {
-                            console.Add(mediumConfidenceSimilarImageCount + " orta benzerlikte resim bulundu.");
-                        }
-
-                        if (lowConfidenceSimilarImageCount > 0)
-                        {
-                            console.Add(lowConfidenceSimilarImageCount + " düşük benzerlikte resim bulundu.");
-                        }
+                    if (lowConfidenceSimilarImageCount > 0)
+                    {
+                        console.Add(LocalizationManager.GetString("Console.LowSimilarity", lowConfidenceSimilarImageCount));
                     }
                 }
             };
 
             Action updateConsole1 = delegate ()
             {
-                if (englishMenuItem.IsChecked)
-                {
-                    console.Add("Paths added successfully. " + files.Count + " images found. Reading files from disk...");
-                    console.Add("0% done, processing files...");
-                }
-                else
-                {
-                    console.Add("Konumlar başarıyla eklendi. " + files.Count + " resim doysası bulundu. Dosyalar okunuyor...");
-                    console.Add("0% tamamlandı, dosyalar işleniyor...");
-                }
+                console.Add(LocalizationManager.GetString("Console.PathsAddedSuccessfully", files.Count));
+                console.Add(LocalizationManager.GetString("Console.ProcessingFiles", 0));
             };
 
             Action updateConsole2 = delegate ()
             {
-                if (englishMenuItem.IsChecked)
-                {
-                    console[console.Count - 1] = "All files have been processed. Comparing...";
-                }
-                else
-                {
-                    console[console.Count - 1] = "Bütün dosyalar işlendi. Karşılaştırma yapılıyor...";
-                }
+                console[console.Count - 1] = LocalizationManager.GetString("Console.FilesProcessedComparing");
             };
 
             AddFiles(directories);
