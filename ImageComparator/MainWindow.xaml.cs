@@ -434,7 +434,8 @@ namespace ImageComparator
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            AboutWindow aboutWindow = new AboutWindow(isEnglish);
+            aboutWindow.ShowDialog();
         }
 
         private void AddFolderButton_Click(object sender, RoutedEventArgs e)
