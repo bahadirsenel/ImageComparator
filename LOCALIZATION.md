@@ -180,7 +180,7 @@ ImageComparator/
 
 ## Complete String Catalog
 
-The system includes 100+ translated strings covering:
+The system includes 101 translated strings covering:
 - Menu items (18 strings)
 - Buttons (13 strings)
 - Labels (2 strings)

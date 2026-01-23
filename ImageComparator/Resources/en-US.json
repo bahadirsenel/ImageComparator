@@ -63,8 +63,8 @@
   "Console.MediumSimilarity": "{0} images found with medium similarity.",
   "Console.LowSimilarity": "{0} images found with low similarity.",
   
-  "Console.SessionSaved": "Session have been saved to {0}",
-  "Console.SessionLoaded": "Session have been loaded from {0}",
+  "Console.SessionSaved": "Session has been saved to {0}",
+  "Console.SessionLoaded": "Session has been loaded from {0}",
   
   "Dialog.SaveTitle": "Save Results",
   "Dialog.LoadTitle": "Load Results",

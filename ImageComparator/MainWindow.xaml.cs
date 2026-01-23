@@ -334,6 +334,7 @@ namespace ImageComparator
             if (openFileDialog.ShowDialog().Value)
             {
                 Deserialize(openFileDialog.FileName);
+                console.Add(LocalizationManager.GetString("Console.SessionLoaded", openFileDialog.FileName));
             }
         }
 
