@@ -6,9 +6,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageComparator"
         mc:Ignorable="d"
-        Title="About" Height="380" Width="500" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="About" Height="420" Width="520" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Grid Margin="20">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -40,7 +41,7 @@
         <TextBlock Grid.Row="4" Name="descriptionText" TextWrapping="Wrap" FontSize="13" HorizontalAlignment="Center" TextAlignment="Center" Margin="0,15,0,0" MaxWidth="420"/>
 
         <!-- Developer Info -->
-        <StackPanel Grid.Row="5" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,15,0,0">
+        <StackPanel Grid.Row="5" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,15,0,15">
             <TextBlock Name="developerText" TextWrapping="Wrap" FontSize="12" Foreground="Gray" HorizontalAlignment="Center" TextAlignment="Center"/>
             <TextBlock HorizontalAlignment="Center" TextAlignment="Center" Margin="0,5,0,0">
                 <Run Text="GitHub: " FontSize="12" Foreground="Gray"/>
@@ -50,7 +51,10 @@
             </TextBlock>
         </StackPanel>
 
+        <!-- Spacer -->
+        <Border Grid.Row="6"/>
+
         <!-- Close Button -->
-        <Button Name="closeButton" Content="Close" Grid.Row="6" Margin="0,20,0,0" Height="35" Width="120" HorizontalAlignment="Center" Click="CloseButton_Click" FontSize="14"/>
+        <Button Name="closeButton" Content="Close" Grid.Row="7" Margin="0,10,0,0" Height="35" Width="120" HorizontalAlignment="Center" Click="CloseButton_Click" FontSize="14"/>
     </Grid>
 </Window>
