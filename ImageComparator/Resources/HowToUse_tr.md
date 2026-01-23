@@ -64,6 +64,6 @@ Görüntü Karşılaştırıcı'ya hoş geldiniz! Bu uygulama klasörlerinizdeki
 • Fare tekerleğini veya +/- düğmelerini kullanarak önizleme görsellerini yakınlaştırabilir/uzaklaştırabilirsiniz
 • Dosyaları açmak veya konumlarını görüntülemek için sağ tıklayın
 • Sonuçlara hızlıca göz atmak için klavye gezintisini (ok tuşları) kullanın
-• Madde işaretlerine tıklayarak sonuçlar sıralanabilir
+• Öğeleri varsayılan görüntü görüntüleyicinizde açmak için çift tıklayın
 
 Daha fazla bilgi için veya sorun bildirmek için proje deposunu ziyaret edin.

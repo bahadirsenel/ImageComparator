@@ -64,6 +64,6 @@ Welcome to Image Comparator! This application helps you find and manage duplicat
 • You can zoom in/out on preview images using the mouse wheel or +/- buttons
 • Right-click on files to open them or view their location
 • Use keyboard navigation (arrow keys) to browse through results quickly
-• Results can be sorted by clicking on the bullet points
+• Double-click on items to open them in your default image viewer
 
 For more information or to report issues, visit the project repository.

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Reflection;
 using System.Windows;
 
 namespace ImageComparator
@@ -34,7 +33,7 @@ namespace ImageComparator
         {
             try
             {
-                string basePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                string basePath = AppDomain.CurrentDomain.BaseDirectory;
                 string filePath = Path.Combine(basePath, "Resources", fileName);
                 
                 if (File.Exists(filePath))
