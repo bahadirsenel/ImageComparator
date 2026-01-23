@@ -10,7 +10,7 @@ namespace ImageComparator
     /// Manages application localization by loading language strings from JSON files.
     /// 
     /// How to add a new language:
-    /// 1. Create a new JSON file in the Resources folder (e.g., "de-DE.json" for German)
+    /// 1. Create a new JSON file in the Resources/Localization folder (e.g., "de-DE.json" for German)
     /// 2. Copy the structure from en-US.json and translate all the values
     /// 3. Add the JSON file to the .csproj as a Content item with CopyToOutputDirectory set to PreserveNewest
     /// 4. Add a new MenuItem in MainWindow.xaml for the new language
@@ -108,14 +108,14 @@ namespace ImageComparator
             try
             {
                 string basePath = AppDomain.CurrentDomain.BaseDirectory;
-                string filePath = Path.Combine(basePath, "Resources", $"{languageCode}.json");
+                string filePath = Path.Combine(basePath, "Resources", "Localization", $"{languageCode}.json");
 
                 if (!File.Exists(filePath))
                 {
                     // Fallback to en-US if file not found
                     if (languageCode != "en-US")
                     {
-                        filePath = Path.Combine(basePath, "Resources", "en-US.json");
+                        filePath = Path.Combine(basePath, "Resources", "Localization", "en-US.json");
                     }
 
                     if (!File.Exists(filePath))
