@@ -428,7 +428,8 @@ namespace ImageComparator
 
         private void HowToUseMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            HowToUseWindow howToUseWindow = new HowToUseWindow(isEnglish);
+            howToUseWindow.ShowDialog();
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
