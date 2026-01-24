@@ -83,7 +83,7 @@ namespace ImageComparator
                     fileSuffix = "sv";
                     break;
                 case "nb-NO":
-                    fileSuffix = "no";
+                    fileSuffix = "nb";
                     break;
                 case "da-DK":
                     fileSuffix = "da";

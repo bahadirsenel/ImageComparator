@@ -1944,15 +1944,7 @@ namespace ImageComparator
                 // Set language based on saved currentLanguageCode
                 string languageToSet = mainWindow.currentLanguageCode;
                 
-                // List of valid language codes
-                var validLanguages = new[] { 
-                    "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT", 
-                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "hi-IN", 
-                    "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK" 
-                };
-                
-                // Validate language code and default to en-US if invalid
-                if (string.IsNullOrEmpty(languageToSet) || !validLanguages.Contains(languageToSet))
+                if (string.IsNullOrEmpty(languageToSet))
                 {
                     languageToSet = "en-US";
                 }
