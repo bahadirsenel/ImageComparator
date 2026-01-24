@@ -143,6 +143,7 @@
       <DependentUpon>HowToUseWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="LocalizationManager.cs" />
+    <Compile Include="ViewModelLocator.cs" />
     <Compile Include="Models\DiscreteCosineTransform2D.cs" />
     <Compile Include="Models\ImageComparisonResult.cs" />
     <Compile Include="Models\ComparisonSettings.cs" />
@@ -150,6 +151,7 @@
     <Compile Include="Commands\RelayCommand.cs" />
     <Compile Include="Commands\AsyncRelayCommand.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
+    <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Services\DialogService.cs" />
     <Compile Include="Services\FileService.cs" />
     <Compile Include="MainWindow.xaml.cs">
