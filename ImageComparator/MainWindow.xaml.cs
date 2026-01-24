@@ -1637,7 +1637,21 @@ namespace ImageComparator
             tiffMenuItemChecked = (bool)info.GetValue("tiffMenuItemChecked", typeof(bool));
             icoMenuItemChecked = (bool)info.GetValue("icoMenuItemChecked", typeof(bool));
             sendsToRecycleBin = (bool)info.GetValue("sendsToRecycleBin", typeof(bool));
-            currentLanguageCode = (string)info.GetValue("currentLanguageCode", typeof(string));
+            try
+            {
+                currentLanguageCode = (string)info.GetValue("currentLanguageCode", typeof(string));
+                // Validate and default to en-US if null or invalid
+                if (string.IsNullOrEmpty(currentLanguageCode) || 
+                    (currentLanguageCode != "en-US" && currentLanguageCode != "tr-TR" && currentLanguageCode != "ja-JP"))
+                {
+                    currentLanguageCode = "en-US";
+                }
+            }
+            catch
+            {
+                // Default to English if field doesn't exist
+                currentLanguageCode = "en-US";
+            }
             includeSubfolders = (bool)info.GetValue("includeSubfolders", typeof(bool));
             skipFilesWithDifferentOrientation = (bool)info.GetValue("skipFilesWithDifferentOrientation", typeof(bool));
             duplicatesOnly = (bool)info.GetValue("duplicatesOnly", typeof(bool));
@@ -1734,6 +1748,13 @@ namespace ImageComparator
 
                 // Set language based on saved currentLanguageCode
                 string languageToSet = mainWindow.currentLanguageCode;
+                
+                // Validate language code and default to en-US if invalid
+                if (string.IsNullOrEmpty(languageToSet) || 
+                    (languageToSet != "en-US" && languageToSet != "tr-TR" && languageToSet != "ja-JP"))
+                {
+                    languageToSet = "en-US";
+                }
                 
                 // Set menu states based on the language
                 englishMenuItem.IsChecked = (languageToSet == "en-US");
