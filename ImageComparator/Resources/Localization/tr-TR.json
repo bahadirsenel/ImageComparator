@@ -65,6 +65,7 @@
   
   "Console.SessionSaved": "Oturum şuraya kaydedildi: {0}",
   "Console.SessionLoaded": "Oturum şuradan yüklendi: {0}",
+  "Console.FalsePositiveDatabaseCleared": "Hatalı sonuç veritabanı temizlendi.",
   
   "Dialog.SaveTitle": "Sonuçları Kaydet",
   "Dialog.LoadTitle": "Sonuçları Yükle",
