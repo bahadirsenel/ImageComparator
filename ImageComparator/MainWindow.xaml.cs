@@ -247,18 +247,99 @@ namespace ImageComparator
             }
 
             // Initialize localization based on menu selection
-            if (japaneseMenuItem.IsChecked)
+            if (englishMenuItem.IsChecked)
             {
-                currentLanguageCode = "ja-JP";
-                LocalizationManager.SetLanguage("ja-JP");
+                currentLanguageCode = "en-US";
+                LocalizationManager.SetLanguage("en-US");
             }
             else if (turkishMenuItem.IsChecked)
             {
                 currentLanguageCode = "tr-TR";
                 LocalizationManager.SetLanguage("tr-TR");
             }
+            else if (japaneseMenuItem.IsChecked)
+            {
+                currentLanguageCode = "ja-JP";
+                LocalizationManager.SetLanguage("ja-JP");
+            }
+            else if (spanishMenuItem.IsChecked)
+            {
+                currentLanguageCode = "es-ES";
+                LocalizationManager.SetLanguage("es-ES");
+            }
+            else if (frenchMenuItem.IsChecked)
+            {
+                currentLanguageCode = "fr-FR";
+                LocalizationManager.SetLanguage("fr-FR");
+            }
+            else if (germanMenuItem.IsChecked)
+            {
+                currentLanguageCode = "de-DE";
+                LocalizationManager.SetLanguage("de-DE");
+            }
+            else if (italianMenuItem.IsChecked)
+            {
+                currentLanguageCode = "it-IT";
+                LocalizationManager.SetLanguage("it-IT");
+            }
+            else if (portugueseMenuItem.IsChecked)
+            {
+                currentLanguageCode = "pt-BR";
+                LocalizationManager.SetLanguage("pt-BR");
+            }
+            else if (russianMenuItem.IsChecked)
+            {
+                currentLanguageCode = "ru-RU";
+                LocalizationManager.SetLanguage("ru-RU");
+            }
+            else if (chineseMenuItem.IsChecked)
+            {
+                currentLanguageCode = "zh-CN";
+                LocalizationManager.SetLanguage("zh-CN");
+            }
+            else if (koreanMenuItem.IsChecked)
+            {
+                currentLanguageCode = "ko-KR";
+                LocalizationManager.SetLanguage("ko-KR");
+            }
+            else if (arabicMenuItem.IsChecked)
+            {
+                currentLanguageCode = "ar-SA";
+                LocalizationManager.SetLanguage("ar-SA");
+            }
+            else if (hindiMenuItem.IsChecked)
+            {
+                currentLanguageCode = "hi-IN";
+                LocalizationManager.SetLanguage("hi-IN");
+            }
+            else if (dutchMenuItem.IsChecked)
+            {
+                currentLanguageCode = "nl-NL";
+                LocalizationManager.SetLanguage("nl-NL");
+            }
+            else if (polishMenuItem.IsChecked)
+            {
+                currentLanguageCode = "pl-PL";
+                LocalizationManager.SetLanguage("pl-PL");
+            }
+            else if (swedishMenuItem.IsChecked)
+            {
+                currentLanguageCode = "sv-SE";
+                LocalizationManager.SetLanguage("sv-SE");
+            }
+            else if (norwegianMenuItem.IsChecked)
+            {
+                currentLanguageCode = "nb-NO";
+                LocalizationManager.SetLanguage("nb-NO");
+            }
+            else if (danishMenuItem.IsChecked)
+            {
+                currentLanguageCode = "da-DK";
+                LocalizationManager.SetLanguage("da-DK");
+            }
             else
             {
+                // Default to English if no language is checked
                 currentLanguageCode = "en-US";
                 LocalizationManager.SetLanguage("en-US");
             }
@@ -673,6 +754,21 @@ namespace ImageComparator
                 englishMenuItem.IsEnabled = !englishMenuItem.IsChecked;
                 turkishMenuItem.IsEnabled = !turkishMenuItem.IsChecked;
                 japaneseMenuItem.IsEnabled = !japaneseMenuItem.IsChecked;
+                spanishMenuItem.IsEnabled = !spanishMenuItem.IsChecked;
+                frenchMenuItem.IsEnabled = !frenchMenuItem.IsChecked;
+                germanMenuItem.IsEnabled = !germanMenuItem.IsChecked;
+                italianMenuItem.IsEnabled = !italianMenuItem.IsChecked;
+                portugueseMenuItem.IsEnabled = !portugueseMenuItem.IsChecked;
+                russianMenuItem.IsEnabled = !russianMenuItem.IsChecked;
+                chineseMenuItem.IsEnabled = !chineseMenuItem.IsChecked;
+                koreanMenuItem.IsEnabled = !koreanMenuItem.IsChecked;
+                arabicMenuItem.IsEnabled = !arabicMenuItem.IsChecked;
+                hindiMenuItem.IsEnabled = !hindiMenuItem.IsChecked;
+                dutchMenuItem.IsEnabled = !dutchMenuItem.IsChecked;
+                polishMenuItem.IsEnabled = !polishMenuItem.IsChecked;
+                swedishMenuItem.IsEnabled = !swedishMenuItem.IsChecked;
+                norwegianMenuItem.IsEnabled = !norwegianMenuItem.IsChecked;
+                danishMenuItem.IsEnabled = !danishMenuItem.IsChecked;
                 includeSubfoldersMenuItem.IsEnabled = true;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = true;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = true;
@@ -699,6 +795,21 @@ namespace ImageComparator
                 englishMenuItem.IsEnabled = false;
                 turkishMenuItem.IsEnabled = false;
                 japaneseMenuItem.IsEnabled = false;
+                spanishMenuItem.IsEnabled = false;
+                frenchMenuItem.IsEnabled = false;
+                germanMenuItem.IsEnabled = false;
+                italianMenuItem.IsEnabled = false;
+                portugueseMenuItem.IsEnabled = false;
+                russianMenuItem.IsEnabled = false;
+                chineseMenuItem.IsEnabled = false;
+                koreanMenuItem.IsEnabled = false;
+                arabicMenuItem.IsEnabled = false;
+                hindiMenuItem.IsEnabled = false;
+                dutchMenuItem.IsEnabled = false;
+                polishMenuItem.IsEnabled = false;
+                swedishMenuItem.IsEnabled = false;
+                norwegianMenuItem.IsEnabled = false;
+                danishMenuItem.IsEnabled = false;
                 includeSubfoldersMenuItem.IsEnabled = false;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = false;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = false;
@@ -1856,21 +1967,135 @@ namespace ImageComparator
                 // Set language based on saved currentLanguageCode
                 string languageToSet = mainWindow.currentLanguageCode;
                 
+                // List of valid language codes
+                var validLanguages = new[] { 
+                    "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT", 
+                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "hi-IN", 
+                    "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK" 
+                };
+                
                 // Validate language code and default to en-US if invalid
-                if (string.IsNullOrEmpty(languageToSet) || 
-                    (languageToSet != "en-US" && languageToSet != "tr-TR" && languageToSet != "ja-JP"))
+                if (string.IsNullOrEmpty(languageToSet) || !validLanguages.Contains(languageToSet))
                 {
                     languageToSet = "en-US";
                 }
                 
-                // Set menu states based on the language
-                englishMenuItem.IsChecked = (languageToSet == "en-US");
-                turkishMenuItem.IsChecked = (languageToSet == "tr-TR");
-                japaneseMenuItem.IsChecked = (languageToSet == "ja-JP");
+                // Uncheck all language menu items
+                englishMenuItem.IsChecked = false;
+                turkishMenuItem.IsChecked = false;
+                japaneseMenuItem.IsChecked = false;
+                spanishMenuItem.IsChecked = false;
+                frenchMenuItem.IsChecked = false;
+                germanMenuItem.IsChecked = false;
+                italianMenuItem.IsChecked = false;
+                portugueseMenuItem.IsChecked = false;
+                russianMenuItem.IsChecked = false;
+                chineseMenuItem.IsChecked = false;
+                koreanMenuItem.IsChecked = false;
+                arabicMenuItem.IsChecked = false;
+                hindiMenuItem.IsChecked = false;
+                dutchMenuItem.IsChecked = false;
+                polishMenuItem.IsChecked = false;
+                swedishMenuItem.IsChecked = false;
+                norwegianMenuItem.IsChecked = false;
+                danishMenuItem.IsChecked = false;
                 
-                englishMenuItem.IsEnabled = (languageToSet != "en-US");
-                turkishMenuItem.IsEnabled = (languageToSet != "tr-TR");
-                japaneseMenuItem.IsEnabled = (languageToSet != "ja-JP");
+                // Enable all language menu items
+                englishMenuItem.IsEnabled = true;
+                turkishMenuItem.IsEnabled = true;
+                japaneseMenuItem.IsEnabled = true;
+                spanishMenuItem.IsEnabled = true;
+                frenchMenuItem.IsEnabled = true;
+                germanMenuItem.IsEnabled = true;
+                italianMenuItem.IsEnabled = true;
+                portugueseMenuItem.IsEnabled = true;
+                russianMenuItem.IsEnabled = true;
+                chineseMenuItem.IsEnabled = true;
+                koreanMenuItem.IsEnabled = true;
+                arabicMenuItem.IsEnabled = true;
+                hindiMenuItem.IsEnabled = true;
+                dutchMenuItem.IsEnabled = true;
+                polishMenuItem.IsEnabled = true;
+                swedishMenuItem.IsEnabled = true;
+                norwegianMenuItem.IsEnabled = true;
+                danishMenuItem.IsEnabled = true;
+                
+                // Check and disable the selected language
+                switch (languageToSet)
+                {
+                    case "en-US":
+                        englishMenuItem.IsChecked = true;
+                        englishMenuItem.IsEnabled = false;
+                        break;
+                    case "tr-TR":
+                        turkishMenuItem.IsChecked = true;
+                        turkishMenuItem.IsEnabled = false;
+                        break;
+                    case "ja-JP":
+                        japaneseMenuItem.IsChecked = true;
+                        japaneseMenuItem.IsEnabled = false;
+                        break;
+                    case "es-ES":
+                        spanishMenuItem.IsChecked = true;
+                        spanishMenuItem.IsEnabled = false;
+                        break;
+                    case "fr-FR":
+                        frenchMenuItem.IsChecked = true;
+                        frenchMenuItem.IsEnabled = false;
+                        break;
+                    case "de-DE":
+                        germanMenuItem.IsChecked = true;
+                        germanMenuItem.IsEnabled = false;
+                        break;
+                    case "it-IT":
+                        italianMenuItem.IsChecked = true;
+                        italianMenuItem.IsEnabled = false;
+                        break;
+                    case "pt-BR":
+                        portugueseMenuItem.IsChecked = true;
+                        portugueseMenuItem.IsEnabled = false;
+                        break;
+                    case "ru-RU":
+                        russianMenuItem.IsChecked = true;
+                        russianMenuItem.IsEnabled = false;
+                        break;
+                    case "zh-CN":
+                        chineseMenuItem.IsChecked = true;
+                        chineseMenuItem.IsEnabled = false;
+                        break;
+                    case "ko-KR":
+                        koreanMenuItem.IsChecked = true;
+                        koreanMenuItem.IsEnabled = false;
+                        break;
+                    case "ar-SA":
+                        arabicMenuItem.IsChecked = true;
+                        arabicMenuItem.IsEnabled = false;
+                        break;
+                    case "hi-IN":
+                        hindiMenuItem.IsChecked = true;
+                        hindiMenuItem.IsEnabled = false;
+                        break;
+                    case "nl-NL":
+                        dutchMenuItem.IsChecked = true;
+                        dutchMenuItem.IsEnabled = false;
+                        break;
+                    case "pl-PL":
+                        polishMenuItem.IsChecked = true;
+                        polishMenuItem.IsEnabled = false;
+                        break;
+                    case "sv-SE":
+                        swedishMenuItem.IsChecked = true;
+                        swedishMenuItem.IsEnabled = false;
+                        break;
+                    case "nb-NO":
+                        norwegianMenuItem.IsChecked = true;
+                        norwegianMenuItem.IsEnabled = false;
+                        break;
+                    case "da-DK":
+                        danishMenuItem.IsChecked = true;
+                        danishMenuItem.IsEnabled = false;
+                        break;
+                }
                 
                 currentLanguageCode = languageToSet;
                 LocalizationManager.SetLanguage(languageToSet);
