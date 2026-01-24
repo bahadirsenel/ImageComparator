@@ -380,8 +380,10 @@ namespace ImageComparator
         {
             englishMenuItem.IsChecked = true;
             turkishMenuItem.IsChecked = false;
+            japaneseMenuItem.IsChecked = false;
             englishMenuItem.IsEnabled = false;
             turkishMenuItem.IsEnabled = true;
+            japaneseMenuItem.IsEnabled = true;
             LocalizationManager.SetLanguage("en-US");
             UpdateUI();
         }
@@ -390,9 +392,23 @@ namespace ImageComparator
         {
             englishMenuItem.IsChecked = false;
             turkishMenuItem.IsChecked = true;
+            japaneseMenuItem.IsChecked = false;
             englishMenuItem.IsEnabled = true;
             turkishMenuItem.IsEnabled = false;
+            japaneseMenuItem.IsEnabled = true;
             LocalizationManager.SetLanguage("tr-TR");
+            UpdateUI();
+        }
+
+        private void JapaneseMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            englishMenuItem.IsChecked = false;
+            turkishMenuItem.IsChecked = false;
+            japaneseMenuItem.IsChecked = true;
+            englishMenuItem.IsEnabled = true;
+            turkishMenuItem.IsEnabled = true;
+            japaneseMenuItem.IsEnabled = false;
+            LocalizationManager.SetLanguage("ja-JP");
             UpdateUI();
         }
 

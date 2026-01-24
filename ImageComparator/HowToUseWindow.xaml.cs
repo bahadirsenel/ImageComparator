@@ -18,7 +18,19 @@ namespace ImageComparator
             closeButton.Content = LocalizationManager.GetString("Dialog.HowToUseCloseButton");
             
             // Load content based on current language
-            string fileName = LocalizationManager.CurrentLanguage == "en-US" ? "HowToUse_en.md" : "HowToUse_tr.md";
+            string fileName;
+            switch (LocalizationManager.CurrentLanguage)
+            {
+                case "tr-TR":
+                    fileName = "HowToUse_tr.md";
+                    break;
+                case "ja-JP":
+                    fileName = "HowToUse_ja.md";
+                    break;
+                default:
+                    fileName = "HowToUse_en.md";
+                    break;
+            }
             contentTextBlock.Text = LoadContentFromFile(fileName);
         }
 
