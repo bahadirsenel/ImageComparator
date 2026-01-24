@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 18.2.11415.280
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageComparator", "ImageComparator\ImageComparator.csproj", "{9803EFCC-4A75-4720-974F-49BB2D5C6F93}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8A497364-F50F-4E6C-ADB6-5F14A90F23FF} = {8A497364-F50F-4E6C-ADB6-5F14A90F23FF}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AddFiles", "AddFiles\AddFiles.csproj", "{8A497364-F50F-4E6C-ADB6-5F14A90F23FF}"
 EndProject

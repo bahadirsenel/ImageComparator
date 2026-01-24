@@ -8,9 +8,9 @@ namespace AddFiles
     static class Program
     {
         #region variables
-        static List<String> tempDirectories = new List<String>();
+        static readonly List<String> files = new List<String>();
+        static readonly List<String> tempDirectories = new List<String>();
         static List<String> tempFiles = new List<String>();
-        static List<String> files = new List<String>();
         static bool includeSubfolders, jpegFiles, gifFiles, pngFiles, bmpFiles, tiffFiles, icoFiles, gotException = false;
         static StreamWriter streamWriter;
         static StreamReader streamReader;
@@ -54,11 +54,11 @@ namespace AddFiles
                         files.AddRange(tempFiles);
                         Directory.GetDirectories(tempDirectories.ElementAt(0)).ToList().ForEach(s => tempDirectories.Add(s));
                     }
-                    catch (UnauthorizedAccessException ex)
+                    catch (UnauthorizedAccessException)
                     {
                         gotException = true;
                     }
-                    catch (DirectoryNotFoundException ex)
+                    catch (DirectoryNotFoundException)
                     {
                     }
                     tempDirectories.RemoveAt(0);
@@ -83,7 +83,7 @@ namespace AddFiles
                             }
                         }
                     }
-                    catch (UnauthorizedAccessException ex)
+                    catch (UnauthorizedAccessException)
                     {
                         gotException = true;
                     }

@@ -164,4 +164,7 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(TargetDir)$(TargetName).exe" "$(SolutionDir)External Tools\" /Y /I</PostBuildEvent>
+  </PropertyGroup>
 </Project>

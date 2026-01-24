@@ -348,6 +348,6 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(ProjectDir)External Tools\*.exe" "$(TargetDir)Bin\" /Y /I</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)External Tools\*.exe" "$(TargetDir)Bin\" /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>
