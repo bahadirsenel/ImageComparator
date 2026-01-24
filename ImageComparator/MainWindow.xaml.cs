@@ -55,8 +55,9 @@ namespace ImageComparator
         MainWindow mainWindow;
         long firstTime, secondTime, pauseTime, pausedFirstTime, pausedSecondTime;
         int processThreadsiAsync, compareResultsiAsync, timeDifferenceInSeconds, duplicateImageCount, highConfidenceSimilarImageCount, mediumConfidenceSimilarImageCount, lowConfidenceSimilarImageCount;
-        public bool gotException = false, skipFilesWithDifferentOrientation = true, duplicatesOnly = false, comparing = false, includeSubfolders, jpegMenuItemChecked, gifMenuItemChecked, pngMenuItemChecked, bmpMenuItemChecked, tiffMenuItemChecked, icoMenuItemChecked, isEnglish = true, sendsToRecycleBin, opening = true, deleteMarkedItems = false;
+        public bool gotException = false, skipFilesWithDifferentOrientation = true, duplicatesOnly = false, comparing = false, includeSubfolders, jpegMenuItemChecked, gifMenuItemChecked, pngMenuItemChecked, bmpMenuItemChecked, tiffMenuItemChecked, icoMenuItemChecked, sendsToRecycleBin, opening = true, deleteMarkedItems = false;
         string path;
+        string currentLanguageCode = "en-US"; // Track current language for serialization
 
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
         public static DependencyProperty ImagePathProperty2 = DependencyProperty.Register("ImagePath2", typeof(string), typeof(MainWindow), null);
@@ -246,14 +247,8 @@ namespace ImageComparator
             }
 
             // Initialize localization based on menu selection
-            if (turkishMenuItem.IsChecked)
-            {
-                LocalizationManager.SetLanguage("tr-TR");
-            }
-            else
-            {
-                LocalizationManager.SetLanguage("en-US");
-            }
+            currentLanguageCode = GetCurrentLanguageFromMenu();
+            LocalizationManager.SetLanguage(currentLanguageCode);
 
             UpdateUI();
             outputListView.ItemsSource = console;
@@ -378,22 +373,179 @@ namespace ImageComparator
 
         private void EnglishMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            englishMenuItem.IsChecked = true;
-            turkishMenuItem.IsChecked = false;
-            englishMenuItem.IsEnabled = false;
-            turkishMenuItem.IsEnabled = true;
-            LocalizationManager.SetLanguage("en-US");
-            UpdateUI();
+            SetLanguage("en-US", englishMenuItem);
         }
 
         private void TurkishMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            englishMenuItem.IsChecked = false;
-            turkishMenuItem.IsChecked = true;
-            englishMenuItem.IsEnabled = true;
-            turkishMenuItem.IsEnabled = false;
-            LocalizationManager.SetLanguage("tr-TR");
+            SetLanguage("tr-TR", turkishMenuItem);
+        }
+
+        private void JapaneseMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("ja-JP", japaneseMenuItem);
+        }
+
+        private void SpanishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("es-ES", spanishMenuItem);
+        }
+
+        private void FrenchMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("fr-FR", frenchMenuItem);
+        }
+
+        private void GermanMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("de-DE", germanMenuItem);
+        }
+
+        private void ItalianMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("it-IT", italianMenuItem);
+        }
+
+        private void PortugueseMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("pt-BR", portugueseMenuItem);
+        }
+
+        private void RussianMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("ru-RU", russianMenuItem);
+        }
+
+        private void ChineseMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("zh-CN", chineseMenuItem);
+        }
+
+        private void KoreanMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("ko-KR", koreanMenuItem);
+        }
+
+        private void ArabicMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("ar-SA", arabicMenuItem);
+        }
+
+        private void HindiMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("hi-IN", hindiMenuItem);
+        }
+
+        private void DutchMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("nl-NL", dutchMenuItem);
+        }
+
+        private void PolishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("pl-PL", polishMenuItem);
+        }
+
+        private void SwedishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("sv-SE", swedishMenuItem);
+        }
+
+        private void NorwegianMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("nb-NO", norwegianMenuItem);
+        }
+
+        private void DanishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("da-DK", danishMenuItem);
+        }
+
+        /// <summary>
+        /// Helper method to set the language and update UI state
+        /// </summary>
+        /// <param name="languageCode">The language code (e.g., "en-US")</param>
+        /// <param name="selectedMenuItem">The menu item that was clicked</param>
+        private void SetLanguage(string languageCode, MenuItem selectedMenuItem)
+        {
+            // Use the centralized menu state management
+            SetLanguageMenuStates(languageCode);
+
+            // Set the language
+            currentLanguageCode = languageCode;
+            LocalizationManager.SetLanguage(languageCode);
             UpdateUI();
+        }
+
+        /// <summary>
+        /// Helper method to get the currently selected language code based on menu item states
+        /// </summary>
+        /// <returns>The language code of the checked menu item, or "en-US" as default</returns>
+        private string GetCurrentLanguageFromMenu()
+        {
+            if (englishMenuItem.IsChecked) return "en-US";
+            if (turkishMenuItem.IsChecked) return "tr-TR";
+            if (japaneseMenuItem.IsChecked) return "ja-JP";
+            if (spanishMenuItem.IsChecked) return "es-ES";
+            if (frenchMenuItem.IsChecked) return "fr-FR";
+            if (germanMenuItem.IsChecked) return "de-DE";
+            if (italianMenuItem.IsChecked) return "it-IT";
+            if (portugueseMenuItem.IsChecked) return "pt-BR";
+            if (russianMenuItem.IsChecked) return "ru-RU";
+            if (chineseMenuItem.IsChecked) return "zh-CN";
+            if (koreanMenuItem.IsChecked) return "ko-KR";
+            if (arabicMenuItem.IsChecked) return "ar-SA";
+            if (hindiMenuItem.IsChecked) return "hi-IN";
+            if (dutchMenuItem.IsChecked) return "nl-NL";
+            if (polishMenuItem.IsChecked) return "pl-PL";
+            if (swedishMenuItem.IsChecked) return "sv-SE";
+            if (norwegianMenuItem.IsChecked) return "nb-NO";
+            if (danishMenuItem.IsChecked) return "da-DK";
+            return "en-US"; // Default
+        }
+
+        /// <summary>
+        /// Helper method to set menu states for a specific language code
+        /// </summary>
+        /// <param name="languageCode">The language code to activate</param>
+        private void SetLanguageMenuStates(string languageCode)
+        {
+            // Map of language codes to menu items
+            var languageMenuItems = new Dictionary<string, MenuItem>
+            {
+                { "en-US", englishMenuItem },
+                { "tr-TR", turkishMenuItem },
+                { "ja-JP", japaneseMenuItem },
+                { "es-ES", spanishMenuItem },
+                { "fr-FR", frenchMenuItem },
+                { "de-DE", germanMenuItem },
+                { "it-IT", italianMenuItem },
+                { "pt-BR", portugueseMenuItem },
+                { "ru-RU", russianMenuItem },
+                { "zh-CN", chineseMenuItem },
+                { "ko-KR", koreanMenuItem },
+                { "ar-SA", arabicMenuItem },
+                { "hi-IN", hindiMenuItem },
+                { "nl-NL", dutchMenuItem },
+                { "pl-PL", polishMenuItem },
+                { "sv-SE", swedishMenuItem },
+                { "nb-NO", norwegianMenuItem },
+                { "da-DK", danishMenuItem }
+            };
+
+            // Uncheck and enable all menu items
+            foreach (var menuItem in languageMenuItems.Values)
+            {
+                menuItem.IsChecked = false;
+                menuItem.IsEnabled = true;
+            }
+
+            // Check and disable the selected language
+            if (languageMenuItems.TryGetValue(languageCode, out MenuItem selectedMenuItem))
+            {
+                selectedMenuItem.IsChecked = true;
+                selectedMenuItem.IsEnabled = false;
+            }
         }
 
         private void ClearFalsePositiveDatabaseButton_Click(object sender, RoutedEventArgs e)
@@ -526,6 +678,29 @@ namespace ImageComparator
 
         private void FindDuplicatesButton_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            // Array of all language menu items
+            var languageMenuItems = new[]
+            {
+                englishMenuItem,
+                turkishMenuItem,
+                japaneseMenuItem,
+                spanishMenuItem,
+                frenchMenuItem,
+                germanMenuItem,
+                italianMenuItem,
+                portugueseMenuItem,
+                russianMenuItem,
+                chineseMenuItem,
+                koreanMenuItem,
+                arabicMenuItem,
+                hindiMenuItem,
+                dutchMenuItem,
+                polishMenuItem,
+                swedishMenuItem,
+                norwegianMenuItem,
+                danishMenuItem
+            };
+
             if (findDuplicatesButton.Visibility == Visibility.Visible)
             {
                 saveResultsMenuItem.IsEnabled = true;
@@ -536,8 +711,13 @@ namespace ImageComparator
                 gifMenuItem.IsEnabled = true;
                 tiffMenuItem.IsEnabled = true;
                 icoMenuItem.IsEnabled = true;
-                englishMenuItem.IsEnabled = !englishMenuItem.IsChecked;
-                turkishMenuItem.IsEnabled = !turkishMenuItem.IsChecked;
+                
+                // Enable language menu items (disable the checked one)
+                foreach (var languageMenuItem in languageMenuItems)
+                {
+                    languageMenuItem.IsEnabled = !languageMenuItem.IsChecked;
+                }
+                
                 includeSubfoldersMenuItem.IsEnabled = true;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = true;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = true;
@@ -561,8 +741,13 @@ namespace ImageComparator
                 gifMenuItem.IsEnabled = false;
                 tiffMenuItem.IsEnabled = false;
                 icoMenuItem.IsEnabled = false;
-                englishMenuItem.IsEnabled = false;
-                turkishMenuItem.IsEnabled = false;
+                
+                // Disable all language menu items
+                foreach (var languageMenuItem in languageMenuItems)
+                {
+                    languageMenuItem.IsEnabled = false;
+                }
+                
                 includeSubfoldersMenuItem.IsEnabled = false;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = false;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = false;
@@ -1608,7 +1793,28 @@ namespace ImageComparator
             tiffMenuItemChecked = (bool)info.GetValue("tiffMenuItemChecked", typeof(bool));
             icoMenuItemChecked = (bool)info.GetValue("icoMenuItemChecked", typeof(bool));
             sendsToRecycleBin = (bool)info.GetValue("sendsToRecycleBin", typeof(bool));
-            isEnglish = (bool)info.GetValue("isEnglish", typeof(bool));
+            try
+            {
+                currentLanguageCode = (string)info.GetValue("currentLanguageCode", typeof(string));
+                
+                // List of valid language codes
+                var validLanguages = new[] { 
+                    "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT", 
+                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "hi-IN", 
+                    "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK" 
+                };
+                
+                // Validate and default to en-US if null or invalid
+                if (string.IsNullOrEmpty(currentLanguageCode) || !validLanguages.Contains(currentLanguageCode))
+                {
+                    currentLanguageCode = "en-US";
+                }
+            }
+            catch
+            {
+                // Default to English if field doesn't exist
+                currentLanguageCode = "en-US";
+            }
             includeSubfolders = (bool)info.GetValue("includeSubfolders", typeof(bool));
             skipFilesWithDifferentOrientation = (bool)info.GetValue("skipFilesWithDifferentOrientation", typeof(bool));
             duplicatesOnly = (bool)info.GetValue("duplicatesOnly", typeof(bool));
@@ -1630,7 +1836,7 @@ namespace ImageComparator
             info.AddValue("tiffMenuItemChecked", tiffMenuItem.IsChecked);
             info.AddValue("icoMenuItemChecked", icoMenuItem.IsChecked);
             info.AddValue("sendsToRecycleBin", sendToRecycleBinMenuItem.IsChecked);
-            info.AddValue("isEnglish", englishMenuItem.IsChecked);
+            info.AddValue("currentLanguageCode", currentLanguageCode);
             info.AddValue("includeSubfolders", includeSubfoldersMenuItem.IsChecked);
             info.AddValue("skipFilesWithDifferentOrientation", skipFilesWithDifferentOrientationMenuItem.IsChecked);
             info.AddValue("duplicatesOnly", findExactDuplicatesOnlyMenuItem.IsChecked);
@@ -1703,15 +1909,20 @@ namespace ImageComparator
                     deletePermanentlyMenuItem.IsEnabled = false;
                 }
 
-                if (!mainWindow.isEnglish)
+                // Set language based on saved currentLanguageCode
+                string languageToSet = mainWindow.currentLanguageCode;
+                
+                if (string.IsNullOrEmpty(languageToSet))
                 {
-                    englishMenuItem.IsChecked = false;
-                    turkishMenuItem.IsChecked = true;
-                    englishMenuItem.IsEnabled = true;
-                    turkishMenuItem.IsEnabled = false;
-                    LocalizationManager.SetLanguage("tr-TR");
-                    UpdateUI();
+                    languageToSet = "en-US";
                 }
+                
+                // Set menu states for the language
+                SetLanguageMenuStates(languageToSet);
+                
+                currentLanguageCode = languageToSet;
+                LocalizationManager.SetLanguage(languageToSet);
+                UpdateUI();
             }
             else
             {
@@ -1773,15 +1984,18 @@ namespace ImageComparator
             markAsFalsePositiveButton.Content = LocalizationManager.GetString("Button.MarkAsFalsePositive");
             removeMarkButton.Content = LocalizationManager.GetString("Button.RemoveMark");
 
+            // Update context menu items
+            listView1OpenMenuItem.Header = LocalizationManager.GetString("ContextMenu.Open");
+            listView1OpenFileLocationMenuItem.Header = LocalizationManager.GetString("ContextMenu.OpenFileLocation");
+            listView2OpenMenuItem.Header = LocalizationManager.GetString("ContextMenu.Open");
+            listView2OpenFileLocationMenuItem.Header = LocalizationManager.GetString("ContextMenu.OpenFileLocation");
+
             // Update labels
             previewLabel.Content = LocalizationManager.GetString("Label.PreviewSelect");
 
             // Update console
             console.Clear();
             console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
-
-            // Update isEnglish flag for backward compatibility
-            isEnglish = LocalizationManager.CurrentLanguage == "en-US";
         }
 
         public void Clear()
