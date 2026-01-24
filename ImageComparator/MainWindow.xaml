@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ImageComparator"
         mc:Ignorable="d"
-        Title="Image Comparator" Width="1005" Height="600" MinWidth="365" MinHeight="400" Closing="Window_Closing" WindowStartupLocation="CenterScreen">
+        Title="Image Comparator" Width="1005" Height="600" MinWidth="365" MinHeight="400" Closing="Window_Closing" WindowStartupLocation="CenterScreen" Icon="/Resources/icon.ico">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
