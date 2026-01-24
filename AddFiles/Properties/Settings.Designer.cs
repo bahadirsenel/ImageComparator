@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace ImageComparator.Properties {
+namespace AddFiles.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

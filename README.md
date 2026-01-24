@@ -65,7 +65,11 @@ Image Comparator is a WPF-based tool that helps you identify duplicate and simil
 2. Open `ImageComparator.sln` in Visual Studio
 3. Restore NuGet packages
 4. Build the solution (F6 or Build → Build Solution)
-5. The executable will be in `ImageComparator/bin/Debug/` or `ImageComparator/bin/Release/`
+   - This will build both the main ImageComparator project and the AddFiles helper tool
+   - AddFiles.exe is a console application used for file enumeration and will be placed in the `ImageComparator/bin/Debug/Bin/` or `ImageComparator/bin/Release/Bin/` directory
+5. The main executable will be in `ImageComparator/bin/Debug/` or `ImageComparator/bin/Release/`
+
+**Note**: The AddFiles project is a helper tool that performs file system operations. It must be built along with the main application for the software to function correctly.
 
 ## Usage
 
