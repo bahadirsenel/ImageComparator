@@ -143,7 +143,7 @@ This approach allows the application to detect:
 - **Discrete Cosine Transform**: Perceptual image hashing algorithm
 - **Ookii Dialogs**: Modern folder browser dialogs
 - **System.Drawing**: Image loading and processing
-- **System.Web.Extensions**: JSON serialization for settings and localization
+- **System.Web.Extensions**: JSON serialization (JavaScriptSerializer) for settings and localization
 - **Microsoft.VisualBasic**: File operations (Recycle Bin functionality)
 
 ## Project Structure
