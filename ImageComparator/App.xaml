@@ -84,25 +84,7 @@
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Trigger.EnterActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="border" 
-                                                              Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" 
-                                                              To="{Binding Source={StaticResource PrimaryDarkColor}, Path=Color}" 
-                                                              Duration="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.EnterActions>
-                                    <Trigger.ExitActions>
-                                        <BeginStoryboard>
-                                            <Storyboard>
-                                                <ColorAnimation Storyboard.TargetName="border" 
-                                                              Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" 
-                                                              Duration="0:0:0.2"/>
-                                            </Storyboard>
-                                        </BeginStoryboard>
-                                    </Trigger.ExitActions>
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryDarkColor}"/>
                                 </Trigger>
                                 <Trigger Property="IsPressed" Value="True">
                                     <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryDarkColor}"/>
@@ -215,12 +197,12 @@
             </Style>
             
             <!-- Fade In Animation -->
-            <Storyboard x:Key="FadeInAnimation">
+            <Storyboard x:Key="FadeInAnimation" x:Shared="False">
                 <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
             </Storyboard>
             
             <!-- Slide In Animation -->
-            <Storyboard x:Key="SlideInAnimation">
+            <Storyboard x:Key="SlideInAnimation" x:Shared="False">
                 <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" 
                                From="20" To="0" Duration="0:0:0.3">
                     <DoubleAnimation.EasingFunction>
