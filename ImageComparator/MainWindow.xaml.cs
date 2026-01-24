@@ -55,7 +55,7 @@ namespace ImageComparator
         MainWindow mainWindow;
         long firstTime, secondTime, pauseTime, pausedFirstTime, pausedSecondTime;
         int processThreadsiAsync, compareResultsiAsync, timeDifferenceInSeconds, duplicateImageCount, highConfidenceSimilarImageCount, mediumConfidenceSimilarImageCount, lowConfidenceSimilarImageCount;
-        public bool gotException = false, skipFilesWithDifferentOrientation = true, duplicatesOnly = false, comparing = false, includeSubfolders, jpegMenuItemChecked, gifMenuItemChecked, pngMenuItemChecked, bmpMenuItemChecked, tiffMenuItemChecked, icoMenuItemChecked, isEnglish = true, sendsToRecycleBin, opening = true, deleteMarkedItems = false;
+        public bool gotException = false, skipFilesWithDifferentOrientation = true, duplicatesOnly = false, comparing = false, includeSubfolders, jpegMenuItemChecked, gifMenuItemChecked, pngMenuItemChecked, bmpMenuItemChecked, tiffMenuItemChecked, icoMenuItemChecked, sendsToRecycleBin, opening = true, deleteMarkedItems = false;
         string path;
         string currentLanguageCode = "en-US"; // Track current language for serialization
 
@@ -393,7 +393,6 @@ namespace ImageComparator
             turkishMenuItem.IsEnabled = true;
             japaneseMenuItem.IsEnabled = true;
             currentLanguageCode = "en-US";
-            isEnglish = true;
             LocalizationManager.SetLanguage("en-US");
             UpdateUI();
         }
@@ -407,7 +406,6 @@ namespace ImageComparator
             turkishMenuItem.IsEnabled = false;
             japaneseMenuItem.IsEnabled = true;
             currentLanguageCode = "tr-TR";
-            isEnglish = false;
             LocalizationManager.SetLanguage("tr-TR");
             UpdateUI();
         }
@@ -421,7 +419,6 @@ namespace ImageComparator
             turkishMenuItem.IsEnabled = true;
             japaneseMenuItem.IsEnabled = false;
             currentLanguageCode = "ja-JP";
-            isEnglish = false;
             LocalizationManager.SetLanguage("ja-JP");
             UpdateUI();
         }
@@ -1640,17 +1637,7 @@ namespace ImageComparator
             tiffMenuItemChecked = (bool)info.GetValue("tiffMenuItemChecked", typeof(bool));
             icoMenuItemChecked = (bool)info.GetValue("icoMenuItemChecked", typeof(bool));
             sendsToRecycleBin = (bool)info.GetValue("sendsToRecycleBin", typeof(bool));
-            isEnglish = (bool)info.GetValue("isEnglish", typeof(bool));
-            // Try to load currentLanguageCode for newer saves, default to en-US or tr-TR based on isEnglish for backward compatibility
-            try
-            {
-                currentLanguageCode = (string)info.GetValue("currentLanguageCode", typeof(string));
-            }
-            catch
-            {
-                // For backward compatibility with old saves that don't have currentLanguageCode
-                currentLanguageCode = isEnglish ? "en-US" : "tr-TR";
-            }
+            currentLanguageCode = (string)info.GetValue("currentLanguageCode", typeof(string));
             includeSubfolders = (bool)info.GetValue("includeSubfolders", typeof(bool));
             skipFilesWithDifferentOrientation = (bool)info.GetValue("skipFilesWithDifferentOrientation", typeof(bool));
             duplicatesOnly = (bool)info.GetValue("duplicatesOnly", typeof(bool));
@@ -1672,7 +1659,6 @@ namespace ImageComparator
             info.AddValue("tiffMenuItemChecked", tiffMenuItem.IsChecked);
             info.AddValue("icoMenuItemChecked", icoMenuItem.IsChecked);
             info.AddValue("sendsToRecycleBin", sendToRecycleBinMenuItem.IsChecked);
-            info.AddValue("isEnglish", englishMenuItem.IsChecked);
             info.AddValue("currentLanguageCode", currentLanguageCode);
             info.AddValue("includeSubfolders", includeSubfoldersMenuItem.IsChecked);
             info.AddValue("skipFilesWithDifferentOrientation", skipFilesWithDifferentOrientationMenuItem.IsChecked);
@@ -1746,37 +1732,21 @@ namespace ImageComparator
                     deletePermanentlyMenuItem.IsEnabled = false;
                 }
 
-                if (!mainWindow.isEnglish)
-                {
-                    // Use currentLanguageCode if available, otherwise fall back to Turkish for backward compatibility
-                    string languageToSet = mainWindow.currentLanguageCode;
-                    if (string.IsNullOrEmpty(languageToSet) || languageToSet == "en-US")
-                    {
-                        languageToSet = "tr-TR"; // Backward compatibility: isEnglish=false used to mean Turkish
-                    }
-                    
-                    // Set menu states based on the language
-                    englishMenuItem.IsChecked = false;
-                    turkishMenuItem.IsChecked = (languageToSet == "tr-TR");
-                    japaneseMenuItem.IsChecked = (languageToSet == "ja-JP");
-                    
-                    englishMenuItem.IsEnabled = true;
-                    turkishMenuItem.IsEnabled = (languageToSet != "tr-TR");
-                    japaneseMenuItem.IsEnabled = (languageToSet != "ja-JP");
-                    
-                    currentLanguageCode = languageToSet;
-                    LocalizationManager.SetLanguage(languageToSet);
-                    UpdateUI();
-                }
-                else
-                {
-                    // Ensure Japanese and Turkish states are set correctly for English
-                    turkishMenuItem.IsChecked = false;
-                    japaneseMenuItem.IsChecked = false;
-                    turkishMenuItem.IsEnabled = true;
-                    japaneseMenuItem.IsEnabled = true;
-                    currentLanguageCode = "en-US";
-                }
+                // Set language based on saved currentLanguageCode
+                string languageToSet = mainWindow.currentLanguageCode;
+                
+                // Set menu states based on the language
+                englishMenuItem.IsChecked = (languageToSet == "en-US");
+                turkishMenuItem.IsChecked = (languageToSet == "tr-TR");
+                japaneseMenuItem.IsChecked = (languageToSet == "ja-JP");
+                
+                englishMenuItem.IsEnabled = (languageToSet != "en-US");
+                turkishMenuItem.IsEnabled = (languageToSet != "tr-TR");
+                japaneseMenuItem.IsEnabled = (languageToSet != "ja-JP");
+                
+                currentLanguageCode = languageToSet;
+                LocalizationManager.SetLanguage(languageToSet);
+                UpdateUI();
             }
             else
             {
@@ -1850,9 +1820,6 @@ namespace ImageComparator
             // Update console
             console.Clear();
             console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
-
-            // Update isEnglish flag for backward compatibility
-            isEnglish = LocalizationManager.CurrentLanguage == "en-US";
         }
 
         public void Clear()
