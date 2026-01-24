@@ -386,40 +386,147 @@ namespace ImageComparator
 
         private void EnglishMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            englishMenuItem.IsChecked = true;
-            turkishMenuItem.IsChecked = false;
-            japaneseMenuItem.IsChecked = false;
-            englishMenuItem.IsEnabled = false;
-            turkishMenuItem.IsEnabled = true;
-            japaneseMenuItem.IsEnabled = true;
-            currentLanguageCode = "en-US";
-            LocalizationManager.SetLanguage("en-US");
-            UpdateUI();
+            SetLanguage("en-US", englishMenuItem);
         }
 
         private void TurkishMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            englishMenuItem.IsChecked = false;
-            turkishMenuItem.IsChecked = true;
-            japaneseMenuItem.IsChecked = false;
-            englishMenuItem.IsEnabled = true;
-            turkishMenuItem.IsEnabled = false;
-            japaneseMenuItem.IsEnabled = true;
-            currentLanguageCode = "tr-TR";
-            LocalizationManager.SetLanguage("tr-TR");
-            UpdateUI();
+            SetLanguage("tr-TR", turkishMenuItem);
         }
 
         private void JapaneseMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            SetLanguage("ja-JP", japaneseMenuItem);
+        }
+
+        private void SpanishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("es-ES", spanishMenuItem);
+        }
+
+        private void FrenchMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("fr-FR", frenchMenuItem);
+        }
+
+        private void GermanMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("de-DE", germanMenuItem);
+        }
+
+        private void ItalianMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("it-IT", italianMenuItem);
+        }
+
+        private void PortugueseMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("pt-BR", portugueseMenuItem);
+        }
+
+        private void RussianMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("ru-RU", russianMenuItem);
+        }
+
+        private void ChineseMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("zh-CN", chineseMenuItem);
+        }
+
+        private void KoreanMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("ko-KR", koreanMenuItem);
+        }
+
+        private void ArabicMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("ar-SA", arabicMenuItem);
+        }
+
+        private void HindiMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("hi-IN", hindiMenuItem);
+        }
+
+        private void DutchMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("nl-NL", dutchMenuItem);
+        }
+
+        private void PolishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("pl-PL", polishMenuItem);
+        }
+
+        private void SwedishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("sv-SE", swedishMenuItem);
+        }
+
+        private void NorwegianMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("nb-NO", norwegianMenuItem);
+        }
+
+        private void DanishMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("da-DK", danishMenuItem);
+        }
+
+        /// <summary>
+        /// Helper method to set the language and update UI state
+        /// </summary>
+        /// <param name="languageCode">The language code (e.g., "en-US")</param>
+        /// <param name="selectedMenuItem">The menu item that was clicked</param>
+        private void SetLanguage(string languageCode, MenuItem selectedMenuItem)
+        {
+            // Uncheck and enable all language menu items
             englishMenuItem.IsChecked = false;
             turkishMenuItem.IsChecked = false;
-            japaneseMenuItem.IsChecked = true;
+            japaneseMenuItem.IsChecked = false;
+            spanishMenuItem.IsChecked = false;
+            frenchMenuItem.IsChecked = false;
+            germanMenuItem.IsChecked = false;
+            italianMenuItem.IsChecked = false;
+            portugueseMenuItem.IsChecked = false;
+            russianMenuItem.IsChecked = false;
+            chineseMenuItem.IsChecked = false;
+            koreanMenuItem.IsChecked = false;
+            arabicMenuItem.IsChecked = false;
+            hindiMenuItem.IsChecked = false;
+            dutchMenuItem.IsChecked = false;
+            polishMenuItem.IsChecked = false;
+            swedishMenuItem.IsChecked = false;
+            norwegianMenuItem.IsChecked = false;
+            danishMenuItem.IsChecked = false;
+
             englishMenuItem.IsEnabled = true;
             turkishMenuItem.IsEnabled = true;
-            japaneseMenuItem.IsEnabled = false;
-            currentLanguageCode = "ja-JP";
-            LocalizationManager.SetLanguage("ja-JP");
+            japaneseMenuItem.IsEnabled = true;
+            spanishMenuItem.IsEnabled = true;
+            frenchMenuItem.IsEnabled = true;
+            germanMenuItem.IsEnabled = true;
+            italianMenuItem.IsEnabled = true;
+            portugueseMenuItem.IsEnabled = true;
+            russianMenuItem.IsEnabled = true;
+            chineseMenuItem.IsEnabled = true;
+            koreanMenuItem.IsEnabled = true;
+            arabicMenuItem.IsEnabled = true;
+            hindiMenuItem.IsEnabled = true;
+            dutchMenuItem.IsEnabled = true;
+            polishMenuItem.IsEnabled = true;
+            swedishMenuItem.IsEnabled = true;
+            norwegianMenuItem.IsEnabled = true;
+            danishMenuItem.IsEnabled = true;
+
+            // Check and disable the selected language
+            selectedMenuItem.IsChecked = true;
+            selectedMenuItem.IsEnabled = false;
+
+            // Set the language
+            currentLanguageCode = languageCode;
+            LocalizationManager.SetLanguage(languageCode);
             UpdateUI();
         }
 

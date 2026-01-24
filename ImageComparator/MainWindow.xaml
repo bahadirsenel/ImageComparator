@@ -58,6 +58,21 @@
                     <MenuItem Name="englishMenuItem" Header="English" IsCheckable="True" IsChecked="True" IsEnabled="False" Click="EnglishMenuItem_Click"/>
                     <MenuItem Name="turkishMenuItem" Header="Türkçe" IsCheckable="True" IsChecked="False" Click="TurkishMenuItem_Click"/>
                     <MenuItem Name="japaneseMenuItem" Header="日本語" IsCheckable="True" IsChecked="False" Click="JapaneseMenuItem_Click"/>
+                    <MenuItem Name="spanishMenuItem" Header="Español" IsCheckable="True" IsChecked="False" Click="SpanishMenuItem_Click"/>
+                    <MenuItem Name="frenchMenuItem" Header="Français" IsCheckable="True" IsChecked="False" Click="FrenchMenuItem_Click"/>
+                    <MenuItem Name="germanMenuItem" Header="Deutsch" IsCheckable="True" IsChecked="False" Click="GermanMenuItem_Click"/>
+                    <MenuItem Name="italianMenuItem" Header="Italiano" IsCheckable="True" IsChecked="False" Click="ItalianMenuItem_Click"/>
+                    <MenuItem Name="portugueseMenuItem" Header="Português (Brasil)" IsCheckable="True" IsChecked="False" Click="PortugueseMenuItem_Click"/>
+                    <MenuItem Name="russianMenuItem" Header="Русский" IsCheckable="True" IsChecked="False" Click="RussianMenuItem_Click"/>
+                    <MenuItem Name="chineseMenuItem" Header="简体中文" IsCheckable="True" IsChecked="False" Click="ChineseMenuItem_Click"/>
+                    <MenuItem Name="koreanMenuItem" Header="한국어" IsCheckable="True" IsChecked="False" Click="KoreanMenuItem_Click"/>
+                    <MenuItem Name="arabicMenuItem" Header="العربية" IsCheckable="True" IsChecked="False" Click="ArabicMenuItem_Click"/>
+                    <MenuItem Name="hindiMenuItem" Header="हिन्दी" IsCheckable="True" IsChecked="False" Click="HindiMenuItem_Click"/>
+                    <MenuItem Name="dutchMenuItem" Header="Nederlands" IsCheckable="True" IsChecked="False" Click="DutchMenuItem_Click"/>
+                    <MenuItem Name="polishMenuItem" Header="Polski" IsCheckable="True" IsChecked="False" Click="PolishMenuItem_Click"/>
+                    <MenuItem Name="swedishMenuItem" Header="Svenska" IsCheckable="True" IsChecked="False" Click="SwedishMenuItem_Click"/>
+                    <MenuItem Name="norwegianMenuItem" Header="Norsk" IsCheckable="True" IsChecked="False" Click="NorwegianMenuItem_Click"/>
+                    <MenuItem Name="danishMenuItem" Header="Dansk" IsCheckable="True" IsChecked="False" Click="DanishMenuItem_Click"/>
                 </MenuItem>
 
                 <Separator />
