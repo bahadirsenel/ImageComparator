@@ -5,49 +5,45 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <!-- Light Theme (Default) -->
-                <ResourceDictionary x:Key="LightTheme">
-                    <!-- Color Palette -->
-                    <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>
-                    <SolidColorBrush x:Key="PrimaryDarkColor" Color="#1976D2"/>
-                    <SolidColorBrush x:Key="PrimaryLightColor" Color="#BBDEFB"/>
-                    <SolidColorBrush x:Key="AccentColor" Color="#FF9800"/>
-                    <SolidColorBrush x:Key="AccentDarkColor" Color="#F57C00"/>
-                    
-                    <SolidColorBrush x:Key="BackgroundColor" Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="SurfaceColor" Color="#F5F5F5"/>
-                    <SolidColorBrush x:Key="TextPrimaryColor" Color="#212121"/>
-                    <SolidColorBrush x:Key="TextSecondaryColor" Color="#757575"/>
-                    <SolidColorBrush x:Key="BorderColor" Color="#E0E0E0"/>
-                    <SolidColorBrush x:Key="HoverColor" Color="#E3F2FD"/>
-                    
-                    <SolidColorBrush x:Key="SuccessColor" Color="#4CAF50"/>
-                    <SolidColorBrush x:Key="WarningColor" Color="#FBC342"/>
-                    <SolidColorBrush x:Key="ErrorColor" Color="#F44336"/>
-                </ResourceDictionary>
+            <!-- Light Theme Dictionary -->
+            <ResourceDictionary x:Key="LightTheme">
+                <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>
+                <SolidColorBrush x:Key="PrimaryDarkColor" Color="#1976D2"/>
+                <SolidColorBrush x:Key="PrimaryLightColor" Color="#BBDEFB"/>
+                <SolidColorBrush x:Key="AccentColor" Color="#FF9800"/>
+                <SolidColorBrush x:Key="AccentDarkColor" Color="#F57C00"/>
                 
-                <!-- Dark Theme -->
-                <ResourceDictionary x:Key="DarkTheme">
-                    <!-- Color Palette -->
-                    <SolidColorBrush x:Key="PrimaryColor" Color="#90CAF9"/>
-                    <SolidColorBrush x:Key="PrimaryDarkColor" Color="#42A5F5"/>
-                    <SolidColorBrush x:Key="PrimaryLightColor" Color="#1E3A5F"/>
-                    <SolidColorBrush x:Key="AccentColor" Color="#FFB74D"/>
-                    <SolidColorBrush x:Key="AccentDarkColor" Color="#FFA726"/>
-                    
-                    <SolidColorBrush x:Key="BackgroundColor" Color="#1E1E1E"/>
-                    <SolidColorBrush x:Key="SurfaceColor" Color="#2D2D30"/>
-                    <SolidColorBrush x:Key="TextPrimaryColor" Color="#FFFFFF"/>
-                    <SolidColorBrush x:Key="TextSecondaryColor" Color="#B0B0B0"/>
-                    <SolidColorBrush x:Key="BorderColor" Color="#3F3F46"/>
-                    <SolidColorBrush x:Key="HoverColor" Color="#3E3E42"/>
-                    
-                    <SolidColorBrush x:Key="SuccessColor" Color="#66BB6A"/>
-                    <SolidColorBrush x:Key="WarningColor" Color="#FFB74D"/>
-                    <SolidColorBrush x:Key="ErrorColor" Color="#EF5350"/>
-                </ResourceDictionary>
-            </ResourceDictionary.MergedDictionaries>
+                <SolidColorBrush x:Key="BackgroundColor" Color="#FFFFFF"/>
+                <SolidColorBrush x:Key="SurfaceColor" Color="#F5F5F5"/>
+                <SolidColorBrush x:Key="TextPrimaryColor" Color="#212121"/>
+                <SolidColorBrush x:Key="TextSecondaryColor" Color="#757575"/>
+                <SolidColorBrush x:Key="BorderColor" Color="#E0E0E0"/>
+                <SolidColorBrush x:Key="HoverColor" Color="#E3F2FD"/>
+                
+                <SolidColorBrush x:Key="SuccessColor" Color="#4CAF50"/>
+                <SolidColorBrush x:Key="WarningColor" Color="#FBC342"/>
+                <SolidColorBrush x:Key="ErrorColor" Color="#F44336"/>
+            </ResourceDictionary>
+            
+            <!-- Dark Theme Dictionary -->
+            <ResourceDictionary x:Key="DarkTheme">
+                <SolidColorBrush x:Key="PrimaryColor" Color="#90CAF9"/>
+                <SolidColorBrush x:Key="PrimaryDarkColor" Color="#42A5F5"/>
+                <SolidColorBrush x:Key="PrimaryLightColor" Color="#1E3A5F"/>
+                <SolidColorBrush x:Key="AccentColor" Color="#FFB74D"/>
+                <SolidColorBrush x:Key="AccentDarkColor" Color="#FFA726"/>
+                
+                <SolidColorBrush x:Key="BackgroundColor" Color="#1E1E1E"/>
+                <SolidColorBrush x:Key="SurfaceColor" Color="#2D2D30"/>
+                <SolidColorBrush x:Key="TextPrimaryColor" Color="#FFFFFF"/>
+                <SolidColorBrush x:Key="TextSecondaryColor" Color="#B0B0B0"/>
+                <SolidColorBrush x:Key="BorderColor" Color="#3F3F46"/>
+                <SolidColorBrush x:Key="HoverColor" Color="#3E3E42"/>
+                
+                <SolidColorBrush x:Key="SuccessColor" Color="#66BB6A"/>
+                <SolidColorBrush x:Key="WarningColor" Color="#FFB74D"/>
+                <SolidColorBrush x:Key="ErrorColor" Color="#EF5350"/>
+            </ResourceDictionary>
             
             <!-- Default to Light Theme -->
             <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>

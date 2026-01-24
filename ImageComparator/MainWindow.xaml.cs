@@ -417,20 +417,12 @@ namespace ImageComparator
         private void ApplyTheme(bool isDarkMode)
         {
             var resources = Application.Current.Resources;
-            var themeDict = resources.MergedDictionaries.FirstOrDefault(d => d.Contains("LightTheme") || d.Contains("DarkTheme"));
-            
-            if (themeDict == null)
-            {
-                themeDict = new ResourceDictionary();
-                resources.MergedDictionaries.Add(themeDict);
-            }
-
             var sourceTheme = isDarkMode ? "DarkTheme" : "LightTheme";
-            var sourceDict = resources.MergedDictionaries.FirstOrDefault(d => d.Contains(sourceTheme)) as ResourceDictionary;
             
-            if (sourceDict != null)
+            // Get the theme dictionary directly from resources
+            if (resources.Contains(sourceTheme))
             {
-                var theme = sourceDict[sourceTheme] as ResourceDictionary;
+                var theme = resources[sourceTheme] as ResourceDictionary;
                 if (theme != null)
                 {
                     // Update all color resources
