@@ -246,7 +246,11 @@ namespace ImageComparator
             }
 
             // Initialize localization based on menu selection
-            if (turkishMenuItem.IsChecked)
+            if (japaneseMenuItem.IsChecked)
+            {
+                LocalizationManager.SetLanguage("ja-JP");
+            }
+            else if (turkishMenuItem.IsChecked)
             {
                 LocalizationManager.SetLanguage("tr-TR");
             }
@@ -554,6 +558,7 @@ namespace ImageComparator
                 icoMenuItem.IsEnabled = true;
                 englishMenuItem.IsEnabled = !englishMenuItem.IsChecked;
                 turkishMenuItem.IsEnabled = !turkishMenuItem.IsChecked;
+                japaneseMenuItem.IsEnabled = !japaneseMenuItem.IsChecked;
                 includeSubfoldersMenuItem.IsEnabled = true;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = true;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = true;
@@ -579,6 +584,7 @@ namespace ImageComparator
                 icoMenuItem.IsEnabled = false;
                 englishMenuItem.IsEnabled = false;
                 turkishMenuItem.IsEnabled = false;
+                japaneseMenuItem.IsEnabled = false;
                 includeSubfoldersMenuItem.IsEnabled = false;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = false;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = false;
@@ -1721,12 +1727,21 @@ namespace ImageComparator
 
                 if (!mainWindow.isEnglish)
                 {
+                    // For backward compatibility, isEnglish=false means Turkish
                     englishMenuItem.IsChecked = false;
                     turkishMenuItem.IsChecked = true;
+                    japaneseMenuItem.IsChecked = false;
                     englishMenuItem.IsEnabled = true;
                     turkishMenuItem.IsEnabled = false;
+                    japaneseMenuItem.IsEnabled = true;
                     LocalizationManager.SetLanguage("tr-TR");
                     UpdateUI();
+                }
+                else
+                {
+                    // Ensure Japanese state is set correctly for English too
+                    japaneseMenuItem.IsChecked = false;
+                    japaneseMenuItem.IsEnabled = true;
                 }
             }
             else
