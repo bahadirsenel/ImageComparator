@@ -20,8 +20,8 @@
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Name="warningTextBlock" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Margin="5" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center"/>
-                <Button Name="yesButton" Content="Yes" Grid.Row="1" Grid.Column="0" Margin="5" Height="22" Click="yesButton_Click"/>
-                <Button Name="noButton" Content="No" Grid.Row="1" Grid.Column="1" Margin="5" Height="22" Click="noButton_Click"/>
+                <Button Name="yesButton" Content="Yes" Grid.Row="1" Grid.Column="0" Margin="5" Height="22" Click="yesButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                <Button Name="noButton" Content="No" Grid.Row="1" Grid.Column="1" Margin="5" Height="22" Click="noButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
             </Grid>
         </Border>
     </Grid>

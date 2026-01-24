@@ -396,6 +396,55 @@ namespace ImageComparator
             UpdateUI();
         }
 
+        private void LightModeMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            lightModeMenuItem.IsChecked = true;
+            darkModeMenuItem.IsChecked = false;
+            lightModeMenuItem.IsEnabled = false;
+            darkModeMenuItem.IsEnabled = true;
+            ApplyTheme(false);
+        }
+
+        private void DarkModeMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            lightModeMenuItem.IsChecked = false;
+            darkModeMenuItem.IsChecked = true;
+            lightModeMenuItem.IsEnabled = true;
+            darkModeMenuItem.IsEnabled = false;
+            ApplyTheme(true);
+        }
+
+        private void ApplyTheme(bool isDarkMode)
+        {
+            var resources = Application.Current.Resources;
+            var themeDict = resources.MergedDictionaries.FirstOrDefault(d => d.Contains("LightTheme") || d.Contains("DarkTheme"));
+            
+            if (themeDict == null)
+            {
+                themeDict = new ResourceDictionary();
+                resources.MergedDictionaries.Add(themeDict);
+            }
+
+            var sourceTheme = isDarkMode ? "DarkTheme" : "LightTheme";
+            var sourceDict = resources.MergedDictionaries.FirstOrDefault(d => d.Contains(sourceTheme)) as ResourceDictionary;
+            
+            if (sourceDict != null)
+            {
+                var theme = sourceDict[sourceTheme] as ResourceDictionary;
+                if (theme != null)
+                {
+                    // Update all color resources
+                    foreach (var key in theme.Keys)
+                    {
+                        if (resources.Contains(key))
+                        {
+                            resources[key] = theme[key];
+                        }
+                    }
+                }
+            }
+        }
+
         private void ClearFalsePositiveDatabaseButton_Click(object sender, RoutedEventArgs e)
         {
             int count = falsePositiveList1.Count;
@@ -1750,6 +1799,9 @@ namespace ImageComparator
             sendToRecycleBinMenuItem.Header = LocalizationManager.GetString("Menu.SendToRecycleBin");
             deletePermanentlyMenuItem.Header = LocalizationManager.GetString("Menu.DeletePermanently");
             languageMenuItem.Header = LocalizationManager.GetString("Menu.Language");
+            themeMenuItem.Header = LocalizationManager.GetString("Menu.Theme");
+            lightModeMenuItem.Header = LocalizationManager.GetString("Menu.LightMode");
+            darkModeMenuItem.Header = LocalizationManager.GetString("Menu.DarkMode");
             includeSubfoldersMenuItem.Header = LocalizationManager.GetString("Menu.IncludeSubfolders");
             skipFilesWithDifferentOrientationMenuItem.Header = LocalizationManager.GetString("Menu.SkipDifferentOrientation");
             findExactDuplicatesOnlyMenuItem.Header = LocalizationManager.GetString("Menu.FindExactDuplicatesOnly");

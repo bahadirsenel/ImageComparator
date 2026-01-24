@@ -59,6 +59,11 @@
                     <MenuItem Name="turkishMenuItem" Header="Türkçe" IsCheckable="True" IsChecked="False" Click="TurkishMenuItem_Click"/>
                 </MenuItem>
 
+                <MenuItem Name="themeMenuItem" Header="Theme">
+                    <MenuItem Name="lightModeMenuItem" Header="Light Mode" IsCheckable="True" IsChecked="True" IsEnabled="False" Click="LightModeMenuItem_Click"/>
+                    <MenuItem Name="darkModeMenuItem" Header="Dark Mode" IsCheckable="True" IsChecked="False" Click="DarkModeMenuItem_Click"/>
+                </MenuItem>
+
                 <Separator />
 
                 <MenuItem Name="includeSubfoldersMenuItem" Header="Include Subfolders" IsCheckable="True" IsChecked="True"/>
@@ -108,12 +113,12 @@
                 <ColumnDefinition Width="82*"/>
             </Grid.ColumnDefinitions>
 
-            <Button Name="addFolderButton" Content="Add Folder" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Margin="5,5,0,0" Click="AddFolderButton_Click" Height="22"/>
-            <Button Name="findDuplicatesButton" Content="Find Duplicates" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="4" Margin="5,5,5,0" Click="FindDuplicatesButton_Click" IsVisibleChanged="FindDuplicatesButton_IsVisibleChanged"/>
-            <Button Name="pauseButton" Content="Pause" Tag="0" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="5,5,0,0" Click="PauseButton_Click"/>
-            <Button Name="stopButton" Content="Stop" Grid.Row="0" Grid.Column="8" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="5,5,5,0" Click="StopButton_Click"/>
-            <Button Name="clearResultsButton" Content="Clear Results" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Visibility="Collapsed" Margin="5,5,0,0" Click="ClearButton_Click"/>
-            <Button Name="applyButton" Content="Apply" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="4" Visibility="Collapsed" Margin="5,5,0,0" Click="ApplyButton_Click"/>
+            <Button Name="addFolderButton" Content="Add Folder" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Margin="5,5,0,0" Click="AddFolderButton_Click" Height="22" Style="{StaticResource ModernButtonStyle}"/>
+            <Button Name="findDuplicatesButton" Content="Find Duplicates" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="4" Margin="5,5,5,0" Click="FindDuplicatesButton_Click" IsVisibleChanged="FindDuplicatesButton_IsVisibleChanged" Style="{StaticResource AccentButtonStyle}"/>
+            <Button Name="pauseButton" Content="Pause" Tag="0" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="5,5,0,0" Click="PauseButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Name="stopButton" Content="Stop" Grid.Row="0" Grid.Column="8" Grid.ColumnSpan="2" Visibility="Collapsed" Margin="5,5,5,0" Click="StopButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Name="clearResultsButton" Content="Clear Results" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" Visibility="Collapsed" Margin="5,5,0,0" Click="ClearButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Name="applyButton" Content="Apply" Grid.Row="0" Grid.Column="6" Grid.ColumnSpan="4" Visibility="Collapsed" Margin="5,5,0,0" Click="ApplyButton_Click" Style="{StaticResource AccentButtonStyle}"/>
 
             <ListView Name="listView1" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" Margin="5,5,0,0" ItemsSource="{Binding}" KeyDown="ListView1_KeyDown" MouseDoubleClick="ListView1_MouseDoubleClick" SelectionChanged="ListView1_SelectionChanged" ScrollViewer.ScrollChanged="ListView1_ScrollChanged">
                 <ListView.ItemTemplate>
@@ -251,12 +256,12 @@
                 </ListView.ItemContainerStyle>
             </ListView>
 
-            <Button Name="deleteSelectedButton" Content="Delete Selected" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,5,0,0" IsEnabled="False" Click="DeleteSelectedButton_Click"/>
-            <Button Name="removeFromListButton" Content="Remove From List" Grid.Row="2" Grid.Column="5" Grid.ColumnSpan="2" Margin="5,5,0,0" IsEnabled="False" Click="RemoveFromListButton_Click"/>
-            <Button Name="clearButton" Content="Clear" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="3" Margin="5,5,5,0" Click="ClearButton_Click"/>
-            <Button Name="markForDeletionButton" Content="Mark For Deletion" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,5,0,0" IsEnabled="False" Click='MarkForDeletionButton_Click'/>
-            <Button Name="markAsFalsePositiveButton" Content="Mark As False Positive" Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="2" Margin="5,5,0,0" IsEnabled="False" Click='MarkAsFalsePositiveButton_Click'/>
-            <Button Name="removeMarkButton" Content="Remove Mark" Grid.Row="3" Grid.Column="7" Grid.ColumnSpan="3" Margin="5,5,5,0" IsEnabled="False" Click='RemoveMarkButton_Click'/>
+            <Button Name="deleteSelectedButton" Content="Delete Selected" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,5,0,0" IsEnabled="False" Click="DeleteSelectedButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Name="removeFromListButton" Content="Remove From List" Grid.Row="2" Grid.Column="5" Grid.ColumnSpan="2" Margin="5,5,0,0" IsEnabled="False" Click="RemoveFromListButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Name="clearButton" Content="Clear" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="3" Margin="5,5,5,0" Click="ClearButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Name="markForDeletionButton" Content="Mark For Deletion" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="5" Margin="5,5,0,0" IsEnabled="False" Click='MarkForDeletionButton_Click' Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Name="markAsFalsePositiveButton" Content="Mark As False Positive" Grid.Row="3" Grid.Column="5" Grid.ColumnSpan="2" Margin="5,5,0,0" IsEnabled="False" Click='MarkAsFalsePositiveButton_Click' Style="{StaticResource SecondaryButtonStyle}"/>
+            <Button Name="removeMarkButton" Content="Remove Mark" Grid.Row="3" Grid.Column="7" Grid.ColumnSpan="3" Margin="5,5,5,0" IsEnabled="False" Click='RemoveMarkButton_Click' Style="{StaticResource SecondaryButtonStyle}"/>
             <ProgressBar Name="progressBar" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="10" Margin="5,5,5,0" Height="20"/>
             <ListView Name="outputListView" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="10" Margin="5,5,5,5" AllowDrop="True" DragEnter="OutputListView_DragEnter" Drop="OutputListView_Drop"/>
         </Grid>

@@ -24,9 +24,9 @@
                     Are you sure you want to discard current results? You can save them to continue working on them later.
                 </TextBlock>
 
-                <Button Name="saveResultsButton" Content="Save" Grid.Row="1" Grid.Column="0" Margin="5" Height="22" Click="saveResultsButton_Click"/>
-                <Button Name="discardResultsButton" Content="Discard" Grid.Row="1" Grid.Column="1" Margin="5" Height="22" Click="discardResultsButton_Click"/>
-                <Button Name="cancelResultsButton" Content="Cancel" Grid.Row="1" Grid.Column="2" Margin="5" Height="22" Click="cancelResultsButton_Click"/>
+                <Button Name="saveResultsButton" Content="Save" Grid.Row="1" Grid.Column="0" Margin="5" Height="22" Click="saveResultsButton_Click" Style="{StaticResource AccentButtonStyle}"/>
+                <Button Name="discardResultsButton" Content="Discard" Grid.Row="1" Grid.Column="1" Margin="5" Height="22" Click="discardResultsButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
+                <Button Name="cancelResultsButton" Content="Cancel" Grid.Row="1" Grid.Column="2" Margin="5" Height="22" Click="cancelResultsButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
             </Grid>
         </Border>
     </Grid>

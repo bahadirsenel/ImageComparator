@@ -4,6 +4,235 @@
              xmlns:local="clr-namespace:ImageComparator"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Light Theme (Default) -->
+                <ResourceDictionary x:Key="LightTheme">
+                    <!-- Color Palette -->
+                    <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>
+                    <SolidColorBrush x:Key="PrimaryDarkColor" Color="#1976D2"/>
+                    <SolidColorBrush x:Key="PrimaryLightColor" Color="#BBDEFB"/>
+                    <SolidColorBrush x:Key="AccentColor" Color="#FF9800"/>
+                    <SolidColorBrush x:Key="AccentDarkColor" Color="#F57C00"/>
+                    
+                    <SolidColorBrush x:Key="BackgroundColor" Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="SurfaceColor" Color="#F5F5F5"/>
+                    <SolidColorBrush x:Key="TextPrimaryColor" Color="#212121"/>
+                    <SolidColorBrush x:Key="TextSecondaryColor" Color="#757575"/>
+                    <SolidColorBrush x:Key="BorderColor" Color="#E0E0E0"/>
+                    <SolidColorBrush x:Key="HoverColor" Color="#E3F2FD"/>
+                    
+                    <SolidColorBrush x:Key="SuccessColor" Color="#4CAF50"/>
+                    <SolidColorBrush x:Key="WarningColor" Color="#FBC342"/>
+                    <SolidColorBrush x:Key="ErrorColor" Color="#F44336"/>
+                </ResourceDictionary>
+                
+                <!-- Dark Theme -->
+                <ResourceDictionary x:Key="DarkTheme">
+                    <!-- Color Palette -->
+                    <SolidColorBrush x:Key="PrimaryColor" Color="#90CAF9"/>
+                    <SolidColorBrush x:Key="PrimaryDarkColor" Color="#42A5F5"/>
+                    <SolidColorBrush x:Key="PrimaryLightColor" Color="#1E3A5F"/>
+                    <SolidColorBrush x:Key="AccentColor" Color="#FFB74D"/>
+                    <SolidColorBrush x:Key="AccentDarkColor" Color="#FFA726"/>
+                    
+                    <SolidColorBrush x:Key="BackgroundColor" Color="#1E1E1E"/>
+                    <SolidColorBrush x:Key="SurfaceColor" Color="#2D2D30"/>
+                    <SolidColorBrush x:Key="TextPrimaryColor" Color="#FFFFFF"/>
+                    <SolidColorBrush x:Key="TextSecondaryColor" Color="#B0B0B0"/>
+                    <SolidColorBrush x:Key="BorderColor" Color="#3F3F46"/>
+                    <SolidColorBrush x:Key="HoverColor" Color="#3E3E42"/>
+                    
+                    <SolidColorBrush x:Key="SuccessColor" Color="#66BB6A"/>
+                    <SolidColorBrush x:Key="WarningColor" Color="#FFB74D"/>
+                    <SolidColorBrush x:Key="ErrorColor" Color="#EF5350"/>
+                </ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+            
+            <!-- Default to Light Theme -->
+            <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>
+            <SolidColorBrush x:Key="PrimaryDarkColor" Color="#1976D2"/>
+            <SolidColorBrush x:Key="PrimaryLightColor" Color="#BBDEFB"/>
+            <SolidColorBrush x:Key="AccentColor" Color="#FF9800"/>
+            <SolidColorBrush x:Key="AccentDarkColor" Color="#F57C00"/>
+            
+            <SolidColorBrush x:Key="BackgroundColor" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="SurfaceColor" Color="#F5F5F5"/>
+            <SolidColorBrush x:Key="TextPrimaryColor" Color="#212121"/>
+            <SolidColorBrush x:Key="TextSecondaryColor" Color="#757575"/>
+            <SolidColorBrush x:Key="BorderColor" Color="#E0E0E0"/>
+            <SolidColorBrush x:Key="HoverColor" Color="#E3F2FD"/>
+            
+            <SolidColorBrush x:Key="SuccessColor" Color="#4CAF50"/>
+            <SolidColorBrush x:Key="WarningColor" Color="#FBC342"/>
+            <SolidColorBrush x:Key="ErrorColor" Color="#F44336"/>
+            
+            <!-- Button Style with Animation -->
+            <Style x:Key="ModernButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource PrimaryColor}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="12,6"/>
+                <Setter Property="FontSize" Value="13"/>
+                <Setter Property="FontWeight" Value="Medium"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" 
+                                    Background="{TemplateBinding Background}" 
+                                    BorderBrush="{TemplateBinding BorderBrush}" 
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Trigger.EnterActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="border" 
+                                                              Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" 
+                                                              To="{Binding Source={StaticResource PrimaryDarkColor}, Path=Color}" 
+                                                              Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.EnterActions>
+                                    <Trigger.ExitActions>
+                                        <BeginStoryboard>
+                                            <Storyboard>
+                                                <ColorAnimation Storyboard.TargetName="border" 
+                                                              Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)" 
+                                                              Duration="0:0:0.2"/>
+                                            </Storyboard>
+                                        </BeginStoryboard>
+                                    </Trigger.ExitActions>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource PrimaryDarkColor}"/>
+                                    <Setter Property="RenderTransform">
+                                        <Setter.Value>
+                                            <ScaleTransform ScaleX="0.95" ScaleY="0.95"/>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Opacity" Value="0.5"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!-- Secondary Button Style -->
+            <Style x:Key="SecondaryButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+                <Setter Property="Background" Value="{DynamicResource SurfaceColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+            </Style>
+            
+            <!-- Accent Button Style -->
+            <Style x:Key="AccentButtonStyle" TargetType="Button" BasedOn="{StaticResource ModernButtonStyle}">
+                <Setter Property="Background" Value="{DynamicResource AccentColor}"/>
+            </Style>
+            
+            <!-- Menu Style -->
+            <Style TargetType="Menu">
+                <Setter Property="Background" Value="{DynamicResource SurfaceColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+            </Style>
+            
+            <Style TargetType="MenuItem">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+                <Setter Property="Background" Value="{DynamicResource SurfaceColor}"/>
+                <Style.Triggers>
+                    <Trigger Property="IsHighlighted" Value="True">
+                        <Setter Property="Background" Value="{DynamicResource HoverColor}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+            
+            <!-- Window Style -->
+            <Style TargetType="Window">
+                <Setter Property="Background" Value="{DynamicResource BackgroundColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+            </Style>
+            
+            <!-- ListView Style -->
+            <Style TargetType="ListView">
+                <Setter Property="Background" Value="{DynamicResource BackgroundColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+            </Style>
+            
+            <!-- Label Style -->
+            <Style TargetType="Label">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+            </Style>
+            
+            <!-- TextBlock Style -->
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryColor}"/>
+            </Style>
+            
+            <!-- Border Style -->
+            <Style TargetType="Border">
+                <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}"/>
+            </Style>
+            
+            <!-- ProgressBar Style with Animation -->
+            <Style TargetType="ProgressBar">
+                <Setter Property="Height" Value="6"/>
+                <Setter Property="Background" Value="{DynamicResource SurfaceColor}"/>
+                <Setter Property="Foreground" Value="{DynamicResource PrimaryColor}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ProgressBar">
+                            <Grid>
+                                <Border Background="{TemplateBinding Background}" CornerRadius="3"/>
+                                <Border x:Name="PART_Track" CornerRadius="3">
+                                    <Border x:Name="PART_Indicator" 
+                                            Background="{TemplateBinding Foreground}" 
+                                            HorizontalAlignment="Left" 
+                                            CornerRadius="3">
+                                        <Border.Triggers>
+                                            <EventTrigger RoutedEvent="Border.Loaded">
+                                                <BeginStoryboard>
+                                                    <Storyboard RepeatBehavior="Forever">
+                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity" 
+                                                                       From="1.0" To="0.7" Duration="0:0:1" 
+                                                                       AutoReverse="True"/>
+                                                    </Storyboard>
+                                                </BeginStoryboard>
+                                            </EventTrigger>
+                                        </Border.Triggers>
+                                    </Border>
+                                </Border>
+                            </Grid>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            
+            <!-- Fade In Animation -->
+            <Storyboard x:Key="FadeInAnimation">
+                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
+            </Storyboard>
+            
+            <!-- Slide In Animation -->
+            <Storyboard x:Key="SlideInAnimation">
+                <DoubleAnimation Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.Y)" 
+                               From="20" To="0" Duration="0:0:0.3">
+                    <DoubleAnimation.EasingFunction>
+                        <CubicEase EasingMode="EaseOut"/>
+                    </DoubleAnimation.EasingFunction>
+                </DoubleAnimation>
+                <DoubleAnimation Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.3"/>
+            </Storyboard>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

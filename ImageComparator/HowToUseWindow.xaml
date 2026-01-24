@@ -19,6 +19,6 @@
             </TextBlock>
         </ScrollViewer>
 
-        <Button Name="closeButton" Content="Close" Grid.Row="1" Margin="10" Height="30" Width="100" HorizontalAlignment="Center" Click="CloseButton_Click"/>
+        <Button Name="closeButton" Content="Close" Grid.Row="1" Margin="10" Height="30" Width="100" HorizontalAlignment="Center" Click="CloseButton_Click" Style="{StaticResource ModernButtonStyle}"/>
     </Grid>
 </Window>
