@@ -142,6 +142,7 @@
     <Compile Include="HowToUseWindow.xaml.cs">
       <DependentUpon>HowToUseWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Constants.cs" />
     <Compile Include="LocalizationManager.cs" />
     <Compile Include="ViewModelLocator.cs" />
     <Compile Include="Models\DiscreteCosineTransform2D.cs" />
@@ -154,6 +155,8 @@
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Services\DialogService.cs" />
     <Compile Include="Services\FileService.cs" />
+    <Compile Include="Utilities\ImageUtility.cs" />
+    <Compile Include="Utilities\HashUtility.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
