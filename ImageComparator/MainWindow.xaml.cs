@@ -468,48 +468,8 @@ namespace ImageComparator
         /// <param name="selectedMenuItem">The menu item that was clicked</param>
         private void SetLanguage(string languageCode, MenuItem selectedMenuItem)
         {
-            // Uncheck and enable all language menu items
-            englishMenuItem.IsChecked = false;
-            turkishMenuItem.IsChecked = false;
-            japaneseMenuItem.IsChecked = false;
-            spanishMenuItem.IsChecked = false;
-            frenchMenuItem.IsChecked = false;
-            germanMenuItem.IsChecked = false;
-            italianMenuItem.IsChecked = false;
-            portugueseMenuItem.IsChecked = false;
-            russianMenuItem.IsChecked = false;
-            chineseMenuItem.IsChecked = false;
-            koreanMenuItem.IsChecked = false;
-            arabicMenuItem.IsChecked = false;
-            hindiMenuItem.IsChecked = false;
-            dutchMenuItem.IsChecked = false;
-            polishMenuItem.IsChecked = false;
-            swedishMenuItem.IsChecked = false;
-            norwegianMenuItem.IsChecked = false;
-            danishMenuItem.IsChecked = false;
-
-            englishMenuItem.IsEnabled = true;
-            turkishMenuItem.IsEnabled = true;
-            japaneseMenuItem.IsEnabled = true;
-            spanishMenuItem.IsEnabled = true;
-            frenchMenuItem.IsEnabled = true;
-            germanMenuItem.IsEnabled = true;
-            italianMenuItem.IsEnabled = true;
-            portugueseMenuItem.IsEnabled = true;
-            russianMenuItem.IsEnabled = true;
-            chineseMenuItem.IsEnabled = true;
-            koreanMenuItem.IsEnabled = true;
-            arabicMenuItem.IsEnabled = true;
-            hindiMenuItem.IsEnabled = true;
-            dutchMenuItem.IsEnabled = true;
-            polishMenuItem.IsEnabled = true;
-            swedishMenuItem.IsEnabled = true;
-            norwegianMenuItem.IsEnabled = true;
-            danishMenuItem.IsEnabled = true;
-
-            // Check and disable the selected language
-            selectedMenuItem.IsChecked = true;
-            selectedMenuItem.IsEnabled = false;
+            // Use the centralized menu state management
+            SetLanguageMenuStates(languageCode);
 
             // Set the language
             currentLanguageCode = languageCode;
@@ -718,6 +678,29 @@ namespace ImageComparator
 
         private void FindDuplicatesButton_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
+            // Array of all language menu items
+            var languageMenuItems = new[]
+            {
+                englishMenuItem,
+                turkishMenuItem,
+                japaneseMenuItem,
+                spanishMenuItem,
+                frenchMenuItem,
+                germanMenuItem,
+                italianMenuItem,
+                portugueseMenuItem,
+                russianMenuItem,
+                chineseMenuItem,
+                koreanMenuItem,
+                arabicMenuItem,
+                hindiMenuItem,
+                dutchMenuItem,
+                polishMenuItem,
+                swedishMenuItem,
+                norwegianMenuItem,
+                danishMenuItem
+            };
+
             if (findDuplicatesButton.Visibility == Visibility.Visible)
             {
                 saveResultsMenuItem.IsEnabled = true;
@@ -728,24 +711,13 @@ namespace ImageComparator
                 gifMenuItem.IsEnabled = true;
                 tiffMenuItem.IsEnabled = true;
                 icoMenuItem.IsEnabled = true;
-                englishMenuItem.IsEnabled = !englishMenuItem.IsChecked;
-                turkishMenuItem.IsEnabled = !turkishMenuItem.IsChecked;
-                japaneseMenuItem.IsEnabled = !japaneseMenuItem.IsChecked;
-                spanishMenuItem.IsEnabled = !spanishMenuItem.IsChecked;
-                frenchMenuItem.IsEnabled = !frenchMenuItem.IsChecked;
-                germanMenuItem.IsEnabled = !germanMenuItem.IsChecked;
-                italianMenuItem.IsEnabled = !italianMenuItem.IsChecked;
-                portugueseMenuItem.IsEnabled = !portugueseMenuItem.IsChecked;
-                russianMenuItem.IsEnabled = !russianMenuItem.IsChecked;
-                chineseMenuItem.IsEnabled = !chineseMenuItem.IsChecked;
-                koreanMenuItem.IsEnabled = !koreanMenuItem.IsChecked;
-                arabicMenuItem.IsEnabled = !arabicMenuItem.IsChecked;
-                hindiMenuItem.IsEnabled = !hindiMenuItem.IsChecked;
-                dutchMenuItem.IsEnabled = !dutchMenuItem.IsChecked;
-                polishMenuItem.IsEnabled = !polishMenuItem.IsChecked;
-                swedishMenuItem.IsEnabled = !swedishMenuItem.IsChecked;
-                norwegianMenuItem.IsEnabled = !norwegianMenuItem.IsChecked;
-                danishMenuItem.IsEnabled = !danishMenuItem.IsChecked;
+                
+                // Enable language menu items (disable the checked one)
+                foreach (var languageMenuItem in languageMenuItems)
+                {
+                    languageMenuItem.IsEnabled = !languageMenuItem.IsChecked;
+                }
+                
                 includeSubfoldersMenuItem.IsEnabled = true;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = true;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = true;
@@ -769,24 +741,13 @@ namespace ImageComparator
                 gifMenuItem.IsEnabled = false;
                 tiffMenuItem.IsEnabled = false;
                 icoMenuItem.IsEnabled = false;
-                englishMenuItem.IsEnabled = false;
-                turkishMenuItem.IsEnabled = false;
-                japaneseMenuItem.IsEnabled = false;
-                spanishMenuItem.IsEnabled = false;
-                frenchMenuItem.IsEnabled = false;
-                germanMenuItem.IsEnabled = false;
-                italianMenuItem.IsEnabled = false;
-                portugueseMenuItem.IsEnabled = false;
-                russianMenuItem.IsEnabled = false;
-                chineseMenuItem.IsEnabled = false;
-                koreanMenuItem.IsEnabled = false;
-                arabicMenuItem.IsEnabled = false;
-                hindiMenuItem.IsEnabled = false;
-                dutchMenuItem.IsEnabled = false;
-                polishMenuItem.IsEnabled = false;
-                swedishMenuItem.IsEnabled = false;
-                norwegianMenuItem.IsEnabled = false;
-                danishMenuItem.IsEnabled = false;
+                
+                // Disable all language menu items
+                foreach (var languageMenuItem in languageMenuItems)
+                {
+                    languageMenuItem.IsEnabled = false;
+                }
+                
                 includeSubfoldersMenuItem.IsEnabled = false;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = false;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = false;
@@ -1835,9 +1796,16 @@ namespace ImageComparator
             try
             {
                 currentLanguageCode = (string)info.GetValue("currentLanguageCode", typeof(string));
+                
+                // List of valid language codes
+                var validLanguages = new[] { 
+                    "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT", 
+                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "hi-IN", 
+                    "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK" 
+                };
+                
                 // Validate and default to en-US if null or invalid
-                if (string.IsNullOrEmpty(currentLanguageCode) || 
-                    (currentLanguageCode != "en-US" && currentLanguageCode != "tr-TR" && currentLanguageCode != "ja-JP"))
+                if (string.IsNullOrEmpty(currentLanguageCode) || !validLanguages.Contains(currentLanguageCode))
                 {
                     currentLanguageCode = "en-US";
                 }
