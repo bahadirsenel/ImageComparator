@@ -57,6 +57,7 @@
                 <MenuItem Name="languageMenuItem" Header="Language">
                     <MenuItem Name="englishMenuItem" Header="English" IsCheckable="True" IsChecked="True" IsEnabled="False" Click="EnglishMenuItem_Click"/>
                     <MenuItem Name="turkishMenuItem" Header="Türkçe" IsCheckable="True" IsChecked="False" Click="TurkishMenuItem_Click"/>
+                    <MenuItem Name="japaneseMenuItem" Header="日本語" IsCheckable="True" IsChecked="False" Click="JapaneseMenuItem_Click"/>
                 </MenuItem>
 
                 <Separator />
@@ -171,8 +172,8 @@
                         <ContextMenu.BitmapEffect>
                             <BitmapEffectGroup/>
                         </ContextMenu.BitmapEffect>
-                        <MenuItem Header="Open" Click="ListView1_OpenMenuItem_Click"/>
-                        <MenuItem Header="Open File Location" Click="ListView1_OpenFileLocationMenuItem_Click"/>
+                        <MenuItem Name="listView1OpenMenuItem" Header="Open" Click="ListView1_OpenMenuItem_Click"/>
+                        <MenuItem Name="listView1OpenFileLocationMenuItem" Header="Open File Location" Click="ListView1_OpenFileLocationMenuItem_Click"/>
                     </ContextMenu>
                 </ListView.ContextMenu>
 
@@ -239,8 +240,8 @@
                         <ContextMenu.BitmapEffect>
                             <BitmapEffectGroup/>
                         </ContextMenu.BitmapEffect>
-                        <MenuItem Header="Open" Click="ListView2_OpenMenuItem_Click"/>
-                        <MenuItem Header="Open File Location" Click="ListView2_OpenFileLocationMenuItem_Click"/>
+                        <MenuItem Name="listView2OpenMenuItem" Header="Open" Click="ListView2_OpenMenuItem_Click"/>
+                        <MenuItem Name="listView2OpenFileLocationMenuItem" Header="Open File Location" Click="ListView2_OpenFileLocationMenuItem_Click"/>
                     </ContextMenu>
                 </ListView.ContextMenu>
 

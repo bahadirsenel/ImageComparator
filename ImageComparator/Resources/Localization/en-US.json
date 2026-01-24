@@ -32,6 +32,9 @@
   "Button.MarkAsFalsePositive": "Mark As False Positive",
   "Button.RemoveMark": "Remove Mark",
   
+  "ContextMenu.Open": "Open",
+  "ContextMenu.OpenFileLocation": "Open File Location",
+  
   "Label.PreviewSelect": "Select a file to preview:",
   "Label.DragDropFolders": "Drag-Drop to add folders:",
   

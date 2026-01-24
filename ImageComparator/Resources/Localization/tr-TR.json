@@ -32,6 +32,9 @@
   "Button.MarkAsFalsePositive": "Hatalı Sonuç Olarak İşaretle",
   "Button.RemoveMark": "İşareti Kaldır",
   
+  "ContextMenu.Open": "Aç",
+  "ContextMenu.OpenFileLocation": "Dosya Konumunu Aç",
+  
   "Label.PreviewSelect": "Görüntülemek için bir dosya seçin:",
   "Label.DragDropFolders": "Klasör eklemek için sürükle-bırak:",
   
