@@ -172,8 +172,8 @@
                         <ContextMenu.BitmapEffect>
                             <BitmapEffectGroup/>
                         </ContextMenu.BitmapEffect>
-                        <MenuItem Header="Open" Click="ListView1_OpenMenuItem_Click"/>
-                        <MenuItem Header="Open File Location" Click="ListView1_OpenFileLocationMenuItem_Click"/>
+                        <MenuItem Name="listView1OpenMenuItem" Header="Open" Click="ListView1_OpenMenuItem_Click"/>
+                        <MenuItem Name="listView1OpenFileLocationMenuItem" Header="Open File Location" Click="ListView1_OpenFileLocationMenuItem_Click"/>
                     </ContextMenu>
                 </ListView.ContextMenu>
 
@@ -240,8 +240,8 @@
                         <ContextMenu.BitmapEffect>
                             <BitmapEffectGroup/>
                         </ContextMenu.BitmapEffect>
-                        <MenuItem Header="Open" Click="ListView2_OpenMenuItem_Click"/>
-                        <MenuItem Header="Open File Location" Click="ListView2_OpenFileLocationMenuItem_Click"/>
+                        <MenuItem Name="listView2OpenMenuItem" Header="Open" Click="ListView2_OpenMenuItem_Click"/>
+                        <MenuItem Name="listView2OpenFileLocationMenuItem" Header="Open File Location" Click="ListView2_OpenFileLocationMenuItem_Click"/>
                     </ContextMenu>
                 </ListView.ContextMenu>
 

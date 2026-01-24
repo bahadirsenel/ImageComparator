@@ -32,6 +32,9 @@
   "Button.MarkAsFalsePositive": "誤検出としてマーク",
   "Button.RemoveMark": "マークを削除",
   
+  "ContextMenu.Open": "開く",
+  "ContextMenu.OpenFileLocation": "ファイルの場所を開く",
+  
   "Label.PreviewSelect": "プレビューするファイルを選択:",
   "Label.DragDropFolders": "フォルダーをドラッグ＆ドロップで追加:",
   

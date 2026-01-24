@@ -1789,6 +1789,12 @@ namespace ImageComparator
             markAsFalsePositiveButton.Content = LocalizationManager.GetString("Button.MarkAsFalsePositive");
             removeMarkButton.Content = LocalizationManager.GetString("Button.RemoveMark");
 
+            // Update context menu items
+            listView1OpenMenuItem.Header = LocalizationManager.GetString("ContextMenu.Open");
+            listView1OpenFileLocationMenuItem.Header = LocalizationManager.GetString("ContextMenu.OpenFileLocation");
+            listView2OpenMenuItem.Header = LocalizationManager.GetString("ContextMenu.Open");
+            listView2OpenFileLocationMenuItem.Header = LocalizationManager.GetString("ContextMenu.OpenFileLocation");
+
             // Update labels
             previewLabel.Content = LocalizationManager.GetString("Label.PreviewSelect");
 
