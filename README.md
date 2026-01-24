@@ -17,25 +17,27 @@ Image Comparator is a WPF-based tool that helps you identify duplicate and simil
 
 ### Advanced Options
 - **Confidence Levels**: Color-coded indicators show the similarity confidence:
-  - 🔵 Blue: Exact duplicates
-  - 🔴 Red: High similarity
-  - 🟡 Yellow: Medium similarity
-  - 🟢 Green: Low similarity
-- **Orientation Filtering**: Option to skip images with different orientations
-- **Exact Match Mode**: Find only byte-perfect duplicates
-- **False Positive Management**: Mark incorrect matches to improve future scans
+  - 🔵 Blue: Duplicate (exact match)
+  - 🔴 Red: High confidence of similarity
+  - 🟡 Yellow: Medium confidence of similarity
+  - 🟢 Green: Low confidence of similarity
+- **Orientation Filtering**: Option to skip images with different orientations (ignores portrait vs landscape matches)
+- **Exact Match Mode**: Find only byte-perfect duplicates (similar files won't be shown)
+- **False Positive Management**: Mark incorrect matches to improve future scans - these pairs will be remembered and won't appear in future scans
 
 ### File Management
 - **Safe Deletion**: Send files to Recycle Bin (default) or delete permanently
-- **Selective Removal**: Mark files for deletion or remove from results without deleting
-- **Save/Load Results**: Save your comparison results and continue later
+- **Delete Selected**: Removes checked files from your system
+- **Mark For Deletion**: Highlights files for later deletion (shown in red background)
+- **Remove From List**: Removes items from results without deleting files from your system
+- **Save/Load Results**: Save your current findings to continue later
 - **File Explorer Integration**: Open files or navigate to their location with right-click menu
 
 ### User Experience
-- **Bilingual Interface**: Available in English and Turkish
-- **Drag-and-Drop Support**: Add folders by dragging them into the application
-- **Keyboard Navigation**: Use arrow keys for quick browsing
-- **Progress Tracking**: Monitor scan progress with pause/resume functionality
+- **Bilingual Interface**: Switch between English and Türkçe (Options > Language). The interface will update immediately
+- **Drag-and-Drop Support**: Add folders by dragging them into the output list at the bottom
+- **Keyboard Navigation**: Use arrow keys to browse through results quickly
+- **Progress Tracking**: Monitor scan progress with pause/resume/stop functionality using the respective buttons
 
 ## Requirements
 
@@ -68,31 +70,50 @@ Image Comparator is a WPF-based tool that helps you identify duplicate and simil
 ## Usage
 
 ### Quick Start
-1. **Add Folders**: Click "Add Folder" or drag folders into the bottom panel
+1. **Add Folders**: Click "Add Folder" button or drag-and-drop folders into the output list at the bottom
 2. **Configure Options**: Set search formats and other preferences in the Options menu
-3. **Find Duplicates**: Click "Find Duplicates" to start scanning
-4. **Review Results**: Browse matched pairs in the side-by-side lists
-5. **Take Action**: Select files to delete, mark as false positives, or save results
+3. **Find Duplicates**: Click "Find Duplicates" to start the comparison process
+4. **Review Results**: Duplicate pairs are shown in two side-by-side lists. Click on any file to preview it in the center panel
+5. **Take Action**: Select files using checkboxes to delete, mark as false positives, or save results
 
 ### Options Menu
 
 #### Search Formats
-Choose which image formats to include in the scan (all enabled by default)
+Go to Options > Search Formats to select which image types to scan:
+- JPEG
+- BMP
+- PNG
+- GIF
+- TIFF
+- ICO
+
+All formats are enabled by default.
 
 #### Deletion Method
-- **Send To Recycle Bin** (Default): Safer option, allows recovery
-- **Delete Permanently**: No recovery possible
+Go to Options > Deletion Method to choose:
+- **Send To Recycle Bin** (Default): Safer option, allows file recovery
+- **Delete Permanently**: Files are deleted permanently without recovery option
 
 #### Additional Settings
-- **Include Subfolders**: Scan nested directories
-- **Skip Files With Different Orientation**: Ignore portrait/landscape mismatches
-- **Find Exact Duplicates Only**: Disable similarity matching
+- **Include Subfolders**: Scans all subfolders within selected folders
+- **Skip Files With Different Orientation**: Ignores portrait vs landscape matches
+- **Find Exact Duplicates Only**: Only finds exact duplicate files, similar files won't be shown
+- **Clear False Positive Database**: Clears the remembered false positive pairs (Options > Clear False Positive Database)
 
 ### Keyboard Shortcuts
-- **Arrow Keys**: Navigate through results
+- **Arrow Keys**: Navigate through results quickly
 - **Space**: Toggle checkbox selection
-- **Double-Click**: Open file in default viewer
-- **Right-Click**: Context menu for file operations
+- **Double-Click**: Open file in default image viewer
+- **Right-Click**: Context menu to open files or view their location
+
+### Preview and Zoom
+- **Mouse Wheel**: Zoom in/out on preview images
+- **+/- Buttons**: Alternative zoom controls
+- **Click and Drag**: Pan around zoomed images
+
+### Saving and Loading Results
+- **File > Save Results**: Saves your current findings to continue later
+- **File > Load Results**: Loads previously saved results
 
 ## How It Works
 
