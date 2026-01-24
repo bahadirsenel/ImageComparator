@@ -34,7 +34,7 @@ Image Comparator is a WPF-based tool that helps you identify duplicate and simil
 - **File Explorer Integration**: Open files or navigate to their location with right-click menu
 
 ### User Experience
-- **Bilingual Interface**: Switch between English and Türkçe (Options > Language). The interface will update immediately
+- **Multilingual Interface**: Supports 18 languages including English, Türkçe, 日本語, Español, Français, Deutsch, Italiano, Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी, Nederlands, Polski, Svenska, Norsk, and Dansk. Switch languages via Options > Language, and the interface will update immediately
 - **Drag-and-Drop Support**: Add folders by dragging them into the output list at the bottom
 - **Keyboard Navigation**: Use arrow keys to browse through results quickly
 - **Progress Tracking**: Monitor scan progress with pause/resume/stop functionality using the respective buttons
