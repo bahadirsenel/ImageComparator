@@ -57,6 +57,7 @@ namespace ImageComparator
         int processThreadsiAsync, compareResultsiAsync, timeDifferenceInSeconds, duplicateImageCount, highConfidenceSimilarImageCount, mediumConfidenceSimilarImageCount, lowConfidenceSimilarImageCount;
         public bool gotException = false, skipFilesWithDifferentOrientation = true, duplicatesOnly = false, comparing = false, includeSubfolders, jpegMenuItemChecked, gifMenuItemChecked, pngMenuItemChecked, bmpMenuItemChecked, tiffMenuItemChecked, icoMenuItemChecked, isEnglish = true, sendsToRecycleBin, opening = true, deleteMarkedItems = false;
         string path;
+        string currentLanguageCode = "en-US"; // Track current language for serialization
 
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
         public static DependencyProperty ImagePathProperty2 = DependencyProperty.Register("ImagePath2", typeof(string), typeof(MainWindow), null);
@@ -248,14 +249,17 @@ namespace ImageComparator
             // Initialize localization based on menu selection
             if (japaneseMenuItem.IsChecked)
             {
+                currentLanguageCode = "ja-JP";
                 LocalizationManager.SetLanguage("ja-JP");
             }
             else if (turkishMenuItem.IsChecked)
             {
+                currentLanguageCode = "tr-TR";
                 LocalizationManager.SetLanguage("tr-TR");
             }
             else
             {
+                currentLanguageCode = "en-US";
                 LocalizationManager.SetLanguage("en-US");
             }
 
@@ -388,6 +392,7 @@ namespace ImageComparator
             englishMenuItem.IsEnabled = false;
             turkishMenuItem.IsEnabled = true;
             japaneseMenuItem.IsEnabled = true;
+            currentLanguageCode = "en-US";
             LocalizationManager.SetLanguage("en-US");
             UpdateUI();
         }
@@ -400,6 +405,7 @@ namespace ImageComparator
             englishMenuItem.IsEnabled = true;
             turkishMenuItem.IsEnabled = false;
             japaneseMenuItem.IsEnabled = true;
+            currentLanguageCode = "tr-TR";
             LocalizationManager.SetLanguage("tr-TR");
             UpdateUI();
         }
@@ -412,6 +418,7 @@ namespace ImageComparator
             englishMenuItem.IsEnabled = true;
             turkishMenuItem.IsEnabled = true;
             japaneseMenuItem.IsEnabled = false;
+            currentLanguageCode = "ja-JP";
             LocalizationManager.SetLanguage("ja-JP");
             UpdateUI();
         }
@@ -1631,6 +1638,16 @@ namespace ImageComparator
             icoMenuItemChecked = (bool)info.GetValue("icoMenuItemChecked", typeof(bool));
             sendsToRecycleBin = (bool)info.GetValue("sendsToRecycleBin", typeof(bool));
             isEnglish = (bool)info.GetValue("isEnglish", typeof(bool));
+            // Try to load currentLanguageCode for newer saves, default to en-US or tr-TR based on isEnglish for backward compatibility
+            try
+            {
+                currentLanguageCode = (string)info.GetValue("currentLanguageCode", typeof(string));
+            }
+            catch
+            {
+                // For backward compatibility with old saves that don't have currentLanguageCode
+                currentLanguageCode = isEnglish ? "en-US" : "tr-TR";
+            }
             includeSubfolders = (bool)info.GetValue("includeSubfolders", typeof(bool));
             skipFilesWithDifferentOrientation = (bool)info.GetValue("skipFilesWithDifferentOrientation", typeof(bool));
             duplicatesOnly = (bool)info.GetValue("duplicatesOnly", typeof(bool));
@@ -1653,6 +1670,7 @@ namespace ImageComparator
             info.AddValue("icoMenuItemChecked", icoMenuItem.IsChecked);
             info.AddValue("sendsToRecycleBin", sendToRecycleBinMenuItem.IsChecked);
             info.AddValue("isEnglish", englishMenuItem.IsChecked);
+            info.AddValue("currentLanguageCode", LocalizationManager.CurrentLanguage);
             info.AddValue("includeSubfolders", includeSubfoldersMenuItem.IsChecked);
             info.AddValue("skipFilesWithDifferentOrientation", skipFilesWithDifferentOrientationMenuItem.IsChecked);
             info.AddValue("duplicatesOnly", findExactDuplicatesOnlyMenuItem.IsChecked);
@@ -1727,20 +1745,27 @@ namespace ImageComparator
 
                 if (!mainWindow.isEnglish)
                 {
-                    // For backward compatibility, isEnglish=false means Turkish
+                    // Use currentLanguageCode if available, otherwise fall back to Turkish for backward compatibility
+                    string languageToSet = mainWindow.currentLanguageCode ?? "tr-TR";
+                    
+                    // Set menu states based on the language
                     englishMenuItem.IsChecked = false;
-                    turkishMenuItem.IsChecked = true;
-                    japaneseMenuItem.IsChecked = false;
+                    turkishMenuItem.IsChecked = (languageToSet == "tr-TR");
+                    japaneseMenuItem.IsChecked = (languageToSet == "ja-JP");
+                    
                     englishMenuItem.IsEnabled = true;
-                    turkishMenuItem.IsEnabled = false;
-                    japaneseMenuItem.IsEnabled = true;
-                    LocalizationManager.SetLanguage("tr-TR");
+                    turkishMenuItem.IsEnabled = (languageToSet != "tr-TR");
+                    japaneseMenuItem.IsEnabled = (languageToSet != "ja-JP");
+                    
+                    LocalizationManager.SetLanguage(languageToSet);
                     UpdateUI();
                 }
                 else
                 {
-                    // Ensure Japanese state is set correctly for English too
+                    // Ensure Japanese and Turkish states are set correctly for English
+                    turkishMenuItem.IsChecked = false;
                     japaneseMenuItem.IsChecked = false;
+                    turkishMenuItem.IsEnabled = true;
                     japaneseMenuItem.IsEnabled = true;
                 }
             }
