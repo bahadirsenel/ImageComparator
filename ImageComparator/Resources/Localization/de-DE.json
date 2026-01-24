@@ -36,7 +36,7 @@
   "ContextMenu.OpenFileLocation": "Dateispeicherort Öffnen",
   
   "Label.PreviewSelect": "Wählen Sie eine Datei für die Vorschau:",
-  "Label.DragDropFolders": "Drag-Drop zum Hinzufügen von Ordnern:",
+  "Label.DragDropFolders": "Ziehen und Ablegen zum Hinzufügen von Ordnern:",
   
   "Console.ComparingWithSubdirs": "Vergleiche Bilder von {0} und seinen Unterverzeichnissen.",
   "Console.ComparingWithoutSubdirs": "Vergleiche Bilder von {0}.",
