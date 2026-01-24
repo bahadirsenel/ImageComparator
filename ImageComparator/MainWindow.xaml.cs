@@ -1392,28 +1392,32 @@ namespace ImageComparator
             if (findDuplicatesButton.Visibility == Visibility.Visible)
             {
                 string[] dragDrop = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-                DirectoryInfo directoryInfo;
 
-                if (directories.Count == 0)
+                if (dragDrop != null)
                 {
-                    console.Clear();
-                    console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
-                }
+                    DirectoryInfo directoryInfo;
 
-                for (int i = 0; i < dragDrop.Length; i++)
-                {
-                    directoryInfo = new DirectoryInfo(dragDrop[i]);
-
-                    if (!directories.Contains(dragDrop[i]))
+                    if (directories.Count == 0)
                     {
-                        if (directoryInfo.Exists)
+                        console.Clear();
+                        console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
+                    }
+
+                    for (int i = 0; i < dragDrop.Length; i++)
+                    {
+                        directoryInfo = new DirectoryInfo(dragDrop[i]);
+
+                        if (!directories.Contains(dragDrop[i]))
                         {
-                            directories.Add(dragDrop[i]);
-                            console.Insert(console.Count - 1, LocalizationManager.GetString("Console.DirectoryAdded", dragDrop[i]));
-                        }
-                        else
-                        {
-                            console.Insert(console.Count - 1, LocalizationManager.GetString("Console.DirectoriesOnly"));
+                            if (directoryInfo.Exists)
+                            {
+                                directories.Add(dragDrop[i]);
+                                console.Insert(console.Count - 1, LocalizationManager.GetString("Console.DirectoryAdded", dragDrop[i]));
+                            }
+                            else
+                            {
+                                console.Insert(console.Count - 1, LocalizationManager.GetString("Console.DirectoriesOnly"));
+                            }
                         }
                     }
                 }
@@ -2103,7 +2107,7 @@ namespace ImageComparator
                         {
                             // Save confidence before removing the item
                             int confidence = list1[i].confidence;
-                            
+
                             list1.RemoveAt(i);
                             list2.RemoveAt(i);
 
@@ -2123,7 +2127,7 @@ namespace ImageComparator
                             {
                                 duplicateImageCount--;
                             }
-                            
+
                             // Break out of inner loop since we found a match
                             break;
                         }
