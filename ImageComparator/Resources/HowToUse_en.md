@@ -46,7 +46,10 @@ Welcome to Image Comparator! This application helps you find and manage duplicat
    • To clear the false positive database, go to Options > Clear False Positive Database
 
 ## 8. LANGUAGE OPTIONS
-   • Go to Options > Language to switch between English and Türkçe
+   • Go to Options > Language to switch between 18 supported languages:
+     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
+     Nederlands, Polski, Svenska, Norsk, Dansk
    • The interface will update immediately
 
 ## 9. ADDITIONAL OPTIONS
