@@ -42,7 +42,7 @@ Image Comparator is a WPF-based tool that helps you identify duplicate and simil
 ## Requirements
 
 - Windows 7 or later
-- .NET Framework 4.7.2 or higher
+- .NET Framework 4.8 or higher
 - Sufficient disk space for temporary file operations
 
 ## Installation
@@ -55,7 +55,7 @@ Image Comparator is a WPF-based tool that helps you identify duplicate and simil
 
 ### Prerequisites
 - Visual Studio 2017 or later
-- .NET Framework 4.7.2 SDK
+- .NET Framework 4.8 SDK
 
 ### Build Steps
 1. Clone the repository:
@@ -137,23 +137,43 @@ This approach allows the application to detect:
 
 ## Technologies
 
-- **C# / .NET Framework 4.7.2**: Core application framework
+- **C# / .NET Framework 4.8**: Core application framework
 - **WPF (Windows Presentation Foundation)**: User interface
-- **Discrete Cosine Transform**: Image comparison algorithm
-- **Ookii Dialogs**: Modern Windows dialogs
-- **System.Drawing**: Image processing
+- **XAML**: UI markup language for windows and controls
+- **Discrete Cosine Transform**: Perceptual image hashing algorithm
+- **Ookii Dialogs**: Modern folder browser dialogs
+- **System.Drawing**: Image loading and processing
+- **System.Web.Extensions**: JSON serialization (JavaScriptSerializer) for settings and localization
+- **Microsoft.VisualBasic**: File operations (Recycle Bin functionality)
 
 ## Project Structure
 
 ```
 ImageComparator/
-├── ImageComparator/          # Main application code
-│   ├── Models/              # Core algorithms (DCT, etc.)
-│   ├── Resources/           # Images, localization, documentation
-│   ├── MainWindow.xaml      # Main application window
-│   └── LocalizationManager.cs # Language support
-├── ImageComparator.sln      # Visual Studio solution
-└── README.md               # This file
+├── ImageComparator/              # Main WPF application
+│   ├── Models/                   # Core algorithms and custom controls
+│   │   ├── DiscreteCosineTransform2D.cs  # DCT perceptual hashing
+│   │   ├── ImageViewControl.cs   # Custom image viewer with zoom/pan
+│   │   └── MyInt.cs              # Helper class for image processing
+│   ├── Resources/                # Application resources
+│   │   ├── Localization/         # JSON language files (18 languages)
+│   │   ├── HowToUse_*.md         # Help documentation (18 languages)
+│   │   └── *.png, *.ico          # UI icons and images
+│   ├── Properties/               # Assembly info and settings
+│   ├── MainWindow.xaml(.cs)      # Main application window
+│   ├── AboutWindow.xaml(.cs)     # About dialog
+│   ├── HowToUseWindow.xaml(.cs)  # Help window
+│   ├── ApplyPopupWindow.xaml(.cs) # Confirmation dialog
+│   ├── ClearPopupWindow.xaml(.cs) # Clear confirmation dialog
+│   ├── LocalizationManager.cs    # Language support manager
+│   ├── App.xaml(.cs)             # Application entry point
+│   └── packages.config           # NuGet package references
+├── AddFiles/                     # Helper console application
+│   ├── Program.cs                # File enumeration tool
+│   └── Properties/               # Assembly info
+├── ImageComparator.sln           # Visual Studio solution
+├── LICENSE.txt                   # GPL v3.0 License
+└── README.md                     # This file
 ```
 
 ## License
