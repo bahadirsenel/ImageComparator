@@ -2,6 +2,8 @@
 
 A powerful Windows desktop application for finding and managing duplicate images using advanced image comparison algorithms.
 
+<img width="991" height="593" alt="4" src="https://github.com/user-attachments/assets/38b2b3d2-24ad-4dec-9d94-f257c61b3857" />
+
 ## Overview
 
 Image Comparator is a WPF-based tool that helps you identify duplicate and similar images across multiple folders. Using Discrete Cosine Transform (DCT) algorithms, it can detect both exact duplicates and visually similar images, even if they have been resized, compressed, or slightly modified.
