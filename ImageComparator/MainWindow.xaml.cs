@@ -2195,14 +2195,7 @@ namespace ImageComparator
                                         {
                                             for (int k = 0; k < 9; k++)
                                             {
-                                                if (grayscale.GetPixel(j, k).R < grayscale.GetPixel(j + 1, k).R)
-                                                {
-                                                    hdHashArray[i, j * 8 + k] = 0;
-                                                }
-                                                else
-                                                {
-                                                    hdHashArray[i, j * 8 + k] = 1;
-                                                }
+                                                hdHashArray[i, j * 8 + k] = grayscale.GetPixel(j, k).R < grayscale.GetPixel(j + 1, k).R ? 0 : 1;
                                             }
                                         }
 
@@ -2211,14 +2204,7 @@ namespace ImageComparator
                                         {
                                             for (int k = 0; k < 8; k++)
                                             {
-                                                if (grayscale.GetPixel(j, k).R < grayscale.GetPixel(k, k + 1).R)
-                                                {
-                                                    vdHashArray[i, j * 8 + k] = 0;
-                                                }
-                                                else
-                                                {
-                                                    vdHashArray[i, j * 8 + k] = 1;
-                                                }
+                                                vdHashArray[i, j * 8 + k] = grayscale.GetPixel(j, k).R < grayscale.GetPixel(k, k + 1).R ? 0 : 1;
                                             }
                                         }
 
@@ -2241,14 +2227,7 @@ namespace ImageComparator
                                             {
                                                 for (int k = 0; k < 8; k++)
                                                 {
-                                                    if (resized8.GetPixel(j, k).R < average)
-                                                    {
-                                                        aHashArray[i, j * 8 + k] = 0;
-                                                    }
-                                                    else
-                                                    {
-                                                        aHashArray[i, j * 8 + k] = 1;
-                                                    }
+                                                    aHashArray[i, j * 8 + k] = resized8.GetPixel(j, k).R < average ? 0 : 1;
                                                 }
                                             }
                                         }
