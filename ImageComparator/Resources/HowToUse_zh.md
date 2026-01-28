@@ -46,7 +46,7 @@
    • 要清除误报数据库，请转到选项 > 清除误报数据库
 
 ## 8. 语言选项
-   • 转到选项 > 语言以在18种支持的语言之间切换：
+   • 转到选项 > 语言以在19种支持的语言之间切换：
      English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk

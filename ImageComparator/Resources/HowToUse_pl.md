@@ -46,7 +46,7 @@ Witamy w Porównywarce Obrazów! Ta aplikacja pomaga znaleźć i zarządzać dup
    • Aby wyczyścić bazę danych fałszywych pozytywnych, przejdź do Opcje > Wyczyść bazę danych fałszywych pozytywnych
 
 ## 8. OPCJE JĘZYKOWE
-   • Przejdź do Opcje > Język, aby przełączać się między 18 obsługiwanymi językami:
+   • Przejdź do Opcje > Język, aby przełączać się między 19 obsługiwanymi językami:
      English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk

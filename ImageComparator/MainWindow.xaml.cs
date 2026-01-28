@@ -1807,7 +1807,7 @@ namespace ImageComparator
                 // List of valid language codes
                 var validLanguages = new[] { 
                     "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT", 
-                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "hi-IN", 
+                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "fa-IR", "hi-IN", 
                     "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK" 
                 };
                 

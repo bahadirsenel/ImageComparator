@@ -46,7 +46,7 @@ Velkommen til Bildesammenligner! Denne applikasjonen hjelper deg med å finne og
    • For å tømme databasen for falske positive, gå til Alternativer > Tøm database for falske positive
 
 ## 8. SPRÅKALTERNATIVER
-   • Gå til Alternativer > Språk for å bytte mellom 18 støttede språk:
+   • Gå til Alternativer > Språk for å bytte mellom 19 støttede språk:
      English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk

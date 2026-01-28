@@ -46,7 +46,7 @@ Image Comparator'e hoş geldiniz! Bu uygulama klasörlerinizdeki kopya görselle
    • Hatalı sonuç veritabanını temizlemek için Seçenekler > Hatalı Sonuç Veritabanını Temizle'ye gidin
 
 ## 8. DİL SEÇENEKLERİ
-   • Seçenekler > Dil'e giderek 18 desteklenen dil arasında geçiş yapın:
+   • Seçenekler > Dil'e giderek 19 desteklenen dil arasında geçiş yapın:
      English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk

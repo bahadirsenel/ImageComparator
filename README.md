@@ -36,7 +36,7 @@ Image Comparator is a WPF-based tool that helps you identify duplicate and simil
 - **File Explorer Integration**: Open files or navigate to their location with right-click menu
 
 ### User Experience
-- **Multilingual Interface**: Supports 18 languages including English, Türkçe, 日本語, Español, Français, Deutsch, Italiano, Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी, Nederlands, Polski, Svenska, Norsk, and Dansk. Switch languages via Options > Language, and the interface will update immediately
+- **Multilingual Interface**: Supports 19 languages including English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano, Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी, Nederlands, Polski, Svenska, Norsk, and Dansk. Switch languages via Options > Language, and the interface will update immediately
 - **Drag-and-Drop Support**: Add folders by dragging them into the output list at the bottom
 - **Keyboard Navigation**: Use arrow keys to browse through results quickly
 - **Progress Tracking**: Monitor scan progress with pause/resume/stop functionality using the respective buttons
@@ -158,8 +158,8 @@ ImageComparator/
 │   │   ├── ImageViewControl.cs   # Custom image viewer with zoom/pan
 │   │   └── MyInt.cs              # Helper class for image processing
 │   ├── Resources/                # Application resources
-│   │   ├── Localization/         # JSON language files (18 languages)
-│   │   ├── HowToUse_*.md         # Help documentation (18 languages)
+│   │   ├── Localization/         # JSON language files (19 languages)
+│   │   ├── HowToUse_*.md         # Help documentation (19 languages)
 │   │   └── *.png, *.ico          # UI icons and images
 │   ├── Properties/               # Assembly info and settings
 │   ├── MainWindow.xaml(.cs)      # Main application window
