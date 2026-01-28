@@ -70,6 +70,9 @@ namespace ImageComparator
                 case "ar-SA":
                     fileSuffix = "ar";
                     break;
+                case "fa-IR":
+                    fileSuffix = "fa";
+                    break;
                 case "hi-IN":
                     fileSuffix = "hi";
                     break;
