@@ -2183,14 +2183,7 @@ namespace ImageComparator
                                     {
                                         for (int k = 0; k < 8; k++)
                                         {
-                                            if (result[j, k] < average)
-                                            {
-                                                pHashArray[i, j * 8 + k] = 0;
-                                            }
-                                            else
-                                            {
-                                                pHashArray[i, j * 8 + k] = 1;
-                                            }
+                                            pHashArray[i, j * 8 + k] = result[j, k] < average ? 0 : 1;
                                         }
                                     }
 
