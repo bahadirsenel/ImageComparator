@@ -46,8 +46,8 @@ Bienvenue dans Image Comparator ! Cette application vous aide à trouver et à g
    • Pour effacer la base de données des faux positifs, allez dans Options > Effacer la Base de Données des Faux Positifs
 
 ## 8. OPTIONS DE LANGUE
-   • Allez dans Options > Langue pour basculer entre 18 langues prises en charge :
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+   • Allez dans Options > Langue pour basculer entre 19 langues prises en charge :
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • L'interface sera mise à jour immédiatement

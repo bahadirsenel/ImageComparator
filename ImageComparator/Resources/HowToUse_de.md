@@ -46,8 +46,8 @@ Willkommen bei Image Comparator! Diese Anwendung hilft Ihnen, doppelte Bilder in
    • Um die Datenbank für falsch positive Ergebnisse zu löschen, gehen Sie zu Optionen > Datenbank für falsch positive Ergebnisse löschen
 
 ## 8. SPRACHOPTIONEN
-   • Gehen Sie zu Optionen > Sprache, um zwischen 18 unterstützten Sprachen zu wechseln:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+   • Gehen Sie zu Optionen > Sprache, um zwischen 19 unterstützten Sprachen zu wechseln:
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • Die Benutzeroberfläche wird sofort aktualisiert

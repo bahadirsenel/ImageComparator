@@ -69,6 +69,7 @@
                     <MenuItem Name="turkishMenuItem" Header="Türkçe" IsCheckable="True" IsChecked="False" Click="TurkishMenuItem_Click"/>
                     <MenuItem Name="russianMenuItem" Header="Русский" IsCheckable="True" IsChecked="False" Click="RussianMenuItem_Click"/>
                     <MenuItem Name="arabicMenuItem" Header="العربية" IsCheckable="True" IsChecked="False" Click="ArabicMenuItem_Click"/>
+                    <MenuItem Name="persianMenuItem" Header="فارسی" IsCheckable="True" IsChecked="False" Click="PersianMenuItem_Click"/>
                     <MenuItem Name="hindiMenuItem" Header="हिन्दी" IsCheckable="True" IsChecked="False" Click="HindiMenuItem_Click"/>
                     <MenuItem Name="japaneseMenuItem" Header="日本語" IsCheckable="True" IsChecked="False" Click="JapaneseMenuItem_Click"/>
                     <MenuItem Name="chineseMenuItem" Header="简体中文" IsCheckable="True" IsChecked="False" Click="ChineseMenuItem_Click"/>

@@ -46,8 +46,8 @@
    • 오탐지 데이터베이스를 지우려면 옵션 > 오탐지 데이터베이스 지우기로 이동합니다
 
 ## 8. 언어 옵션
-   • 옵션 > 언어로 이동하여 18개의 지원 언어 간에 전환합니다:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+   • 옵션 > 언어로 이동하여 19개의 지원 언어 간에 전환합니다:
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • 인터페이스가 즉시 업데이트됩니다

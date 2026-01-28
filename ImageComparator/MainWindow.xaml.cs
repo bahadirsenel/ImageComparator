@@ -431,6 +431,11 @@ namespace ImageComparator
             SetLanguage("ar-SA", arabicMenuItem);
         }
 
+        private void PersianMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            SetLanguage("fa-IR", persianMenuItem);
+        }
+
         private void HindiMenuItem_Click(object sender, RoutedEventArgs e)
         {
             SetLanguage("hi-IN", hindiMenuItem);
@@ -495,6 +500,7 @@ namespace ImageComparator
             if (chineseMenuItem.IsChecked) return "zh-CN";
             if (koreanMenuItem.IsChecked) return "ko-KR";
             if (arabicMenuItem.IsChecked) return "ar-SA";
+            if (persianMenuItem.IsChecked) return "fa-IR";
             if (hindiMenuItem.IsChecked) return "hi-IN";
             if (dutchMenuItem.IsChecked) return "nl-NL";
             if (polishMenuItem.IsChecked) return "pl-PL";
@@ -525,6 +531,7 @@ namespace ImageComparator
                 { "zh-CN", chineseMenuItem },
                 { "ko-KR", koreanMenuItem },
                 { "ar-SA", arabicMenuItem },
+                { "fa-IR", persianMenuItem },
                 { "hi-IN", hindiMenuItem },
                 { "nl-NL", dutchMenuItem },
                 { "pl-PL", polishMenuItem },
@@ -1800,7 +1807,7 @@ namespace ImageComparator
                 // List of valid language codes
                 var validLanguages = new[] { 
                     "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT", 
-                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "hi-IN", 
+                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "fa-IR", "hi-IN", 
                     "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK" 
                 };
                 
