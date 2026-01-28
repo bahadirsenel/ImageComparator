@@ -47,7 +47,7 @@ Welkom bij Afbeeldingsvergelijker! Deze applicatie helpt u bij het vinden en beh
 
 ## 8. TAALOPTIES
    • Ga naar Opties > Taal om te schakelen tussen 19 ondersteunde talen:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • De interface wordt onmiddellijk bijgewerkt

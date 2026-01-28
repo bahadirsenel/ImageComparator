@@ -47,7 +47,7 @@ Willkommen bei Image Comparator! Diese Anwendung hilft Ihnen, doppelte Bilder in
 
 ## 8. SPRACHOPTIONEN
    • Gehen Sie zu Optionen > Sprache, um zwischen 19 unterstützten Sprachen zu wechseln:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • Die Benutzeroberfläche wird sofort aktualisiert

@@ -47,7 +47,7 @@ Välkommen till Bildjämförare! Denna applikation hjälper dig att hitta och ha
 
 ## 8. SPRÅKALTERNATIV
    • Gå till Alternativ > Språk för att växla mellan 19 språk som stöds:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • Gränssnittet uppdateras omedelbart

@@ -47,7 +47,7 @@
 
 ## 8. 언어 옵션
    • 옵션 > 언어로 이동하여 19개의 지원 언어 간에 전환합니다:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • 인터페이스가 즉시 업데이트됩니다

@@ -47,7 +47,7 @@ Bienvenue dans Image Comparator ! Cette application vous aide à trouver et à g
 
 ## 8. OPTIONS DE LANGUE
    • Allez dans Options > Langue pour basculer entre 19 langues prises en charge :
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • L'interface sera mise à jour immédiatement

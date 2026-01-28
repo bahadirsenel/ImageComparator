@@ -47,7 +47,7 @@
 
 ## 8. भाषा विकल्प
    • 19 समर्थित भाषाओं के बीच स्विच करने के लिए विकल्प > भाषा पर जाएं:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • इंटरफ़ेस तुरंत अपडेट हो जाएगा

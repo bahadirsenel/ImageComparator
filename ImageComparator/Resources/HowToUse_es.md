@@ -47,7 +47,7 @@ Bienvenido a Image Comparator! Esta aplicación te ayuda a encontrar y gestionar
 
 ## 8. OPCIONES DE IDIOMA
    • Ve a Opciones > Idioma para cambiar entre 19 idiomas compatibles:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • La interfaz se actualizará inmediatamente

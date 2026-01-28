@@ -47,7 +47,7 @@ Velkommen til Billedsammenligner! Denne applikation hjælper dig med at finde og
 
 ## 8. SPROGINDSTILLINGER
    • Gå til Indstillinger > Sprog for at skifte mellem 19 understøttede sprog:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • Grænsefladen opdateres øjeblikkeligt

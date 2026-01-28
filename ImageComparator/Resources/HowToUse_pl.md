@@ -47,7 +47,7 @@ Witamy w Porównywarce Obrazów! Ta aplikacja pomaga znaleźć i zarządzać dup
 
 ## 8. OPCJE JĘZYKOWE
    • Przejdź do Opcje > Język, aby przełączać się między 19 obsługiwanymi językami:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • Interfejs zostanie natychmiast zaktualizowany

@@ -47,7 +47,7 @@
 
 ## 8. 语言选项
    • 转到选项 > 语言以在19种支持的语言之间切换：
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • 界面将立即更新

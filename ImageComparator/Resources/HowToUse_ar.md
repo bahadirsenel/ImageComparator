@@ -47,7 +47,7 @@
 
 ## 8. خيارات اللغة
    • انتقل إلى خيارات > اللغة للتبديل بين 19 لغة مدعومة:
-     English, Türkçe, 日本語, Español, Français, Deutsch, Italiano,
+     English, Türkçe, فارسی, 日本語, Español, Français, Deutsch, Italiano,
      Português (Brasil), Русский, 简体中文, 한국어, العربية, हिन्दी,
      Nederlands, Polski, Svenska, Norsk, Dansk
    • سيتم تحديث الواجهة على الفور
