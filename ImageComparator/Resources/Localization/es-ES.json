@@ -17,7 +17,6 @@
   "Menu.Help": "Ayuda",
   "Menu.HowToUse": "Cómo Usar",
   "Menu.About": "Acerca de",
-  
   "Button.AddFolder": "Agregar Carpeta",
   "Button.FindDuplicates": "Buscar Duplicados",
   "Button.Pause": "Pausar",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "Marcar para Eliminar",
   "Button.MarkAsFalsePositive": "Marcar como Falso Positivo",
   "Button.RemoveMark": "Quitar Marca",
-  
   "ContextMenu.Open": "Abrir",
   "ContextMenu.OpenFileLocation": "Abrir Ubicación del Archivo",
-  
   "Label.PreviewSelect": "Seleccione un archivo para previsualizar:",
   "Label.DragDropFolders": "Arrastre y suelte para agregar carpetas:",
-  
   "Console.ComparingWithSubdirs": "Comparando imágenes de {0} y sus subdirectorios.",
   "Console.ComparingWithoutSubdirs": "Comparando imágenes de {0}.",
   "Console.NoDirectoriesAdded": "No se han agregado directorios.",
   "Console.DirectoryAdded": "Agregado {0}",
   "Console.DirectoriesOnly": "Solo directorios.",
-  
   "Console.SentToRecycleBin": "{0} archivo(s) han sido enviados a la papelera de reciclaje.",
   "Console.FilesDeleted": "{0} archivo(s) han sido eliminados.",
   "Console.MarkedAsFalsePositive": "{0} archivo(s) han sido marcados como falsos positivos.",
-  
   "Console.Paused": "Pausado.",
   "Console.InterruptedByUser": "Interrumpido por el usuario.",
   "Console.PathsAddedSuccessfully": "Rutas agregadas correctamente. {0} imágenes encontradas. Leyendo archivos del disco...",
   "Console.ProcessingFiles": "{0}% completado, procesando archivos...",
   "Console.ComparingResults": "{0}% completado, comparando resultados...",
   "Console.FilesProcessedComparing": "Todos los archivos han sido procesados. Comparando...",
-  
   "Console.AllDone": "¡Todo listo!",
   "Console.RunTimeHours": "El tiempo de ejecución es {0} horas {1} minutos {2} segundos.",
   "Console.RunTimeMinutes": "El tiempo de ejecución es {0} minutos {1} segundos.",
   "Console.RunTimeSeconds": "El tiempo de ejecución es {0} segundos.",
-  
   "Console.NoDuplicatesFound": "No se encontraron duplicados.",
   "Console.DuplicatesFound": "{0} duplicados encontrados.",
   "Console.HighSimilarity": "{0} imágenes encontradas con alta similitud.",
   "Console.MediumSimilarity": "{0} imágenes encontradas con similitud media.",
   "Console.LowSimilarity": "{0} imágenes encontradas con baja similitud.",
-  
   "Console.SessionSaved": "La sesión se ha guardado en {0}",
   "Console.SessionLoaded": "La sesión se ha cargado desde {0}",
   "Console.FalsePositiveDatabaseCleared": "La base de datos de falsos positivos ha sido limpiada.",
-  
   "Dialog.SaveTitle": "Guardar Resultados",
   "Dialog.LoadTitle": "Cargar Resultados",
   "Dialog.AddFolderTitle": "Agregar Carpeta",
-  
   "Dialog.ClearTitle": "Advertencia",
   "Dialog.ClearMessage": "¿Está seguro de que desea descartar los resultados actuales? Puede guardarlos para continuar trabajando con ellos más tarde.",
   "Dialog.SaveButton": "Guardar",
   "Dialog.DiscardButton": "Descartar",
   "Dialog.CancelButton": "Cancelar",
-  
   "Dialog.ApplyTitle": "Advertencia",
   "Dialog.FilesWillBeDeleted": "{0} archivo(s) serán eliminados.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} resultado(s) serán marcados como falsos positivos y no se mostrarán en resultados futuros.\r\n",
   "Dialog.ContinueConfirmation": "¿Desea continuar?",
   "Dialog.YesButton": "Sí",
   "Dialog.NoButton": "No",
-  
   "Dialog.AboutTitle": "Acerca de",
   "Dialog.Version": "Versión:",
   "Dialog.License": "Licencia:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator es una herramienta poderosa para comparar y analizar imágenes. Le ayuda a identificar imágenes similares o duplicadas en su colección.",
   "Dialog.Developer": "Desarrollado por Mustafa Bahadır Şenel",
   "Dialog.CloseButton": "Cerrar",
-  
   "Dialog.HowToUseTitle": "Cómo Usar",
   "Dialog.HowToUseCloseButton": "Cerrar",
-  
   "Dialog.Error": "Error",
   "Dialog.CouldNotOpenLink": "No se pudo abrir el enlace: {0}",
   "Dialog.ErrorLoadingHelp": "Error al cargar el contenido de ayuda: {0}",
   "Dialog.HelpFileNotFound": "Error: No se pudo encontrar el archivo de ayuda en {0}",
-  
   "Error.FileNotFound": "Archivo no encontrado: {0}",
   "Error.FolderNotFound": "Carpeta no encontrada: {0}",
   "Error.UnsupportedFileType": "Tipo de archivo no compatible: {0}\n\nSolo se permiten archivos de imagen.",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "No se puede abrir la carpeta:\n{0}",
   "Error.Title": "Error",
   "Warning.LargeFile": "Este archivo es muy grande ({0} MB). ¿Está seguro de que desea abrirlo?",
-  "Warning.Title": "Advertencia"
+  "Warning.Title": "Advertencia",
+  "Menu.ViewErrorLog": "View Error Log",
+  "Error.SerializationFailed": "Failed to save settings: {0}",
+  "Error.DeserializationFailed": "Failed to load settings: {0}",
+  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
+  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
+  "Error.LogLocation": "Error log: {0}",
+  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
+  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
 }

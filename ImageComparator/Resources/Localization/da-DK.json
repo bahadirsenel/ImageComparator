@@ -17,7 +17,6 @@
   "Menu.Help": "Hjælp",
   "Menu.HowToUse": "Sådan Bruges",
   "Menu.About": "Om",
-  
   "Button.AddFolder": "Tilføj Mappe",
   "Button.FindDuplicates": "Find Duplikater",
   "Button.Pause": "Pause",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "Marker til Sletning",
   "Button.MarkAsFalsePositive": "Marker som Falsk Positiv",
   "Button.RemoveMark": "Fjern Markering",
-  
   "ContextMenu.Open": "Åbn",
   "ContextMenu.OpenFileLocation": "Åbn Filplacering",
-  
   "Label.PreviewSelect": "Vælg en fil til forhåndsvisning:",
   "Label.DragDropFolders": "Træk og slip for at tilføje mapper:",
-  
   "Console.ComparingWithSubdirs": "Sammenligner billeder fra {0} og dets underbiblioteker.",
   "Console.ComparingWithoutSubdirs": "Sammenligner billeder fra {0}.",
   "Console.NoDirectoriesAdded": "Ingen mapper tilføjet.",
   "Console.DirectoryAdded": "Tilføjet {0}",
   "Console.DirectoriesOnly": "Kun mapper.",
-  
   "Console.SentToRecycleBin": "{0} fil(er) er blevet sendt til papirkurven.",
   "Console.FilesDeleted": "{0} fil(er) er blevet slettet.",
   "Console.MarkedAsFalsePositive": "{0} fil(er) er blevet markeret som falske positive.",
-  
   "Console.Paused": "Sat på pause.",
   "Console.InterruptedByUser": "Afbrudt af bruger.",
   "Console.PathsAddedSuccessfully": "Stier tilføjet. {0} billeder fundet. Læser filer fra disk...",
   "Console.ProcessingFiles": "{0}% færdig, behandler filer...",
   "Console.ComparingResults": "{0}% færdig, sammenligner resultater...",
   "Console.FilesProcessedComparing": "Alle filer er blevet behandlet. Sammenligner...",
-  
   "Console.AllDone": "Alt færdigt!",
   "Console.RunTimeHours": "Køretiden er {0} timer {1} minutter {2} sekunder.",
   "Console.RunTimeMinutes": "Køretiden er {0} minutter {1} sekunder.",
   "Console.RunTimeSeconds": "Køretiden er {0} sekunder.",
-  
   "Console.NoDuplicatesFound": "Ingen duplikater fundet.",
   "Console.DuplicatesFound": "{0} duplikater fundet.",
   "Console.HighSimilarity": "{0} billeder med høj lighed fundet.",
   "Console.MediumSimilarity": "{0} billeder med middel lighed fundet.",
   "Console.LowSimilarity": "{0} billeder med lav lighed fundet.",
-  
   "Console.SessionSaved": "Session er blevet gemt til {0}",
   "Console.SessionLoaded": "Session er blevet indlæst fra {0}",
   "Console.FalsePositiveDatabaseCleared": "Falsk positiv-database er blevet ryddet.",
-  
   "Dialog.SaveTitle": "Gem Resultater",
   "Dialog.LoadTitle": "Indlæs Resultater",
   "Dialog.AddFolderTitle": "Tilføj Mappe",
-  
   "Dialog.ClearTitle": "Advarsel",
   "Dialog.ClearMessage": "Er du sikker på, at du vil kassere nuværende resultater? Du kan gemme dem for at fortsætte med at arbejde på dem senere.",
   "Dialog.SaveButton": "Gem",
   "Dialog.DiscardButton": "Kasser",
   "Dialog.CancelButton": "Annuller",
-  
   "Dialog.ApplyTitle": "Advarsel",
   "Dialog.FilesWillBeDeleted": "{0} fil(er) vil blive slettet.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} resultat(er) vil blive markeret som falske positive og vil ikke blive vist i fremtidige resultater.\r\n",
   "Dialog.ContinueConfirmation": "Vil du fortsætte?",
   "Dialog.YesButton": "Ja",
   "Dialog.NoButton": "Nej",
-  
   "Dialog.AboutTitle": "Om",
   "Dialog.Version": "Version:",
   "Dialog.License": "Licens:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator er et kraftfuldt værktøj til sammenligning og analyse af billeder. Det hjælper dig med at identificere lignende eller duplikerede billeder i din samling.",
   "Dialog.Developer": "Udviklet af Mustafa Bahadır Şenel",
   "Dialog.CloseButton": "Luk",
-  
   "Dialog.HowToUseTitle": "Sådan Bruges",
   "Dialog.HowToUseCloseButton": "Luk",
-  
   "Dialog.Error": "Fejl",
   "Dialog.CouldNotOpenLink": "Kunne ikke åbne link: {0}",
   "Dialog.ErrorLoadingHelp": "Fejl ved indlæsning af hjælpeindhold: {0}",
   "Dialog.HelpFileNotFound": "Fejl: Kunne ikke finde hjælpefil på {0}",
-  
   "Error.FileNotFound": "Filen blev ikke fundet: {0}",
   "Error.FolderNotFound": "Mappen blev ikke fundet: {0}",
   "Error.UnsupportedFileType": "Ikke-understøttet filtype: {0}\n\nKun billedfiler er tilladt.",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "Kan ikke åbne mappen:\n{0}",
   "Error.Title": "Fejl",
   "Warning.LargeFile": "Denne fil er meget stor ({0} MB). Er du sikker på, at du vil åbne den?",
-  "Warning.Title": "Advarsel"
+  "Warning.Title": "Advarsel",
+  "Menu.ViewErrorLog": "View Error Log",
+  "Error.SerializationFailed": "Failed to save settings: {0}",
+  "Error.DeserializationFailed": "Failed to load settings: {0}",
+  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
+  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
+  "Error.LogLocation": "Error log: {0}",
+  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
+  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
 }

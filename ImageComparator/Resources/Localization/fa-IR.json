@@ -17,7 +17,6 @@
   "Menu.Help": "راهنما",
   "Menu.HowToUse": "نحوه استفاده",
   "Menu.About": "درباره",
-  
   "Button.AddFolder": "افزودن پوشه",
   "Button.FindDuplicates": "یافتن تکراری‌ها",
   "Button.Pause": "مکث",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "علامت‌گذاری برای حذف",
   "Button.MarkAsFalsePositive": "علامت‌گذاری به عنوان مثبت کاذب",
   "Button.RemoveMark": "حذف علامت",
-  
   "ContextMenu.Open": "باز کردن",
   "ContextMenu.OpenFileLocation": "باز کردن محل فایل",
-  
   "Label.PreviewSelect": "برای پیش‌نمایش یک فایل انتخاب کنید:",
   "Label.DragDropFolders": "برای افزودن پوشه، بکشید و رها کنید:",
-  
   "Console.ComparingWithSubdirs": "مقایسه تصاویر از {0} و پوشه‌های فرعی آن.",
   "Console.ComparingWithoutSubdirs": "مقایسه تصاویر از {0}.",
   "Console.NoDirectoriesAdded": "هیچ پوشه‌ای اضافه نشده است.",
   "Console.DirectoryAdded": "{0} اضافه شد",
   "Console.DirectoriesOnly": "فقط پوشه‌ها.",
-  
   "Console.SentToRecycleBin": "{0} فایل به سطل بازیافت ارسال شد.",
   "Console.FilesDeleted": "{0} فایل حذف شد.",
   "Console.MarkedAsFalsePositive": "{0} فایل به عنوان مثبت کاذب علامت‌گذاری شد.",
-  
   "Console.Paused": "متوقف شد.",
   "Console.InterruptedByUser": "توسط کاربر قطع شد.",
   "Console.PathsAddedSuccessfully": "مسیرها با موفقیت اضافه شد. {0} تصویر پیدا شد. در حال خواندن فایل‌ها از دیسک...",
   "Console.ProcessingFiles": "{0}% انجام شد، در حال پردازش فایل‌ها...",
   "Console.ComparingResults": "{0}% انجام شد، در حال مقایسه نتایج...",
   "Console.FilesProcessedComparing": "تمام فایل‌ها پردازش شدند. در حال مقایسه...",
-  
   "Console.AllDone": "همه چیز انجام شد!",
   "Console.RunTimeHours": "زمان اجرا {0} ساعت {1} دقیقه {2} ثانیه است.",
   "Console.RunTimeMinutes": "زمان اجرا {0} دقیقه {1} ثانیه است.",
   "Console.RunTimeSeconds": "زمان اجرا {0} ثانیه است.",
-  
   "Console.NoDuplicatesFound": "هیچ تکراری پیدا نشد.",
   "Console.DuplicatesFound": "{0} تکراری پیدا شد.",
   "Console.HighSimilarity": "{0} تصویر با شباهت بالا پیدا شد.",
   "Console.MediumSimilarity": "{0} تصویر با شباهت متوسط پیدا شد.",
   "Console.LowSimilarity": "{0} تصویر با شباهت پایین پیدا شد.",
-  
   "Console.SessionSaved": "جلسه در {0} ذخیره شد",
   "Console.SessionLoaded": "جلسه از {0} بارگیری شد",
   "Console.FalsePositiveDatabaseCleared": "پایگاه داده نتایج مثبت کاذب پاک شد.",
-  
   "Dialog.SaveTitle": "ذخیره نتایج",
   "Dialog.LoadTitle": "بارگیری نتایج",
   "Dialog.AddFolderTitle": "افزودن پوشه",
-  
   "Dialog.ClearTitle": "هشدار",
   "Dialog.ClearMessage": "آیا مطمئن هستید که می‌خواهید نتایج فعلی را نادیده بگیرید؟ می‌توانید آنها را ذخیره کنید تا بعداً روی آنها کار کنید.",
   "Dialog.SaveButton": "ذخیره",
   "Dialog.DiscardButton": "نادیده گرفتن",
   "Dialog.CancelButton": "لغو",
-  
   "Dialog.ApplyTitle": "هشدار",
   "Dialog.FilesWillBeDeleted": "{0} فایل حذف خواهد شد.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} نتیجه به عنوان مثبت کاذب علامت‌گذاری می‌شود و در نتایج آینده نمایش داده نخواهد شد.\r\n",
   "Dialog.ContinueConfirmation": "آیا می‌خواهید ادامه دهید؟",
   "Dialog.YesButton": "بله",
   "Dialog.NoButton": "خیر",
-  
   "Dialog.AboutTitle": "درباره",
   "Dialog.Version": "نسخه:",
   "Dialog.License": "مجوز:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator یک ابزار قدرتمند برای مقایسه و تجزیه و تحلیل تصاویر است. به شما کمک می‌کند تصاویر مشابه یا تکراری را در مجموعه خود شناسایی کنید.",
   "Dialog.Developer": "توسعه داده شده توسط Mustafa Bahadır Şenel",
   "Dialog.CloseButton": "بستن",
-  
   "Dialog.HowToUseTitle": "نحوه استفاده",
   "Dialog.HowToUseCloseButton": "بستن",
-  
   "Dialog.Error": "خطا",
   "Dialog.CouldNotOpenLink": "نمی‌توان پیوند را باز کرد: {0}",
   "Dialog.ErrorLoadingHelp": "خطا در بارگیری محتوای راهنما: {0}",
   "Dialog.HelpFileNotFound": "خطا: فایل راهنما در {0} پیدا نشد",
-  
   "Error.FileNotFound": "فایل یافت نشد: {0}",
   "Error.FolderNotFound": "پوشه یافت نشد: {0}",
   "Error.UnsupportedFileType": "نوع فایل پشتیبانی نشده: {0}\n\nفقط فایل‌های تصویری مجاز هستند.",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "امکان باز کردن پوشه وجود ندارد:\n{0}",
   "Error.Title": "خطا",
   "Warning.LargeFile": "این فایل بسیار بزرگ است ({0} مگابایت). آیا مطمئن هستید که می‌خواهید آن را باز کنید؟",
-  "Warning.Title": "هشدار"
+  "Warning.Title": "هشدار",
+  "Menu.ViewErrorLog": "View Error Log",
+  "Error.SerializationFailed": "Failed to save settings: {0}",
+  "Error.DeserializationFailed": "Failed to load settings: {0}",
+  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
+  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
+  "Error.LogLocation": "Error log: {0}",
+  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
+  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
 }

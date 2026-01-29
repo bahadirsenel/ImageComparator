@@ -17,7 +17,6 @@
   "Menu.Help": "Hilfe",
   "Menu.HowToUse": "Verwendung",
   "Menu.About": "Über",
-  
   "Button.AddFolder": "Ordner Hinzufügen",
   "Button.FindDuplicates": "Duplikate Finden",
   "Button.Pause": "Pause",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "Zum Löschen Markieren",
   "Button.MarkAsFalsePositive": "Als Falsch-Positiv Markieren",
   "Button.RemoveMark": "Markierung Entfernen",
-  
   "ContextMenu.Open": "Öffnen",
   "ContextMenu.OpenFileLocation": "Dateispeicherort Öffnen",
-  
   "Label.PreviewSelect": "Wählen Sie eine Datei für die Vorschau:",
   "Label.DragDropFolders": "Ziehen und Ablegen zum Hinzufügen von Ordnern:",
-  
   "Console.ComparingWithSubdirs": "Vergleiche Bilder von {0} und seinen Unterverzeichnissen.",
   "Console.ComparingWithoutSubdirs": "Vergleiche Bilder von {0}.",
   "Console.NoDirectoriesAdded": "Keine Verzeichnisse hinzugefügt.",
   "Console.DirectoryAdded": "{0} hinzugefügt",
   "Console.DirectoriesOnly": "Nur Verzeichnisse.",
-  
   "Console.SentToRecycleBin": "{0} Datei(en) wurden in den Papierkorb verschoben.",
   "Console.FilesDeleted": "{0} Datei(en) wurden gelöscht.",
   "Console.MarkedAsFalsePositive": "{0} Datei(en) wurden als Falsch-Positiv markiert.",
-  
   "Console.Paused": "Pausiert.",
   "Console.InterruptedByUser": "Vom Benutzer unterbrochen.",
   "Console.PathsAddedSuccessfully": "Pfade erfolgreich hinzugefügt. {0} Bilder gefunden. Lese Dateien von der Festplatte...",
   "Console.ProcessingFiles": "{0}% fertig, verarbeite Dateien...",
   "Console.ComparingResults": "{0}% fertig, vergleiche Ergebnisse...",
   "Console.FilesProcessedComparing": "Alle Dateien wurden verarbeitet. Vergleiche...",
-  
   "Console.AllDone": "Alles erledigt!",
   "Console.RunTimeHours": "Laufzeit ist {0} Stunden {1} Minuten {2} Sekunden.",
   "Console.RunTimeMinutes": "Laufzeit ist {0} Minuten {1} Sekunden.",
   "Console.RunTimeSeconds": "Laufzeit ist {0} Sekunden.",
-  
   "Console.NoDuplicatesFound": "Keine Duplikate gefunden.",
   "Console.DuplicatesFound": "{0} Duplikate gefunden.",
   "Console.HighSimilarity": "{0} Bilder mit hoher Ähnlichkeit gefunden.",
   "Console.MediumSimilarity": "{0} Bilder mit mittlerer Ähnlichkeit gefunden.",
   "Console.LowSimilarity": "{0} Bilder mit geringer Ähnlichkeit gefunden.",
-  
   "Console.SessionSaved": "Sitzung wurde in {0} gespeichert",
   "Console.SessionLoaded": "Sitzung wurde von {0} geladen",
   "Console.FalsePositiveDatabaseCleared": "Falsch-Positiv-Datenbank wurde gelöscht.",
-  
   "Dialog.SaveTitle": "Ergebnisse Speichern",
   "Dialog.LoadTitle": "Ergebnisse Laden",
   "Dialog.AddFolderTitle": "Ordner Hinzufügen",
-  
   "Dialog.ClearTitle": "Warnung",
   "Dialog.ClearMessage": "Sind Sie sicher, dass Sie die aktuellen Ergebnisse verwerfen möchten? Sie können sie speichern, um später daran weiterzuarbeiten.",
   "Dialog.SaveButton": "Speichern",
   "Dialog.DiscardButton": "Verwerfen",
   "Dialog.CancelButton": "Abbrechen",
-  
   "Dialog.ApplyTitle": "Warnung",
   "Dialog.FilesWillBeDeleted": "{0} Datei(en) werden gelöscht.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} Ergebnis(se) werden als Falsch-Positiv markiert und werden in zukünftigen Ergebnissen nicht angezeigt.\r\n",
   "Dialog.ContinueConfirmation": "Möchten Sie fortfahren?",
   "Dialog.YesButton": "Ja",
   "Dialog.NoButton": "Nein",
-  
   "Dialog.AboutTitle": "Über",
   "Dialog.Version": "Version:",
   "Dialog.License": "Lizenz:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator ist ein leistungsstarkes Werkzeug zum Vergleichen und Analysieren von Bildern. Es hilft Ihnen, ähnliche oder doppelte Bilder in Ihrer Sammlung zu identifizieren.",
   "Dialog.Developer": "Entwickelt von Mustafa Bahadır Şenel",
   "Dialog.CloseButton": "Schließen",
-  
   "Dialog.HowToUseTitle": "Verwendung",
   "Dialog.HowToUseCloseButton": "Schließen",
-  
   "Dialog.Error": "Fehler",
   "Dialog.CouldNotOpenLink": "Link konnte nicht geöffnet werden: {0}",
   "Dialog.ErrorLoadingHelp": "Fehler beim Laden des Hilfsinhalts: {0}",
   "Dialog.HelpFileNotFound": "Fehler: Hilfedatei konnte nicht gefunden werden unter {0}",
-  
   "Error.FileNotFound": "Datei nicht gefunden: {0}",
   "Error.FolderNotFound": "Ordner nicht gefunden: {0}",
   "Error.UnsupportedFileType": "Nicht unterstützter Dateityp: {0}\n\nNur Bilddateien sind erlaubt.",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "Ordner kann nicht geöffnet werden:\n{0}",
   "Error.Title": "Fehler",
   "Warning.LargeFile": "Diese Datei ist sehr groß ({0} MB). Sind Sie sicher, dass Sie sie öffnen möchten?",
-  "Warning.Title": "Warnung"
+  "Warning.Title": "Warnung",
+  "Menu.ViewErrorLog": "View Error Log",
+  "Error.SerializationFailed": "Failed to save settings: {0}",
+  "Error.DeserializationFailed": "Failed to load settings: {0}",
+  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
+  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
+  "Error.LogLocation": "Error log: {0}",
+  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
+  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
 }

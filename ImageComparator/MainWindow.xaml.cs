@@ -263,14 +263,18 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("MainWindow_Constructor - Deserialize", ex);
                 opening = false;
             }
 
             // Initialize localization based on menu selection
             currentLanguageCode = GetCurrentLanguageFromMenu();
             LocalizationManager.SetLanguage(currentLanguageCode);
+
+            // Clean up old error logs (async to not block startup)
+            System.Threading.Tasks.Task.Run(() => ErrorLogger.CleanupOldLogs());
 
             UpdateUI();
             outputListView.ItemsSource = console;
@@ -286,8 +290,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Serialize", ex);
             }
 
             try
@@ -298,8 +303,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Kill Process", ex);
             }
 
             try
@@ -310,8 +316,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Delete Results.imc", ex);
             }
 
             try
@@ -322,8 +329,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Delete Directories.imc", ex);
             }
 
             try
@@ -334,8 +342,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Delete Filters.imc", ex);
             }
             Environment.Exit(0);
         }
@@ -591,8 +600,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("ClearFalsePositiveDatabaseButton_Click - Serialize", ex);
             }
 
             if (count > 0)
@@ -622,6 +632,38 @@ namespace ImageComparator
         {
             HowToUseWindow howToUseWindow = new HowToUseWindow();
             howToUseWindow.ShowDialog();
+        }
+
+        private void ViewErrorLogMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string logPath = ErrorLogger.GetCurrentLogPath();
+                
+                if (File.Exists(logPath))
+                {
+                    System.Diagnostics.Process.Start("notepad.exe", logPath);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        LocalizationManager.GetString("Error.NoErrorLog"),
+                        LocalizationManager.GetString("Error.Title"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("ViewErrorLogMenuItem_Click", ex);
+                MessageBox.Show(
+                    LocalizationManager.GetString("Error.CannotOpenFile", ex.Message),
+                    LocalizationManager.GetString("Error.Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
@@ -874,9 +916,9 @@ namespace ImageComparator
                 {
                     throw;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Silently continue with other files on deletion errors
+                    ErrorLogger.LogError($"DeleteFilesFromDisk - {Path.GetFileName(filePath)}", ex);
                 }
             }
 
@@ -1181,8 +1223,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("StopButton_Click - Resume Threads", ex);
             }
 
             try
@@ -1197,8 +1240,9 @@ namespace ImageComparator
                     {
                         throw;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        ErrorLogger.LogError($"StopButton_Click - Abort Thread {i}", ex);
                     }
                 }
             }
@@ -1206,8 +1250,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("StopButton_Click - Abort All Threads", ex);
             }
 
             try
@@ -1662,9 +1707,10 @@ namespace ImageComparator
                     currentLanguageCode = "en-US";
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Default to English if field doesn't exist
+                // Default to English if field doesn't exist or there's any serialization error
+                ErrorLogger.LogError("Deserialize - Get Language Code", ex);
                 currentLanguageCode = "en-US";
             }
             includeSubfolders = (bool)info.GetValue("includeSubfolders", typeof(bool));
@@ -2101,16 +2147,18 @@ namespace ImageComparator
                         {
                             throw;
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", ex);
                         }
                     }
                     catch (OutOfMemoryException)
                     {
                         throw;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
                     }
                 }
             }

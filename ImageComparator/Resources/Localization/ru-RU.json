@@ -17,7 +17,6 @@
   "Menu.Help": "Справка",
   "Menu.HowToUse": "Как Использовать",
   "Menu.About": "О Программе",
-  
   "Button.AddFolder": "Добавить Папку",
   "Button.FindDuplicates": "Найти Дубликаты",
   "Button.Pause": "Пауза",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "Отметить для Удаления",
   "Button.MarkAsFalsePositive": "Отметить как Ложное Срабатывание",
   "Button.RemoveMark": "Снять Отметку",
-  
   "ContextMenu.Open": "Открыть",
   "ContextMenu.OpenFileLocation": "Открыть Расположение Файла",
-  
   "Label.PreviewSelect": "Выберите файл для предварительного просмотра:",
   "Label.DragDropFolders": "Перетащите для добавления папок:",
-  
   "Console.ComparingWithSubdirs": "Сравнение изображений из {0} и его подкаталогов.",
   "Console.ComparingWithoutSubdirs": "Сравнение изображений из {0}.",
   "Console.NoDirectoriesAdded": "Каталоги не добавлены.",
   "Console.DirectoryAdded": "Добавлено {0}",
   "Console.DirectoriesOnly": "Только каталоги.",
-  
   "Console.SentToRecycleBin": "{0} файл(ов) отправлено в корзину.",
   "Console.FilesDeleted": "{0} файл(ов) удалено.",
   "Console.MarkedAsFalsePositive": "{0} файл(ов) отмечено как ложные срабатывания.",
-  
   "Console.Paused": "Приостановлено.",
   "Console.InterruptedByUser": "Прервано пользователем.",
   "Console.PathsAddedSuccessfully": "Пути успешно добавлены. Найдено {0} изображений. Чтение файлов с диска...",
   "Console.ProcessingFiles": "{0}% выполнено, обработка файлов...",
   "Console.ComparingResults": "{0}% выполнено, сравнение результатов...",
   "Console.FilesProcessedComparing": "Все файлы обработаны. Сравнение...",
-  
   "Console.AllDone": "Готово!",
   "Console.RunTimeHours": "Время выполнения составляет {0} часов {1} минут {2} секунд.",
   "Console.RunTimeMinutes": "Время выполнения составляет {0} минут {1} секунд.",
   "Console.RunTimeSeconds": "Время выполнения составляет {0} секунд.",
-  
   "Console.NoDuplicatesFound": "Дубликаты не найдены.",
   "Console.DuplicatesFound": "Найдено {0} дубликатов.",
   "Console.HighSimilarity": "Найдено {0} изображений с высокой схожестью.",
   "Console.MediumSimilarity": "Найдено {0} изображений со средней схожестью.",
   "Console.LowSimilarity": "Найдено {0} изображений с низкой схожестью.",
-  
   "Console.SessionSaved": "Сеанс сохранен в {0}",
   "Console.SessionLoaded": "Сеанс загружен из {0}",
   "Console.FalsePositiveDatabaseCleared": "База данных ложных срабатываний очищена.",
-  
   "Dialog.SaveTitle": "Сохранить Результаты",
   "Dialog.LoadTitle": "Загрузить Результаты",
   "Dialog.AddFolderTitle": "Добавить Папку",
-  
   "Dialog.ClearTitle": "Предупреждение",
   "Dialog.ClearMessage": "Вы уверены, что хотите отменить текущие результаты? Вы можете сохранить их, чтобы продолжить работу позже.",
   "Dialog.SaveButton": "Сохранить",
   "Dialog.DiscardButton": "Отменить",
   "Dialog.CancelButton": "Отмена",
-  
   "Dialog.ApplyTitle": "Предупреждение",
   "Dialog.FilesWillBeDeleted": "{0} файл(ов) будет удалено.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} результат(ов) будет отмечено как ложные срабатывания и не будут показаны в будущих результатах.\r\n",
   "Dialog.ContinueConfirmation": "Хотите продолжить?",
   "Dialog.YesButton": "Да",
   "Dialog.NoButton": "Нет",
-  
   "Dialog.AboutTitle": "О Программе",
   "Dialog.Version": "Версия:",
   "Dialog.License": "Лицензия:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator - это мощный инструмент для сравнения и анализа изображений. Он помогает вам идентифицировать похожие или дублирующиеся изображения в вашей коллекции.",
   "Dialog.Developer": "Разработано Mustafa Bahadır Şenel",
   "Dialog.CloseButton": "Закрыть",
-  
   "Dialog.HowToUseTitle": "Как Использовать",
   "Dialog.HowToUseCloseButton": "Закрыть",
-  
   "Dialog.Error": "Ошибка",
   "Dialog.CouldNotOpenLink": "Не удалось открыть ссылку: {0}",
   "Dialog.ErrorLoadingHelp": "Ошибка при загрузке справочного содержимого: {0}",
   "Dialog.HelpFileNotFound": "Ошибка: Не удалось найти файл справки в {0}",
-  
   "Error.FileNotFound": "Файл не найден: {0}",
   "Error.FolderNotFound": "Папка не найдена: {0}",
   "Error.UnsupportedFileType": "Неподдерживаемый тип файла: {0}\n\nРазрешены только файлы изображений.",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "Невозможно открыть папку:\n{0}",
   "Error.Title": "Ошибка",
   "Warning.LargeFile": "Этот файл очень большой ({0} МБ). Вы уверены, что хотите открыть его?",
-  "Warning.Title": "Предупреждение"
+  "Warning.Title": "Предупреждение",
+  "Menu.ViewErrorLog": "View Error Log",
+  "Error.SerializationFailed": "Failed to save settings: {0}",
+  "Error.DeserializationFailed": "Failed to load settings: {0}",
+  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
+  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
+  "Error.LogLocation": "Error log: {0}",
+  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
+  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
 }
