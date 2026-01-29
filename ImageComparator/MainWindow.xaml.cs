@@ -2106,168 +2106,155 @@ namespace ImageComparator
 
         private void ProcessThreadStart()
         {
-            Bitmap image, resizedImage;
             FastDCT2D fastDCT2D;
-            SHA256Managed sha = new SHA256Managed();
             int[,] result;
             double average;
             int i;
 
-            while (processThreadsiAsync < files.Count)
+            using (SHA256Managed sha = new SHA256Managed())
             {
-                lock (myLock)
+                while (processThreadsiAsync < files.Count)
                 {
-                    i = processThreadsiAsync;
-                    processThreadsiAsync++;
-                    percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
-                }
-
-                try
-                {
-                    if (duplicatesOnly)
+                    lock (myLock)
                     {
-                        image = new Bitmap(files[i]);
-                        resolutionArray[i] = image.Size;
-
-                        if (image.Width > image.Height)
-                        {
-                            orientationArray[i] = Orientation.Horizontal;
-                        }
-                        else
-                        {
-                            orientationArray[i] = Orientation.Vertical;
-                        }
-
-                        //SHA256 Calculation
-                        using (FileStream stream = File.OpenRead(files[i]))
-                        {
-                            sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
-                        }
-                        image.Dispose();
+                        i = processThreadsiAsync;
+                        processThreadsiAsync++;
+                        percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
                     }
-                    else
-                    {
-                        image = new Bitmap(files[i]);
-                        resizedImage = ResizeImage(image, 32, 32);
-                        fastDCT2D = new FastDCT2D(resizedImage, 32);
-                        result = fastDCT2D.FastDCT();
-                        resizedImage = ResizeImage(resizedImage, 9, 9);
-                        resizedImage = ConvertToGrayscale(resizedImage);
-                        average = 0;
 
-                        resolutionArray[i] = image.Size;
-
-                        if (image.Width > image.Height)
-                        {
-                            orientationArray[i] = Orientation.Horizontal;
-                        }
-                        else
-                        {
-                            orientationArray[i] = Orientation.Vertical;
-                        }
-
-                        //SHA256 Calculation
-                        using (FileStream stream = File.OpenRead(files[i]))
-                        {
-                            sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
-                        }
-
-                        //pHash(Perceptual Hash) Calculation
-                        for (int j = 0; j < 8; j++)
-                        {
-                            for (int k = 0; k < 8; k++)
-                            {
-                                average += result[j, k];
-                            }
-                        }
-
-                        average -= result[0, 0];
-                        average /= 63;
-
-                        for (int j = 0; j < 8; j++)
-                        {
-                            for (int k = 0; k < 8; k++)
-                            {
-                                if (result[j, k] < average)
-                                {
-                                    pHashArray[i, j * 8 + k] = 0;
-                                }
-                                else
-                                {
-                                    pHashArray[i, j * 8 + k] = 1;
-                                }
-                            }
-                        }
-
-                        //hdHash(Horizontal Difference Hash) Calculation
-                        for (int j = 0; j < 8; j++)
-                        {
-                            for (int k = 0; k < 9; k++)
-                            {
-                                if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(j + 1, k).R)
-                                {
-                                    hdHashArray[i, j * 8 + k] = 0;
-                                }
-                                else
-                                {
-                                    hdHashArray[i, j * 8 + k] = 1;
-                                }
-                            }
-                        }
-
-                        //vdHash(Vertical Difference Hash) Calculation
-                        for (int j = 0; j < 9; j++)
-                        {
-                            for (int k = 0; k < 8; k++)
-                            {
-                                if (resizedImage.GetPixel(j, k).R < resizedImage.GetPixel(k, k + 1).R)
-                                {
-                                    vdHashArray[i, j * 8 + k] = 0;
-                                }
-                                else
-                                {
-                                    vdHashArray[i, j * 8 + k] = 1;
-                                }
-                            }
-                        }
-
-                        //aHash(Average Hash) Calculation
-                        resizedImage = ResizeImage(resizedImage, 8, 8);
-                        average = 0;
-
-                        for (int j = 0; j < 8; j++)
-                        {
-                            for (int k = 0; k < 8; k++)
-                            {
-                                average += resizedImage.GetPixel(j, k).R;
-                            }
-                        }
-
-                        average /= 64;
-
-                        for (int j = 0; j < 8; j++)
-                        {
-                            for (int k = 0; k < 8; k++)
-                            {
-                                if (resizedImage.GetPixel(j, k).R < average)
-                                {
-                                    aHashArray[i, j * 8 + k] = 0;
-                                }
-                                else
-                                {
-                                    aHashArray[i, j * 8 + k] = 1;
-                                }
-                            }
-                        }
-                        image.Dispose();
-                        resizedImage.Dispose();
-                    }
-                }
-                catch (ArgumentException)
-                {
                     try
                     {
-                        pHashArray[i, 0] = -1;
+                        if (duplicatesOnly)
+                        {
+                            using (Bitmap image = new Bitmap(files[i]))
+                            {
+                                resolutionArray[i] = image.Size;
+
+                                if (image.Width > image.Height)
+                                {
+                                    orientationArray[i] = Orientation.Horizontal;
+                                }
+                                else
+                                {
+                                    orientationArray[i] = Orientation.Vertical;
+                                }
+                            }
+
+                            //SHA256 Calculation
+                            using (FileStream stream = File.OpenRead(files[i]))
+                            {
+                                sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
+                            }
+                        }
+                        else
+                        {
+                            using (Bitmap image = new Bitmap(files[i]))
+                            {
+                                resolutionArray[i] = image.Size;
+
+                                if (image.Width > image.Height)
+                                {
+                                    orientationArray[i] = Orientation.Horizontal;
+                                }
+                                else
+                                {
+                                    orientationArray[i] = Orientation.Vertical;
+                                }
+
+                                using (Bitmap resized32 = ResizeImage(image, 32, 32))
+                                {
+                                    fastDCT2D = new FastDCT2D(resized32, 32);
+                                    result = fastDCT2D.FastDCT();
+
+                                    //pHash(Perceptual Hash) Calculation
+                                    average = 0;
+                                    for (int j = 0; j < 8; j++)
+                                    {
+                                        for (int k = 0; k < 8; k++)
+                                        {
+                                            average += result[j, k];
+                                        }
+                                    }
+
+                                    average -= result[0, 0];
+                                    average /= 63;
+
+                                    for (int j = 0; j < 8; j++)
+                                    {
+                                        for (int k = 0; k < 8; k++)
+                                        {
+                                            pHashArray[i, j * 8 + k] = result[j, k] < average ? 0 : 1;
+                                        }
+                                    }
+
+                                    using (Bitmap resized9 = ResizeImage(resized32, 9, 9))
+                                    using (Bitmap grayscale = ConvertToGrayscale(resized9))
+                                    {
+                                        //hdHash(Horizontal Difference Hash) Calculation
+                                        for (int j = 0; j < 8; j++)
+                                        {
+                                            for (int k = 0; k < 9; k++)
+                                            {
+                                                hdHashArray[i, j * 8 + k] = grayscale.GetPixel(j, k).R < grayscale.GetPixel(j + 1, k).R ? 0 : 1;
+                                            }
+                                        }
+
+                                        //vdHash(Vertical Difference Hash) Calculation
+                                        for (int j = 0; j < 9; j++)
+                                        {
+                                            for (int k = 0; k < 8; k++)
+                                            {
+                                                vdHashArray[i, j * 8 + k] = grayscale.GetPixel(j, k).R < grayscale.GetPixel(k, k + 1).R ? 0 : 1;
+                                            }
+                                        }
+
+                                        //aHash(Average Hash) Calculation
+                                        using (Bitmap resized8 = ResizeImage(grayscale, 8, 8))
+                                        {
+                                            average = 0;
+
+                                            for (int j = 0; j < 8; j++)
+                                            {
+                                                for (int k = 0; k < 8; k++)
+                                                {
+                                                    average += resized8.GetPixel(j, k).R;
+                                                }
+                                            }
+
+                                            average /= 64;
+
+                                            for (int j = 0; j < 8; j++)
+                                            {
+                                                for (int k = 0; k < 8; k++)
+                                                {
+                                                    aHashArray[i, j * 8 + k] = resized8.GetPixel(j, k).R < average ? 0 : 1;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            //SHA256 Calculation
+                            using (FileStream stream = File.OpenRead(files[i]))
+                            {
+                                sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
+                            }
+                        }
+                    }
+                    catch (ArgumentException)
+                    {
+                        try
+                        {
+                            pHashArray[i, 0] = -1;
+                        }
+                        catch (OutOfMemoryException)
+                        {
+                            throw;
+                        }
+                        catch
+                        {
+                        }
                     }
                     catch (OutOfMemoryException)
                     {
@@ -2276,13 +2263,6 @@ namespace ImageComparator
                     catch
                     {
                     }
-                }
-                catch (OutOfMemoryException)
-                {
-                    throw;
-                }
-                catch
-                {
                 }
             }
         }
@@ -2539,41 +2519,59 @@ namespace ImageComparator
             Rectangle destRect = new Rectangle(0, 0, width, height);
             Bitmap destImage = new Bitmap(width, height);
 
-            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-            using (Graphics graphics = Graphics.FromImage(destImage))
+            try
             {
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.CompositingQuality = CompositingQuality.HighQuality;
-                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                graphics.SmoothingMode = SmoothingMode.HighQuality;
-                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
+                using (Graphics graphics = Graphics.FromImage(destImage))
                 using (ImageAttributes wrapMode = new ImageAttributes())
                 {
+                    graphics.CompositingMode = CompositingMode.SourceCopy;
+                    graphics.CompositingQuality = CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = SmoothingMode.HighQuality;
+                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
                 }
+                
+                return destImage;
             }
-            return destImage;
+            catch
+            {
+                destImage?.Dispose();
+                throw;
+            }
         }
 
         private Bitmap ConvertToGrayscale(Bitmap inputImage)
         {
             Bitmap cloneImage = (Bitmap)inputImage.Clone();
-            Graphics graphics = Graphics.FromImage(cloneImage);
-            ImageAttributes attributes = new ImageAttributes();
-            ColorMatrix colorMatrix = new ColorMatrix(new float[][]{
-                new float[] {0.299f, 0.299f, 0.299f, 0, 0},
-                new float[] {0.587f, 0.587f, 0.587f, 0, 0},
-                new float[] {0.114f, 0.114f, 0.114f, 0, 0},
-                new float[] {     0,      0,      0, 1, 0},
-                new float[] {     0,      0,      0, 0, 0}
-            });
-            attributes.SetColorMatrix(colorMatrix);
-            graphics.DrawImage(cloneImage, new Rectangle(0, 0, cloneImage.Width, cloneImage.Height), 0, 0, cloneImage.Width, cloneImage.Height, GraphicsUnit.Pixel, attributes);
-            graphics.Dispose();
-            return cloneImage;
+            
+            try
+            {
+                using (Graphics graphics = Graphics.FromImage(cloneImage))
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+                    ColorMatrix colorMatrix = new ColorMatrix(new float[][]{
+                        new float[] {0.299f, 0.299f, 0.299f, 0, 0},
+                        new float[] {0.587f, 0.587f, 0.587f, 0, 0},
+                        new float[] {0.114f, 0.114f, 0.114f, 0, 0},
+                        new float[] {     0,      0,      0, 1, 0},
+                        new float[] {     0,      0,      0, 0, 0}
+                    });
+                    attributes.SetColorMatrix(colorMatrix);
+                    graphics.DrawImage(cloneImage, new Rectangle(0, 0, cloneImage.Width, cloneImage.Height), 0, 0, cloneImage.Width, cloneImage.Height, GraphicsUnit.Pixel, attributes);
+                }
+                
+                return cloneImage;
+            }
+            catch
+            {
+                cloneImage?.Dispose();
+                throw;
+            }
         }
 
         private bool FindSimilarity(int i, int j)
