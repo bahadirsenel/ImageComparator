@@ -787,51 +787,93 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Deletes selected or marked files and removes them from the binding lists.
+        /// Handles the delete button click event to delete selected or marked items.
         /// Optimized implementation using HashSet for O(1) lookups.
         /// Time Complexity: O(n + m) where n is the total number of items in binding lists and m is the number of unique files to delete.
         /// Space Complexity: O(m) where m is the number of files to delete.
         /// </summary>
         private void DeleteSelectedButton_Click(object sender, RoutedEventArgs e)
         {
-            // Use HashSet for O(1) lookup instead of O(n) linear search
+            // Step 1: Collect files to delete
+            var filesToDelete = CollectFilesToDelete();
+            
+            // Step 2: Delete files from disk
+            int deletedCount = DeleteFilesFromDisk(filesToDelete);
+            
+            // Step 3: Remove deleted items from lists
+            RemoveDeletedItemsFromLists(filesToDelete);
+            
+            // Step 4: Remove duplicate pairs
+            RemoveDuplicatePairs();
+            
+            // Step 5: Show results to user
+            ReportDeletionResults(deletedCount, filesToDelete.Count);
+        }
+
+        /// <summary>
+        /// Collects unique file paths to delete from both binding lists
+        /// </summary>
+        /// <returns>Set of file paths to delete</returns>
+        private HashSet<string> CollectFilesToDelete()
+        {
             var filesToDelete = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // Collect from bindingList1
+            foreach (var item in bindingList1.Where(ShouldDelete))
+            {
+                filesToDelete.Add(item.text);
+            }
+
+            // Collect from bindingList2
+            foreach (var item in bindingList2.Where(ShouldDelete))
+            {
+                filesToDelete.Add(item.text);
+            }
+
+            return filesToDelete;
+        }
+
+        /// <summary>
+        /// Determines if an item should be deleted based on current mode
+        /// </summary>
+        /// <param name="item">The item to check</param>
+        /// <returns>True if item should be deleted, false otherwise</returns>
+        private bool ShouldDelete(ListViewDataItem item)
+        {
+            if (deleteMarkedItems)
+            {
+                return item.state == (int)State.MarkedForDeletion;
+            }
+            else
+            {
+                return item.isChecked;
+            }
+        }
+
+        /// <summary>
+        /// Deletes files from disk (either permanently or to recycle bin)
+        /// </summary>
+        /// <param name="filesToDelete">Set of file paths to delete</param>
+        /// <returns>Number of successfully deleted files</returns>
+        private int DeleteFilesFromDisk(HashSet<string> filesToDelete)
+        {
             int deletedCount = 0;
 
-            // O(n) - Single pass to collect unique files to delete from bindingList1
-            foreach (var item in bindingList1.Where(x => 
-                (deleteMarkedItems && x.state == (int)State.MarkedForDeletion) || 
-                (!deleteMarkedItems && x.isChecked)))
-            {
-                filesToDelete.Add(item.text);  // O(1) HashSet add (duplicates automatically ignored)
-            }
-
-            // O(n) - Single pass to collect unique files to delete from bindingList2
-            foreach (var item in bindingList2.Where(x => 
-                (deleteMarkedItems && x.state == (int)State.MarkedForDeletion) || 
-                (!deleteMarkedItems && x.isChecked)))
-            {
-                filesToDelete.Add(item.text);  // O(1) HashSet add (duplicates automatically ignored)
-            }
-
-            // O(m) - Delete files where m is number of unique files to delete
             foreach (var filePath in filesToDelete)
             {
+                if (!File.Exists(filePath))
+                {
+                    continue; // Already deleted or never existed
+                }
+
                 try
                 {
-                    if (File.Exists(filePath))
-                    {
-                        if (deletePermanentlyMenuItem.IsChecked)
-                        {
-                            FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-                        }
-                        else
-                        {
-                            FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                        }
-                        // Only increment count after successful deletion
-                        deletedCount++;
-                    }
+                    var recycleOption = deletePermanentlyMenuItem.IsChecked 
+                        ? RecycleOption.DeletePermanently 
+                        : RecycleOption.SendToRecycleBin;
+                    
+                    FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, recycleOption);
+                    deletedCount++;
                 }
                 catch (OutOfMemoryException)
                 {
@@ -843,18 +885,36 @@ namespace ImageComparator
                 }
             }
 
-            // O(n) - Remove deleted items from binding lists (work backwards to avoid index issues)
+            return deletedCount;
+        }
+
+        /// <summary>
+        /// Removes deleted items from both binding lists
+        /// </summary>
+        /// <param name="deletedFiles">Set of deleted file paths</param>
+        private void RemoveDeletedItemsFromLists(HashSet<string> deletedFiles)
+        {
+            // Remove from end to avoid index shifting issues
             for (int i = bindingList1.Count - 1; i >= 0; i--)
             {
-                if (filesToDelete.Contains(bindingList1[i].text) || filesToDelete.Contains(bindingList2[i].text))
+                if (deletedFiles.Contains(bindingList1[i].text) || 
+                    deletedFiles.Contains(bindingList2[i].text))
                 {
                     bindingList1.RemoveAt(i);
                     bindingList2.RemoveAt(i);
                 }
             }
+        }
 
-            // O(n) - Remove duplicate pairs using HashSet for tracking seen pairs
+        /// <summary>
+        /// Removes duplicate pairs from the binding lists.
+        /// Two pairs are considered duplicates if they contain the same files 
+        /// in any order: (A,B) is the same as (B,A)
+        /// </summary>
+        private void RemoveDuplicatePairs()
+        {
             var seenPairs = new HashSet<string>();
+
             for (int i = bindingList1.Count - 1; i >= 0; i--)
             {
                 // Create a normalized pair key - order doesn't matter (A,B) == (B,A)
@@ -871,11 +931,18 @@ namespace ImageComparator
                 }
                 else
                 {
-                    seenPairs.Add(pairKey);  // O(1) HashSet add
+                    seenPairs.Add(pairKey);
                 }
             }
+        }
 
-            // Show results to user
+        /// <summary>
+        /// Shows deletion results to the user via the console
+        /// </summary>
+        /// <param name="deletedCount">Number of successfully deleted files</param>
+        /// <param name="requestedCount">Total number of files requested for deletion</param>
+        private void ReportDeletionResults(int deletedCount, int requestedCount)
+        {
             if (deletedCount > 0)
             {
                 if (sendToRecycleBinMenuItem.IsChecked)
@@ -887,7 +954,7 @@ namespace ImageComparator
                     console.Add(LocalizationManager.GetString("Console.FilesDeleted", deletedCount));
                 }
             }
-            else if (filesToDelete.Count > 0)
+            else if (requestedCount > 0)
             {
                 // Files were selected for deletion but none were successfully deleted
                 if (sendToRecycleBinMenuItem.IsChecked)
