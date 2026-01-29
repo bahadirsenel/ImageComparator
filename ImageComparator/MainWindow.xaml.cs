@@ -87,6 +87,27 @@ namespace ImageComparator
         }
         #endregion
 
+        #region Constants
+        // Hash calculation constants
+        private const int PHASH_RESIZE_DIMENSION = 32;
+        private const int DHASH_RESIZE_DIMENSION = 9;
+        private const int AHASH_RESIZE_DIMENSION = 8;
+
+        // Hash comparison thresholds
+        private const int EXACT_DUPLICATE_THRESHOLD = 1;
+        private const int PHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
+        private const int PHASH_MEDIUM_CONFIDENCE_THRESHOLD = 12;
+        private const int PHASH_LOW_CONFIDENCE_THRESHOLD = 21;
+        private const int HDHASH_HIGH_CONFIDENCE_THRESHOLD = 10;
+        private const int HDHASH_MEDIUM_CONFIDENCE_THRESHOLD = 13;
+        private const int HDHASH_LOW_CONFIDENCE_THRESHOLD = 18;
+        private const int VDHASH_HIGH_CONFIDENCE_THRESHOLD = 10;
+        private const int VDHASH_MEDIUM_CONFIDENCE_THRESHOLD = 13;
+        private const int VDHASH_LOW_CONFIDENCE_THRESHOLD = 18;
+        private const int AHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
+        private const int AHASH_MEDIUM_CONFIDENCE_THRESHOLD = 12;
+        #endregion
+
         #region Enums
         public enum Orientation
         {
@@ -2145,7 +2166,8 @@ namespace ImageComparator
                             //SHA256 Calculation
                             using (FileStream stream = File.OpenRead(files[i]))
                             {
-                                sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
+                                byte[] hash = sha.ComputeHash(stream);
+                                sha256Array[i] = BitConverter.ToString(hash).Replace("-", string.Empty);
                             }
                         }
                         else
@@ -2163,7 +2185,7 @@ namespace ImageComparator
                                     orientationArray[i] = Orientation.Vertical;
                                 }
 
-                                using (Bitmap resized32 = ResizeImage(image, 32, 32))
+                                using (Bitmap resized32 = ResizeImage(image, PHASH_RESIZE_DIMENSION, PHASH_RESIZE_DIMENSION))
                                 {
                                     fastDCT2D = new FastDCT2D(resized32, 32);
                                     result = fastDCT2D.FastDCT();
@@ -2189,7 +2211,7 @@ namespace ImageComparator
                                         }
                                     }
 
-                                    using (Bitmap resized9 = ResizeImage(resized32, 9, 9))
+                                    using (Bitmap resized9 = ResizeImage(resized32, DHASH_RESIZE_DIMENSION, DHASH_RESIZE_DIMENSION))
                                     using (Bitmap grayscale = ConvertToGrayscale(resized9))
                                     {
                                         //hdHash(Horizontal Difference Hash) Calculation
@@ -2211,7 +2233,7 @@ namespace ImageComparator
                                         }
 
                                         //aHash(Average Hash) Calculation
-                                        using (Bitmap resized8 = ResizeImage(grayscale, 8, 8))
+                                        using (Bitmap resized8 = ResizeImage(grayscale, AHASH_RESIZE_DIMENSION, AHASH_RESIZE_DIMENSION))
                                         {
                                             average = 0;
 
@@ -2240,7 +2262,8 @@ namespace ImageComparator
                             //SHA256 Calculation
                             using (FileStream stream = File.OpenRead(files[i]))
                             {
-                                sha256Array[i] = BitConverter.ToString(sha.ComputeHash(stream)).Replace("-", string.Empty);
+                                byte[] hash = sha.ComputeHash(stream);
+                                sha256Array[i] = BitConverter.ToString(hash).Replace("-", string.Empty);
                             }
                         }
                     }
@@ -2634,7 +2657,7 @@ namespace ImageComparator
                         }
                     }
 
-                    if (sha256Array[i] == sha256Array[j] && pHashHammingDistance < 1 && hdHashHammingDistance < 1 && vdHashHammingDistance < 1 && aHashHammingDistance < 1)
+                    if (sha256Array[i] == sha256Array[j] && pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD)
                     {
                         lock (myLock2)
                         {
@@ -2644,7 +2667,7 @@ namespace ImageComparator
                         }
                         return true;
                     }
-                    else if (pHashHammingDistance < 9 && hdHashHammingDistance < 10 && vdHashHammingDistance < 10 && aHashHammingDistance < 9)
+                    else if (pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD)
                     {
                         lock (myLock2)
                         {
@@ -2653,7 +2676,7 @@ namespace ImageComparator
                             highConfidenceSimilarImageCount++;
                         }
                     }
-                    else if ((pHashHammingDistance < 9 && hdHashHammingDistance < 13 && vdHashHammingDistance < 13 && aHashHammingDistance < 12) || (hdHashHammingDistance < 10 && pHashHammingDistance < 12 && vdHashHammingDistance < 13 && aHashHammingDistance < 12) || (vdHashHammingDistance < 10 && pHashHammingDistance < 12 && hdHashHammingDistance < 13 && aHashHammingDistance < 12) || (aHashHammingDistance < 9 && pHashHammingDistance < 12 && hdHashHammingDistance < 13 && vdHashHammingDistance < 13))
+                    else if ((pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD))
                     {
                         lock (myLock2)
                         {
@@ -2662,7 +2685,7 @@ namespace ImageComparator
                             mediumConfidenceSimilarImageCount++;
                         }
                     }
-                    else if ((pHashHammingDistance < 9 || hdHashHammingDistance < 10 || vdHashHammingDistance < 10) && aHashHammingDistance < 9 && pHashHammingDistance < 21 && hdHashHammingDistance < 18 && vdHashHammingDistance < 18)
+                    else if ((pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD || hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD || vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD) && aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_LOW_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_LOW_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_LOW_CONFIDENCE_THRESHOLD)
                     {
                         lock (myLock2)
                         {
@@ -2735,7 +2758,6 @@ namespace ImageComparator
                     bitmapImage.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
                     bitmapImage.EndInit();
                     previewImage1.Source = bitmapImage;
-                    GC.Collect();
                 }
                 catch (OutOfMemoryException)
                 {
@@ -2764,7 +2786,6 @@ namespace ImageComparator
                     bitmapImage.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
                     bitmapImage.EndInit();
                     previewImage2.Source = bitmapImage;
-                    GC.Collect();
                 }
                 catch (OutOfMemoryException)
                 {
