@@ -788,9 +788,8 @@ namespace ImageComparator
 
         /// <summary>
         /// Handles the delete button click event to delete selected or marked items.
-        /// Optimized implementation using HashSet for O(1) lookups.
-        /// Time Complexity: O(n + m) where n is the total number of items in binding lists and m is the number of unique files to delete.
-        /// Space Complexity: O(m) where m is the number of files to delete.
+        /// This method orchestrates the deletion workflow by coordinating helper methods
+        /// that collect files, delete them from disk, update the UI lists, and report results.
         /// </summary>
         private void DeleteSelectedButton_Click(object sender, RoutedEventArgs e)
         {
@@ -811,9 +810,11 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Collects unique file paths to delete from both binding lists
+        /// Collects unique file paths to delete from both binding lists.
+        /// Uses HashSet for O(1) lookups and automatic duplicate removal.
+        /// Time Complexity: O(n) where n is the total number of items in binding lists.
         /// </summary>
-        /// <returns>Set of file paths to delete</returns>
+        /// <returns>Set of unique file paths to delete</returns>
         private HashSet<string> CollectFilesToDelete()
         {
             var filesToDelete = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -853,27 +854,26 @@ namespace ImageComparator
         /// <summary>
         /// Deletes files from disk (either permanently or to recycle bin)
         /// </summary>
-        /// <param name="filesToDelete">Set of file paths to delete</param>
-        /// <returns>Number of successfully deleted files</returns>
+        /// <param name="filesToDelete">Set of file paths to attempt to delete</param>
+        /// <returns>The count of files that were successfully deleted from the filesystem</returns>
         private int DeleteFilesFromDisk(HashSet<string> filesToDelete)
         {
             int deletedCount = 0;
 
             foreach (var filePath in filesToDelete)
             {
-                if (!File.Exists(filePath))
-                {
-                    continue; // Already deleted or never existed
-                }
-
                 try
                 {
-                    var recycleOption = deletePermanentlyMenuItem.IsChecked 
-                        ? RecycleOption.DeletePermanently 
-                        : RecycleOption.SendToRecycleBin;
-                    
-                    FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, recycleOption);
-                    deletedCount++;
+                    // Check if file exists and delete in same try block to handle race conditions
+                    if (File.Exists(filePath))
+                    {
+                        var recycleOption = deletePermanentlyMenuItem.IsChecked 
+                            ? RecycleOption.DeletePermanently 
+                            : RecycleOption.SendToRecycleBin;
+                        
+                        FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, recycleOption);
+                        deletedCount++;
+                    }
                 }
                 catch (OutOfMemoryException)
                 {
@@ -889,16 +889,19 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Removes deleted items from both binding lists
+        /// Removes items from both binding lists where at least one file in the pair was targeted for deletion.
+        /// Uses OR condition: removes a pair if either file1 OR file2 was in the deletion set.
+        /// This is appropriate for duplicate pairs where deleting either file removes the duplicate relationship.
+        /// Time Complexity: O(n) where n is the number of items in binding lists.
         /// </summary>
-        /// <param name="deletedFiles">Set of deleted file paths</param>
-        private void RemoveDeletedItemsFromLists(HashSet<string> deletedFiles)
+        /// <param name="filesToDelete">Set of file paths that were targeted for deletion</param>
+        private void RemoveDeletedItemsFromLists(HashSet<string> filesToDelete)
         {
             // Remove from end to avoid index shifting issues
             for (int i = bindingList1.Count - 1; i >= 0; i--)
             {
-                if (deletedFiles.Contains(bindingList1[i].text) || 
-                    deletedFiles.Contains(bindingList2[i].text))
+                if (filesToDelete.Contains(bindingList1[i].text) || 
+                    filesToDelete.Contains(bindingList2[i].text))
                 {
                     bindingList1.RemoveAt(i);
                     bindingList2.RemoveAt(i);
@@ -909,7 +912,9 @@ namespace ImageComparator
         /// <summary>
         /// Removes duplicate pairs from the binding lists.
         /// Two pairs are considered duplicates if they contain the same files 
-        /// in any order: (A,B) is the same as (B,A)
+        /// in any order: (A,B) is the same as (B,A).
+        /// Time Complexity: O(n) where n is the number of items in binding lists.
+        /// Uses HashSet for O(1) lookup performance.
         /// </summary>
         private void RemoveDuplicatePairs()
         {
@@ -937,10 +942,10 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Shows deletion results to the user via the console
+        /// Shows deletion results to the user via the application log panel
         /// </summary>
-        /// <param name="deletedCount">Number of successfully deleted files</param>
-        /// <param name="requestedCount">Total number of files requested for deletion</param>
+        /// <param name="deletedCount">Number of files successfully deleted from disk</param>
+        /// <param name="requestedCount">Total number of files that were requested for deletion</param>
         private void ReportDeletionResults(int deletedCount, int requestedCount)
         {
             if (deletedCount > 0)
