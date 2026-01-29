@@ -1868,6 +1868,7 @@ namespace ImageComparator
             resetToDefaultsMenuItem.Header = LocalizationManager.GetString("Menu.ResetToDefaults");
             helpMenuItem.Header = LocalizationManager.GetString("Menu.Help");
             howToUseMenuItem.Header = LocalizationManager.GetString("Menu.HowToUse");
+            viewErrorLogMenuItem.Header = LocalizationManager.GetString("Menu.ViewErrorLog");
             aboutMenuItem.Header = LocalizationManager.GetString("Menu.About");
 
             // Update buttons

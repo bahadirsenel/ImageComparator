@@ -149,7 +149,8 @@ namespace ImageComparator.Helpers
                 foreach (var file in files)
                 {
                     var fileInfo = new FileInfo(file);
-                    if (fileInfo.LastWriteTime < cutoffDate)
+                    // Use CreationTime instead of LastWriteTime for more reliable age detection
+                    if (fileInfo.CreationTime < cutoffDate)
                     {
                         File.Delete(file);
                     }
