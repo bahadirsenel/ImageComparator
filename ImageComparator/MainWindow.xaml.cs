@@ -799,23 +799,19 @@ namespace ImageComparator
             int deletedCount = 0;
 
             // O(n) - Single pass to collect unique files to delete from bindingList1
-            foreach (var item in bindingList1)
+            foreach (var item in bindingList1.Where(x => 
+                (deleteMarkedItems && x.state == (int)State.MarkedForDeletion) || 
+                (!deleteMarkedItems && x.isChecked)))
             {
-                if ((deleteMarkedItems && item.state == (int)State.MarkedForDeletion) || 
-                    (!deleteMarkedItems && item.isChecked))
-                {
-                    filesToDelete.Add(item.text);  // O(1) HashSet add (duplicates automatically ignored)
-                }
+                filesToDelete.Add(item.text);  // O(1) HashSet add (duplicates automatically ignored)
             }
 
             // O(n) - Single pass to collect unique files to delete from bindingList2
-            foreach (var item in bindingList2)
+            foreach (var item in bindingList2.Where(x => 
+                (deleteMarkedItems && x.state == (int)State.MarkedForDeletion) || 
+                (!deleteMarkedItems && x.isChecked)))
             {
-                if ((deleteMarkedItems && item.state == (int)State.MarkedForDeletion) || 
-                    (!deleteMarkedItems && item.isChecked))
-                {
-                    filesToDelete.Add(item.text);  // O(1) HashSet add (duplicates automatically ignored)
-                }
+                filesToDelete.Add(item.text);  // O(1) HashSet add (duplicates automatically ignored)
             }
 
             // O(m) - Delete files where m is number of unique files to delete
@@ -890,6 +886,11 @@ namespace ImageComparator
                 {
                     console.Add(LocalizationManager.GetString("Console.FilesDeleted", deletedCount));
                 }
+            }
+            else if (filesToDelete.Count > 0)
+            {
+                // Files were selected for deletion but none were successfully deleted
+                console.Add(LocalizationManager.GetString("Console.FilesDeleted", 0));
             }
         }
 
