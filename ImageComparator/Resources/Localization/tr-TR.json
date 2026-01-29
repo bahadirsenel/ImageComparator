@@ -101,5 +101,15 @@
   "Dialog.Error": "Hata",
   "Dialog.CouldNotOpenLink": "Link açılamadı: {0}",
   "Dialog.ErrorLoadingHelp": "Yardım içeriği yüklenirken hata oluştu: {0}",
-  "Dialog.HelpFileNotFound": "Hata: Yardım dosyası bulunamadı: {0}"
+  "Dialog.HelpFileNotFound": "Hata: Yardım dosyası bulunamadı: {0}",
+  
+  "Error.FileNotFound": "Dosya bulunamadı: {0}",
+  "Error.FolderNotFound": "Klasör bulunamadı: {0}",
+  "Error.UnsupportedFileType": "Desteklenmeyen dosya türü: {0}\n\nYalnızca resim dosyalarına izin verilir.",
+  "Error.NoDefaultApp": "{0} dosyaları için varsayılan uygulama yok.\n\n{1}",
+  "Error.CannotOpenFile": "Dosya açılamıyor:\n{0}",
+  "Error.CannotOpenFolder": "Klasör açılamıyor:\n{0}",
+  "Error.Title": "Hata",
+  "Warning.LargeFile": "Bu dosya çok büyük ({0} MB). Açmak istediğinizden emin misiniz?",
+  "Warning.Title": "Uyarı"
 }

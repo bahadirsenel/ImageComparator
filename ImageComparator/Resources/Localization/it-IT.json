@@ -101,5 +101,15 @@
   "Dialog.Error": "Errore",
   "Dialog.CouldNotOpenLink": "Impossibile aprire il collegamento: {0}",
   "Dialog.ErrorLoadingHelp": "Errore nel caricamento del contenuto della guida: {0}",
-  "Dialog.HelpFileNotFound": "Errore: Impossibile trovare il file della guida in {0}"
+  "Dialog.HelpFileNotFound": "Errore: Impossibile trovare il file della guida in {0}",
+  
+  "Error.FileNotFound": "File non trovato: {0}",
+  "Error.FolderNotFound": "Cartella non trovata: {0}",
+  "Error.UnsupportedFileType": "Tipo di file non supportato: {0}\n\nSono consentiti solo file immagine.",
+  "Error.NoDefaultApp": "Nessuna applicazione predefinita per i file {0}.\n\n{1}",
+  "Error.CannotOpenFile": "Impossibile aprire il file:\n{0}",
+  "Error.CannotOpenFolder": "Impossibile aprire la cartella:\n{0}",
+  "Error.Title": "Errore",
+  "Warning.LargeFile": "Questo file è molto grande ({0} MB). Sei sicuro di volerlo aprire?",
+  "Warning.Title": "Avviso"
 }

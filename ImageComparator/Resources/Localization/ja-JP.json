@@ -101,5 +101,15 @@
   "Dialog.Error": "エラー",
   "Dialog.CouldNotOpenLink": "リンクを開けませんでした: {0}",
   "Dialog.ErrorLoadingHelp": "ヘルプコンテンツの読み込み中にエラーが発生しました: {0}",
-  "Dialog.HelpFileNotFound": "エラー: {0}でヘルプファイルが見つかりませんでした"
+  "Dialog.HelpFileNotFound": "エラー: {0}でヘルプファイルが見つかりませんでした",
+  
+  "Error.FileNotFound": "ファイルが見つかりません: {0}",
+  "Error.FolderNotFound": "フォルダが見つかりません: {0}",
+  "Error.UnsupportedFileType": "サポートされていないファイルタイプ: {0}\n\n画像ファイルのみ許可されています。",
+  "Error.NoDefaultApp": "{0}ファイルのデフォルトアプリケーションがありません。\n\n{1}",
+  "Error.CannotOpenFile": "ファイルを開けません:\n{0}",
+  "Error.CannotOpenFolder": "フォルダを開けません:\n{0}",
+  "Error.Title": "エラー",
+  "Warning.LargeFile": "このファイルは非常に大きいです（{0} MB）。本当に開きますか？",
+  "Warning.Title": "警告"
 }

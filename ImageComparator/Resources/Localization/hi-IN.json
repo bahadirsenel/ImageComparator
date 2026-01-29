@@ -101,5 +101,15 @@
   "Dialog.Error": "त्रुटि",
   "Dialog.CouldNotOpenLink": "लिंक नहीं खोला जा सका: {0}",
   "Dialog.ErrorLoadingHelp": "सहायता सामग्री लोड करने में त्रुटि: {0}",
-  "Dialog.HelpFileNotFound": "त्रुटि: {0} पर सहायता फ़ाइल नहीं मिली"
+  "Dialog.HelpFileNotFound": "त्रुटि: {0} पर सहायता फ़ाइल नहीं मिली",
+  
+  "Error.FileNotFound": "फ़ाइल नहीं मिली: {0}",
+  "Error.FolderNotFound": "फ़ोल्डर नहीं मिला: {0}",
+  "Error.UnsupportedFileType": "असमर्थित फ़ाइल प्रकार: {0}\n\nकेवल छवि फ़ाइलों की अनुमति है।",
+  "Error.NoDefaultApp": "{0} फ़ाइलों के लिए कोई डिफ़ॉल्ट एप्लिकेशन नहीं।\n\n{1}",
+  "Error.CannotOpenFile": "फ़ाइल नहीं खोली जा सकती:\n{0}",
+  "Error.CannotOpenFolder": "फ़ोल्डर नहीं खोला जा सकता:\n{0}",
+  "Error.Title": "त्रुटि",
+  "Warning.LargeFile": "यह फ़ाइल बहुत बड़ी है ({0} MB)। क्या आप वाकई इसे खोलना चाहते हैं?",
+  "Warning.Title": "चेतावनी"
 }

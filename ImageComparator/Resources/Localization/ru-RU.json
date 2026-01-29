@@ -101,5 +101,15 @@
   "Dialog.Error": "Ошибка",
   "Dialog.CouldNotOpenLink": "Не удалось открыть ссылку: {0}",
   "Dialog.ErrorLoadingHelp": "Ошибка при загрузке справочного содержимого: {0}",
-  "Dialog.HelpFileNotFound": "Ошибка: Не удалось найти файл справки в {0}"
+  "Dialog.HelpFileNotFound": "Ошибка: Не удалось найти файл справки в {0}",
+  
+  "Error.FileNotFound": "Файл не найден: {0}",
+  "Error.FolderNotFound": "Папка не найдена: {0}",
+  "Error.UnsupportedFileType": "Неподдерживаемый тип файла: {0}\n\nРазрешены только файлы изображений.",
+  "Error.NoDefaultApp": "Нет приложения по умолчанию для файлов {0}.\n\n{1}",
+  "Error.CannotOpenFile": "Невозможно открыть файл:\n{0}",
+  "Error.CannotOpenFolder": "Невозможно открыть папку:\n{0}",
+  "Error.Title": "Ошибка",
+  "Warning.LargeFile": "Этот файл очень большой ({0} МБ). Вы уверены, что хотите открыть его?",
+  "Warning.Title": "Предупреждение"
 }

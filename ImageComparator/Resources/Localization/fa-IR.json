@@ -101,5 +101,15 @@
   "Dialog.Error": "خطا",
   "Dialog.CouldNotOpenLink": "نمی‌توان پیوند را باز کرد: {0}",
   "Dialog.ErrorLoadingHelp": "خطا در بارگیری محتوای راهنما: {0}",
-  "Dialog.HelpFileNotFound": "خطا: فایل راهنما در {0} پیدا نشد"
+  "Dialog.HelpFileNotFound": "خطا: فایل راهنما در {0} پیدا نشد",
+  
+  "Error.FileNotFound": "فایل یافت نشد: {0}",
+  "Error.FolderNotFound": "پوشه یافت نشد: {0}",
+  "Error.UnsupportedFileType": "نوع فایل پشتیبانی نشده: {0}\n\nفقط فایل‌های تصویری مجاز هستند.",
+  "Error.NoDefaultApp": "برنامه پیش‌فرض برای فایل‌های {0} وجود ندارد.\n\n{1}",
+  "Error.CannotOpenFile": "امکان باز کردن فایل وجود ندارد:\n{0}",
+  "Error.CannotOpenFolder": "امکان باز کردن پوشه وجود ندارد:\n{0}",
+  "Error.Title": "خطا",
+  "Warning.LargeFile": "این فایل بسیار بزرگ است ({0} مگابایت). آیا مطمئن هستید که می‌خواهید آن را باز کنید؟",
+  "Warning.Title": "هشدار"
 }

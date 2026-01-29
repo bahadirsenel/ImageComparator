@@ -101,5 +101,15 @@
   "Dialog.Error": "Fehler",
   "Dialog.CouldNotOpenLink": "Link konnte nicht geöffnet werden: {0}",
   "Dialog.ErrorLoadingHelp": "Fehler beim Laden des Hilfsinhalts: {0}",
-  "Dialog.HelpFileNotFound": "Fehler: Hilfedatei konnte nicht gefunden werden unter {0}"
+  "Dialog.HelpFileNotFound": "Fehler: Hilfedatei konnte nicht gefunden werden unter {0}",
+  
+  "Error.FileNotFound": "Datei nicht gefunden: {0}",
+  "Error.FolderNotFound": "Ordner nicht gefunden: {0}",
+  "Error.UnsupportedFileType": "Nicht unterstützter Dateityp: {0}\n\nNur Bilddateien sind erlaubt.",
+  "Error.NoDefaultApp": "Keine Standardanwendung für {0}-Dateien.\n\n{1}",
+  "Error.CannotOpenFile": "Datei kann nicht geöffnet werden:\n{0}",
+  "Error.CannotOpenFolder": "Ordner kann nicht geöffnet werden:\n{0}",
+  "Error.Title": "Fehler",
+  "Warning.LargeFile": "Diese Datei ist sehr groß ({0} MB). Sind Sie sicher, dass Sie sie öffnen möchten?",
+  "Warning.Title": "Warnung"
 }

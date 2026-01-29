@@ -101,5 +101,15 @@
   "Dialog.Error": "Fout",
   "Dialog.CouldNotOpenLink": "Kon link niet openen: {0}",
   "Dialog.ErrorLoadingHelp": "Fout bij laden van helpinhoud: {0}",
-  "Dialog.HelpFileNotFound": "Fout: Kon helpbestand niet vinden op {0}"
+  "Dialog.HelpFileNotFound": "Fout: Kon helpbestand niet vinden op {0}",
+  
+  "Error.FileNotFound": "Bestand niet gevonden: {0}",
+  "Error.FolderNotFound": "Map niet gevonden: {0}",
+  "Error.UnsupportedFileType": "Niet-ondersteund bestandstype: {0}\n\nAlleen afbeeldingsbestanden zijn toegestaan.",
+  "Error.NoDefaultApp": "Geen standaardtoepassing voor {0}-bestanden.\n\n{1}",
+  "Error.CannotOpenFile": "Kan bestand niet openen:\n{0}",
+  "Error.CannotOpenFolder": "Kan map niet openen:\n{0}",
+  "Error.Title": "Fout",
+  "Warning.LargeFile": "Dit bestand is erg groot ({0} MB). Weet u zeker dat u het wilt openen?",
+  "Warning.Title": "Waarschuwing"
 }

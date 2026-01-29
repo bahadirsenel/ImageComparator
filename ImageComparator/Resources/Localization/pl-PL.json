@@ -101,5 +101,15 @@
   "Dialog.Error": "Błąd",
   "Dialog.CouldNotOpenLink": "Nie można otworzyć linku: {0}",
   "Dialog.ErrorLoadingHelp": "Błąd podczas ładowania zawartości pomocy: {0}",
-  "Dialog.HelpFileNotFound": "Błąd: Nie można znaleźć pliku pomocy w {0}"
+  "Dialog.HelpFileNotFound": "Błąd: Nie można znaleźć pliku pomocy w {0}",
+  
+  "Error.FileNotFound": "Nie znaleziono pliku: {0}",
+  "Error.FolderNotFound": "Nie znaleziono folderu: {0}",
+  "Error.UnsupportedFileType": "Nieobsługiwany typ pliku: {0}\n\nDozwolone są tylko pliki obrazów.",
+  "Error.NoDefaultApp": "Brak domyślnej aplikacji dla plików {0}.\n\n{1}",
+  "Error.CannotOpenFile": "Nie można otworzyć pliku:\n{0}",
+  "Error.CannotOpenFolder": "Nie można otworzyć folderu:\n{0}",
+  "Error.Title": "Błąd",
+  "Warning.LargeFile": "Ten plik jest bardzo duży ({0} MB). Czy na pewno chcesz go otworzyć?",
+  "Warning.Title": "Ostrzeżenie"
 }

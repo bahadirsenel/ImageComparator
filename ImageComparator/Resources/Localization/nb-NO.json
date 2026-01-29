@@ -101,5 +101,15 @@
   "Dialog.Error": "Feil",
   "Dialog.CouldNotOpenLink": "Kunne ikke åpne lenke: {0}",
   "Dialog.ErrorLoadingHelp": "Feil ved lasting av hjelpeinnhold: {0}",
-  "Dialog.HelpFileNotFound": "Feil: Kunne ikke finne hjelpefil på {0}"
+  "Dialog.HelpFileNotFound": "Feil: Kunne ikke finne hjelpefil på {0}",
+  
+  "Error.FileNotFound": "Filen ble ikke funnet: {0}",
+  "Error.FolderNotFound": "Mappen ble ikke funnet: {0}",
+  "Error.UnsupportedFileType": "Ikke-støttet filtype: {0}\n\nKun bildefiler er tillatt.",
+  "Error.NoDefaultApp": "Ingen standardapplikasjon for {0}-filer.\n\n{1}",
+  "Error.CannotOpenFile": "Kan ikke åpne filen:\n{0}",
+  "Error.CannotOpenFolder": "Kan ikke åpne mappen:\n{0}",
+  "Error.Title": "Feil",
+  "Warning.LargeFile": "Denne filen er veldig stor ({0} MB). Er du sikker på at du vil åpne den?",
+  "Warning.Title": "Advarsel"
 }
