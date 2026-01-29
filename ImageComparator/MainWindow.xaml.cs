@@ -890,7 +890,14 @@ namespace ImageComparator
             else if (filesToDelete.Count > 0)
             {
                 // Files were selected for deletion but none were successfully deleted
-                console.Add(LocalizationManager.GetString("Console.FilesDeleted", 0));
+                if (sendToRecycleBinMenuItem.IsChecked)
+                {
+                    console.Add(LocalizationManager.GetString("Console.SentToRecycleBin", 0));
+                }
+                else
+                {
+                    console.Add(LocalizationManager.GetString("Console.FilesDeleted", 0));
+                }
             }
         }
 
