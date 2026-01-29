@@ -786,278 +786,117 @@ namespace ImageComparator
             }
         }
 
+        /// <summary>
+        /// Deletes selected or marked files and removes them from the binding lists.
+        /// Optimized implementation using HashSet for O(1) lookups.
+        /// Time Complexity: O(n + m) where n is the total number of items in binding lists and m is the number of unique files to delete.
+        /// Space Complexity: O(m) where m is the number of files to delete.
+        /// </summary>
         private void DeleteSelectedButton_Click(object sender, RoutedEventArgs e)
         {
-            List<ListViewDataItem> selectedItems1 = new List<ListViewDataItem>();
-            List<ListViewDataItem> selectedItems2 = new List<ListViewDataItem>();
+            // Use HashSet for O(1) lookup instead of O(n) linear search
+            var filesToDelete = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            int deletedCount = 0;
 
-            for (int i = 0; i < bindingList1.Count; i++)
+            // O(n) - Single pass to collect unique files to delete from bindingList1
+            foreach (var item in bindingList1.Where(x => 
+                (deleteMarkedItems && x.state == (int)State.MarkedForDeletion) || 
+                (!deleteMarkedItems && x.isChecked)))
             {
-                if (((deleteMarkedItems && bindingList1[i].state == (int)State.MarkedForDeletion) || (!deleteMarkedItems && bindingList1[i].isChecked)) && !FileAddedBefore(selectedItems1, bindingList1[i]) && !FileAddedBefore(selectedItems2, bindingList1[i]))
+                filesToDelete.Add(item.text);  // O(1) HashSet add (duplicates automatically ignored)
+            }
+
+            // O(n) - Single pass to collect unique files to delete from bindingList2
+            foreach (var item in bindingList2.Where(x => 
+                (deleteMarkedItems && x.state == (int)State.MarkedForDeletion) || 
+                (!deleteMarkedItems && x.isChecked)))
+            {
+                filesToDelete.Add(item.text);  // O(1) HashSet add (duplicates automatically ignored)
+            }
+
+            // O(m) - Delete files where m is number of unique files to delete
+            foreach (var filePath in filesToDelete)
+            {
+                try
                 {
-                    try
+                    if (File.Exists(filePath))
                     {
                         if (deletePermanentlyMenuItem.IsChecked)
                         {
-                            FileSystem.DeleteFile(bindingList1[i].text, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
+                            FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
                         }
                         else
                         {
-                            FileSystem.DeleteFile(bindingList1[i].text, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+                            FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         }
+                        // Only increment count after successful deletion
+                        deletedCount++;
                     }
-                    catch (OutOfMemoryException)
-                    {
-                        throw;
-                    }
-                    catch
-                    {
-                    }
-                    selectedItems1.Add(bindingList1[i]);
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch
+                {
+                    // Silently continue with other files on deletion errors
                 }
             }
 
-            for (int i = 0; i < bindingList2.Count; i++)
+            // O(n) - Remove deleted items from binding lists (work backwards to avoid index issues)
+            for (int i = bindingList1.Count - 1; i >= 0; i--)
             {
-                if (((deleteMarkedItems && bindingList2[i].state == (int)State.MarkedForDeletion) || (!deleteMarkedItems && bindingList2[i].isChecked)) && !FileAddedBefore(selectedItems1, bindingList2[i]) && !FileAddedBefore(selectedItems2, bindingList2[i]))
+                if (filesToDelete.Contains(bindingList1[i].text) || filesToDelete.Contains(bindingList2[i].text))
                 {
-                    try
-                    {
-                        if (deletePermanentlyMenuItem.IsChecked)
-                        {
-                            FileSystem.DeleteFile(bindingList2[i].text, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently);
-                        }
-                        else
-                        {
-                            FileSystem.DeleteFile(bindingList2[i].text, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
-                        }
-                    }
-                    catch (OutOfMemoryException)
-                    {
-                        throw;
-                    }
-                    catch
-                    {
-                    }
-                    selectedItems2.Add(bindingList2[i]);
+                    bindingList1.RemoveAt(i);
+                    bindingList2.RemoveAt(i);
                 }
             }
 
-            int tempIndex1, tempIndex2;
-            ListViewDataItem tempListViewDataItem;
-
-            for (int i = 0; i < selectedItems1.Count; i++)
+            // O(n) - Remove duplicate pairs using HashSet for tracking seen pairs
+            var seenPairs = new HashSet<string>();
+            for (int i = bindingList1.Count - 1; i >= 0; i--)
             {
-                tempListViewDataItem = selectedItems1[i];
-                tempIndex1 = FindDuplicateIndex(bindingList1, tempListViewDataItem);
-                tempIndex2 = FindDuplicateIndex(bindingList2, tempListViewDataItem);
+                // Create a normalized pair key - order doesn't matter (A,B) == (B,A)
+                // Note: Pipe delimiter is safe as Windows prohibits it in file paths
+                string pairKey = string.Compare(bindingList1[i].text, bindingList2[i].text, StringComparison.OrdinalIgnoreCase) < 0
+                    ? bindingList1[i].text + "|" + bindingList2[i].text
+                    : bindingList2[i].text + "|" + bindingList1[i].text;
 
-                if (tempIndex1 == -1 && tempIndex2 == -1)
+                if (seenPairs.Contains(pairKey))
                 {
-                    for (int j = 0; j < bindingList1.Count; j++)
-                    {
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text) || bindingList2[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList1.RemoveAt(j);
-                            bindingList2.RemoveAt(j);
-                            j--;
-                        }
-                    }
-                }
-                else if (tempIndex1 != -1 && tempIndex2 != -1)
-                {
-                    bindingList2.RemoveAt(tempIndex2);
-
-                    if (tempIndex1 > tempIndex2)
-                    {
-                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1 - 1].text, bindingList2[tempIndex1 - 1].confidence, bindingList2[tempIndex1 - 1].pHashHammingDistance, bindingList2[tempIndex1 - 1].hdHashHammingDistance, bindingList2[tempIndex1 - 1].vdHashHammingDistance, bindingList2[tempIndex1 - 1].aHashHammingDistance, bindingList2[tempIndex1 - 1].sha256Checksum));
-                    }
-                    else
-                    {
-                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList2[tempIndex1].confidence, bindingList2[tempIndex1].pHashHammingDistance, bindingList2[tempIndex1].hdHashHammingDistance, bindingList2[tempIndex1].vdHashHammingDistance, bindingList2[tempIndex1].aHashHammingDistance, bindingList2[tempIndex1].sha256Checksum));
-                    }
-
-                    bindingList2.RemoveAt(tempIndex1);
-                    bindingList1.RemoveAt(tempIndex1);
-
-                    for (int j = 0; j < bindingList1.Count; j++)
-                    {
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList1.RemoveAt(j + 1);
-                        }
-
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList2.RemoveAt(j + 1);
-                        }
-                    }
-                }
-                else if (tempIndex1 != -1)
-                {
-                    for (int j = 0; j < bindingList1.Count; j++)
-                    {
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList1.RemoveAt(j + 1);
-                        }
-
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList2.RemoveAt(j + 1);
-                        }
-                    }
-                    bindingList1.RemoveAt(tempIndex1);
-                    bindingList2.RemoveAt(tempIndex1);
+                    // Duplicate pair found, remove it
+                    bindingList1.RemoveAt(i);
+                    bindingList2.RemoveAt(i);
                 }
                 else
                 {
-                    for (int j = 0; j < bindingList2.Count; j++)
-                    {
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList1.RemoveAt(j + 1);
-                        }
-
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList2.RemoveAt(j + 1);
-                        }
-                    }
-                    bindingList1.RemoveAt(tempIndex2);
-                    bindingList2.RemoveAt(tempIndex2);
-                }
-
-                for (int j = 0; j < bindingList1.Count - 1; j++)
-                {
-                    for (int k = j + 1; k < bindingList1.Count; k++)
-                    {
-                        if (bindingList1[j].text.Equals(bindingList1[k].text) && bindingList2[j].text.Equals(bindingList2[k].text) || bindingList1[j].text.Equals(bindingList2[k].text) && bindingList2[j].text.Equals(bindingList1[k].text))
-                        {
-                            bindingList1.RemoveAt(k);
-                            bindingList2.RemoveAt(k);
-                            k--;
-                        }
-                    }
+                    seenPairs.Add(pairKey);  // O(1) HashSet add
                 }
             }
 
-            for (int i = 0; i < selectedItems2.Count; i++)
-            {
-                tempListViewDataItem = selectedItems2[i];
-                tempIndex1 = FindDuplicateIndex(bindingList1, tempListViewDataItem);
-                tempIndex2 = FindDuplicateIndex(bindingList2, tempListViewDataItem);
-
-                if (tempIndex1 == -1 && tempIndex2 == -1)
-                {
-                    for (int j = 0; j < bindingList1.Count; j++)
-                    {
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text) || bindingList2[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList1.RemoveAt(j);
-                            bindingList2.RemoveAt(j);
-                            j--;
-                        }
-                    }
-                }
-                else if (tempIndex1 != -1 && tempIndex2 != -1)
-                {
-                    bindingList2.RemoveAt(tempIndex2);
-
-                    if (tempIndex1 > tempIndex2)
-                    {
-                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1 - 1].text, bindingList2[tempIndex1 - 1].confidence, bindingList2[tempIndex1 - 1].pHashHammingDistance, bindingList2[tempIndex1 - 1].hdHashHammingDistance, bindingList2[tempIndex1 - 1].vdHashHammingDistance, bindingList2[tempIndex1 - 1].aHashHammingDistance, bindingList2[tempIndex1 - 1].sha256Checksum));
-                    }
-                    else
-                    {
-                        bindingList2.Insert(tempIndex2, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList2[tempIndex1].confidence, bindingList2[tempIndex1].pHashHammingDistance, bindingList2[tempIndex1].hdHashHammingDistance, bindingList2[tempIndex1].vdHashHammingDistance, bindingList2[tempIndex1].aHashHammingDistance, bindingList2[tempIndex1].sha256Checksum));
-                    }
-                    bindingList2.RemoveAt(tempIndex1);
-                    bindingList1.RemoveAt(tempIndex1);
-
-                    for (int j = 0; j < bindingList2.Count; j++)
-                    {
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex2].text, bindingList2[j].confidence, bindingList2[j].pHashHammingDistance, bindingList2[j].hdHashHammingDistance, bindingList2[j].vdHashHammingDistance, bindingList2[j].aHashHammingDistance, bindingList2[j].sha256Checksum));
-                            bindingList1.RemoveAt(j + 1);
-                        }
-
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex2].text, bindingList2[j].confidence, bindingList2[j].pHashHammingDistance, bindingList2[j].hdHashHammingDistance, bindingList2[j].vdHashHammingDistance, bindingList2[j].aHashHammingDistance, bindingList2[j].sha256Checksum));
-                            bindingList2.RemoveAt(j + 1);
-                        }
-                    }
-                }
-                else if (tempIndex1 != -1)
-                {
-                    for (int j = 0; j < bindingList1.Count; j++)
-                    {
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList1.RemoveAt(j + 1);
-                        }
-
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList2[tempIndex1].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList2.RemoveAt(j + 1);
-                        }
-                    }
-                    bindingList1.RemoveAt(tempIndex1);
-                    bindingList2.RemoveAt(tempIndex1);
-                }
-                else
-                {
-                    for (int j = 0; j < bindingList2.Count; j++)
-                    {
-                        if (bindingList1[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList1.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList1.RemoveAt(j + 1);
-                        }
-
-                        if (bindingList2[j].text.Equals(tempListViewDataItem.text))
-                        {
-                            bindingList2.Insert(j, new ListViewDataItem(bindingList1[tempIndex2].text, bindingList1[j].confidence, bindingList1[j].pHashHammingDistance, bindingList1[j].hdHashHammingDistance, bindingList1[j].vdHashHammingDistance, bindingList1[j].aHashHammingDistance, bindingList1[j].sha256Checksum));
-                            bindingList2.RemoveAt(j + 1);
-                        }
-                    }
-                    bindingList1.RemoveAt(tempIndex2);
-                    bindingList2.RemoveAt(tempIndex2);
-                }
-
-                for (int j = 0; j < bindingList1.Count - 1; j++)
-                {
-                    for (int k = j + 1; k < bindingList1.Count; k++)
-                    {
-                        if (bindingList1[j].text.Equals(bindingList1[k].text) && bindingList2[j].text.Equals(bindingList2[k].text) || bindingList1[j].text.Equals(bindingList2[k].text) && bindingList2[j].text.Equals(bindingList1[k].text))
-                        {
-                            bindingList1.RemoveAt(k);
-                            bindingList2.RemoveAt(k);
-                            k--;
-                        }
-                    }
-                }
-            }
-
-            if (selectedItems1.Count + selectedItems2.Count > 0)
+            // Show results to user
+            if (deletedCount > 0)
             {
                 if (sendToRecycleBinMenuItem.IsChecked)
                 {
-                    console.Add(LocalizationManager.GetString("Console.SentToRecycleBin", selectedItems1.Count + selectedItems2.Count));
+                    console.Add(LocalizationManager.GetString("Console.SentToRecycleBin", deletedCount));
                 }
                 else
                 {
-                    console.Add(LocalizationManager.GetString("Console.FilesDeleted", selectedItems1.Count + selectedItems2.Count));
+                    console.Add(LocalizationManager.GetString("Console.FilesDeleted", deletedCount));
+                }
+            }
+            else if (filesToDelete.Count > 0)
+            {
+                // Files were selected for deletion but none were successfully deleted
+                if (sendToRecycleBinMenuItem.IsChecked)
+                {
+                    console.Add(LocalizationManager.GetString("Console.SentToRecycleBin", 0));
+                }
+                else
+                {
+                    console.Add(LocalizationManager.GetString("Console.FilesDeleted", 0));
                 }
             }
         }
@@ -2325,37 +2164,50 @@ namespace ImageComparator
         {
             Action updateUI = delegate ()
             {
+                // Optimize false positive removal using HashSet for O(1) lookups instead of O(n²) nested loops
+                // Build HashSet of false positive pairs - O(n)
+                var falsePositivePairs = new HashSet<string>();
+                for (int i = 0; i < falsePositiveList1.Count; i++)
+                {
+                    // Create normalized pair key - order doesn't matter (A,B) == (B,A)
+                    // Note: Pipe delimiter is safe as SHA256 checksums are hexadecimal without pipe characters
+                    string falsePositivePairKey = string.Compare(falsePositiveList1[i], falsePositiveList2[i], StringComparison.OrdinalIgnoreCase) < 0
+                        ? falsePositiveList1[i] + "|" + falsePositiveList2[i]
+                        : falsePositiveList2[i] + "|" + falsePositiveList1[i];
+                    falsePositivePairs.Add(falsePositivePairKey);
+                }
+
+                // Single pass removal - O(n) with O(1) lookups
                 for (int i = list1.Count - 1; i >= 0; i--)
                 {
-                    for (int j = 0; j < falsePositiveList1.Count; j++)
+                    // Create normalized pair key for current item
+                    string pairKey = string.Compare(list1[i].sha256Checksum, list2[i].sha256Checksum, StringComparison.OrdinalIgnoreCase) < 0
+                        ? list1[i].sha256Checksum + "|" + list2[i].sha256Checksum
+                        : list2[i].sha256Checksum + "|" + list1[i].sha256Checksum;
+
+                    if (falsePositivePairs.Contains(pairKey))  // O(1) lookup
                     {
-                        if ((list1[i].sha256Checksum == falsePositiveList1[j] && list2[i].sha256Checksum == falsePositiveList2[j]) || (list1[i].sha256Checksum == falsePositiveList2[j] && list2[i].sha256Checksum == falsePositiveList1[j]))
+                        // Save confidence before removing the item
+                        int confidence = list1[i].confidence;
+
+                        list1.RemoveAt(i);
+                        list2.RemoveAt(i);
+
+                        if (confidence == (int)Confidence.Low)
                         {
-                            // Save confidence before removing the item
-                            int confidence = list1[i].confidence;
-
-                            list1.RemoveAt(i);
-                            list2.RemoveAt(i);
-
-                            if (confidence == (int)Confidence.Low)
-                            {
-                                lowConfidenceSimilarImageCount--;
-                            }
-                            else if (confidence == (int)Confidence.Medium)
-                            {
-                                mediumConfidenceSimilarImageCount--;
-                            }
-                            else if (confidence == (int)Confidence.High)
-                            {
-                                highConfidenceSimilarImageCount--;
-                            }
-                            else
-                            {
-                                duplicateImageCount--;
-                            }
-
-                            // Break out of inner loop since we found a match
-                            break;
+                            lowConfidenceSimilarImageCount--;
+                        }
+                        else if (confidence == (int)Confidence.Medium)
+                        {
+                            mediumConfidenceSimilarImageCount--;
+                        }
+                        else if (confidence == (int)Confidence.High)
+                        {
+                            highConfidenceSimilarImageCount--;
+                        }
+                        else
+                        {
+                            duplicateImageCount--;
                         }
                     }
                 }
@@ -2694,30 +2546,6 @@ namespace ImageComparator
                             lowConfidenceSimilarImageCount++;
                         }
                     }
-                }
-            }
-            return false;
-        }
-
-        private int FindDuplicateIndex(ObservableCollection<ListViewDataItem> list, ListViewDataItem item)
-        {
-            for (int i = 0; i < list.Count; i++)
-            {
-                if (list[i].text.Equals(item.text) && list[i].confidence == (int)Confidence.Duplicate)
-                {
-                    return i;
-                }
-            }
-            return -1;
-        }
-
-        private bool FileAddedBefore(List<ListViewDataItem> selectedList, ListViewDataItem data)
-        {
-            for (int i = 0; i < selectedList.Count; i++)
-            {
-                if (selectedList[i].text.Equals(data.text))
-                {
-                    return true;
                 }
             }
             return false;
