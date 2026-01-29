@@ -1258,7 +1258,6 @@ namespace ImageComparator
             {
                 FileSystemHelper.SafeOpenFile(bindingList2[listView2.SelectedIndex].text);
             }
-            }
             else if (e.Key == Key.Left && listView2.SelectedIndex != -1)
             {
                 listView1.SelectedIndex = listView2.SelectedIndex;

@@ -23,6 +23,9 @@ namespace ImageComparator.Helpers
         /// <returns>True if successful, false otherwise</returns>
         public static bool SafeOpenFile(string filePath)
         {
+            string fullPath = null;
+            string extension = null;
+            
             try
             {
                 // Validate input
@@ -32,7 +35,10 @@ namespace ImageComparator.Helpers
                 }
 
                 // Normalize path (prevents traversal attacks)
-                string fullPath = Path.GetFullPath(filePath);
+                fullPath = Path.GetFullPath(filePath);
+                
+                // Get extension early for use in error messages
+                extension = Path.GetExtension(fullPath).ToLowerInvariant();
 
                 // Check if file exists
                 if (!File.Exists(fullPath))
@@ -47,7 +53,6 @@ namespace ImageComparator.Helpers
                 }
 
                 // Validate file extension
-                string extension = Path.GetExtension(fullPath).ToLowerInvariant();
                 if (!AllowedImageExtensions.Contains(extension))
                 {
                     MessageBox.Show(
@@ -64,7 +69,7 @@ namespace ImageComparator.Helpers
                 if (fileInfo.Length > 100 * 1024 * 1024) // 100MB limit
                 {
                     var result = MessageBox.Show(
-                        LocalizationManager.GetString("Warning.LargeFile", fileInfo.Length / (1024 * 1024)),
+                        LocalizationManager.GetString("Warning.LargeFile", (fileInfo.Length / (1024.0 * 1024.0)).ToString("F2")),
                         LocalizationManager.GetString("Warning.Title"),
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Warning
@@ -92,7 +97,7 @@ namespace ImageComparator.Helpers
             {
                 // No default application for file type
                 MessageBox.Show(
-                    LocalizationManager.GetString("Error.NoDefaultApp", Path.GetExtension(filePath), ex.Message),
+                    LocalizationManager.GetString("Error.NoDefaultApp", extension ?? "unknown", ex.Message),
                     LocalizationManager.GetString("Error.Title"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error
