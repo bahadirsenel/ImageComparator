@@ -2204,7 +2204,7 @@ namespace ImageComparator
                                         {
                                             for (int k = 0; k < 8; k++)
                                             {
-                                                vdHashArray[i, j * 8 + k] = grayscale.GetPixel(j, k).R < grayscale.GetPixel(k, k + 1).R ? 0 : 1;
+                                                vdHashArray[i, j * 8 + k] = grayscale.GetPixel(j, k).R < grayscale.GetPixel(j, k + 1).R ? 0 : 1;
                                             }
                                         }
 
@@ -2559,7 +2559,7 @@ namespace ImageComparator
                         new float[] {0.587f, 0.587f, 0.587f, 0, 0},
                         new float[] {0.114f, 0.114f, 0.114f, 0, 0},
                         new float[] {     0,      0,      0, 1, 0},
-                        new float[] {     0,      0,      0, 0, 0}
+                        new float[] {     0,      0,      0, 0, 1}
                     });
                     attributes.SetColorMatrix(colorMatrix);
                     graphics.DrawImage(cloneImage, new Rectangle(0, 0, cloneImage.Width, cloneImage.Height), 0, 0, cloneImage.Width, cloneImage.Height, GraphicsUnit.Pixel, attributes);
