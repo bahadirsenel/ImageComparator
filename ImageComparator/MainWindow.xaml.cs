@@ -1,4 +1,5 @@
 ﻿using DiscreteCosineTransform;
+using ImageComparator.Helpers;
 using Microsoft.VisualBasic.FileIO;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -1241,18 +1242,7 @@ namespace ImageComparator
         {
             if (e.Key == Key.Enter && listView1.SelectedIndex != -1)
             {
-                try
-                {
-                    System.Diagnostics.Process.Start(bindingList1[listView1.SelectedIndex].text);
-                }
-                catch (OutOfMemoryException)
-                {
-                    throw;
-                }
-                catch
-                {
-                    Console.WriteLine("Oops3");
-                }
+                FileSystemHelper.SafeOpenFile(bindingList1[listView1.SelectedIndex].text);
             }
             else if (e.Key == Key.Right && listView1.SelectedIndex != -1)
             {
@@ -1266,18 +1256,8 @@ namespace ImageComparator
         {
             if (e.Key == Key.Enter && listView2.SelectedIndex != -1)
             {
-                try
-                {
-                    System.Diagnostics.Process.Start(bindingList2[listView2.SelectedIndex].text);
-                }
-                catch (OutOfMemoryException)
-                {
-                    throw;
-                }
-                catch
-                {
-                    Console.WriteLine("Oops4");
-                }
+                FileSystemHelper.SafeOpenFile(bindingList2[listView2.SelectedIndex].text);
+            }
             }
             else if (e.Key == Key.Left && listView2.SelectedIndex != -1)
             {
@@ -1295,18 +1275,7 @@ namespace ImageComparator
             {
                 if (listView1.SelectedIndex != -1)
                 {
-                    try
-                    {
-                        System.Diagnostics.Process.Start(bindingList1[listView1.SelectedIndex].text);
-                    }
-                    catch (OutOfMemoryException)
-                    {
-                        throw;
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Oops1");
-                    }
+                    FileSystemHelper.SafeOpenFile(bindingList1[listView1.SelectedIndex].text);
                 }
             }
         }
@@ -1319,18 +1288,7 @@ namespace ImageComparator
             {
                 if (listView2.SelectedIndex != -1)
                 {
-                    try
-                    {
-                        System.Diagnostics.Process.Start(bindingList2[listView2.SelectedIndex].text);
-                    }
-                    catch (OutOfMemoryException)
-                    {
-                        throw;
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Oops2");
-                    }
+                    FileSystemHelper.SafeOpenFile(bindingList2[listView2.SelectedIndex].text);
                 }
             }
         }
@@ -1419,18 +1377,7 @@ namespace ImageComparator
         {
             if (listView1.SelectedIndex != -1)
             {
-                try
-                {
-                    System.Diagnostics.Process.Start(bindingList1[listView1.SelectedIndex].text);
-                }
-                catch (OutOfMemoryException)
-                {
-                    throw;
-                }
-                catch
-                {
-                    Console.WriteLine("Oops1");
-                }
+                FileSystemHelper.SafeOpenFile(bindingList1[listView1.SelectedIndex].text);
             }
         }
 
@@ -1438,18 +1385,10 @@ namespace ImageComparator
         {
             if (listView1.SelectedIndex != -1)
             {
-                try
+                string folderPath = FileSystemHelper.SafeGetDirectory(bindingList1[listView1.SelectedIndex].text);
+                if (folderPath != null)
                 {
-                    string filePath = bindingList1[listView1.SelectedIndex].text;
-                    System.Diagnostics.Process.Start(filePath.Substring(0, filePath.LastIndexOf("\\")));
-                }
-                catch (OutOfMemoryException)
-                {
-                    throw;
-                }
-                catch
-                {
-                    Console.WriteLine("Oops1");
+                    FileSystemHelper.SafeOpenFolder(folderPath);
                 }
             }
         }
@@ -1458,18 +1397,7 @@ namespace ImageComparator
         {
             if (listView2.SelectedIndex != -1)
             {
-                try
-                {
-                    System.Diagnostics.Process.Start(bindingList2[listView2.SelectedIndex].text);
-                }
-                catch (OutOfMemoryException)
-                {
-                    throw;
-                }
-                catch
-                {
-                    Console.WriteLine("Oops1");
-                }
+                FileSystemHelper.SafeOpenFile(bindingList2[listView2.SelectedIndex].text);
             }
         }
 
@@ -1477,18 +1405,10 @@ namespace ImageComparator
         {
             if (listView2.SelectedIndex != -1)
             {
-                try
+                string folderPath = FileSystemHelper.SafeGetDirectory(bindingList2[listView2.SelectedIndex].text);
+                if (folderPath != null)
                 {
-                    string filePath = bindingList2[listView2.SelectedIndex].text;
-                    System.Diagnostics.Process.Start(filePath.Substring(0, filePath.LastIndexOf("\\")));
-                }
-                catch (OutOfMemoryException)
-                {
-                    throw;
-                }
-                catch
-                {
-                    Console.WriteLine("Oops1");
+                    FileSystemHelper.SafeOpenFolder(folderPath);
                 }
             }
         }
