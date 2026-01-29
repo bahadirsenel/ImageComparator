@@ -2154,37 +2154,49 @@ namespace ImageComparator
         {
             Action updateUI = delegate ()
             {
+                // Optimize false positive removal using HashSet for O(1) lookups instead of O(n²) nested loops
+                // Build HashSet of false positive pairs - O(n)
+                var falsePositivePairs = new HashSet<string>();
+                for (int i = 0; i < falsePositiveList1.Count; i++)
+                {
+                    // Add both directions of the pair (A,B) and (B,A) with normalized keys
+                    string pair1 = string.Compare(falsePositiveList1[i], falsePositiveList2[i], StringComparison.OrdinalIgnoreCase) < 0
+                        ? falsePositiveList1[i] + "|" + falsePositiveList2[i]
+                        : falsePositiveList2[i] + "|" + falsePositiveList1[i];
+                    falsePositivePairs.Add(pair1);
+                }
+
+                // Single pass removal - O(n) with O(1) lookups
                 for (int i = list1.Count - 1; i >= 0; i--)
                 {
-                    for (int j = 0; j < falsePositiveList1.Count; j++)
+                    // Create normalized pair key
+                    string pairKey = string.Compare(list1[i].sha256Checksum, list2[i].sha256Checksum, StringComparison.OrdinalIgnoreCase) < 0
+                        ? list1[i].sha256Checksum + "|" + list2[i].sha256Checksum
+                        : list2[i].sha256Checksum + "|" + list1[i].sha256Checksum;
+
+                    if (falsePositivePairs.Contains(pairKey))  // O(1) lookup
                     {
-                        if ((list1[i].sha256Checksum == falsePositiveList1[j] && list2[i].sha256Checksum == falsePositiveList2[j]) || (list1[i].sha256Checksum == falsePositiveList2[j] && list2[i].sha256Checksum == falsePositiveList1[j]))
+                        // Save confidence before removing the item
+                        int confidence = list1[i].confidence;
+
+                        list1.RemoveAt(i);
+                        list2.RemoveAt(i);
+
+                        if (confidence == (int)Confidence.Low)
                         {
-                            // Save confidence before removing the item
-                            int confidence = list1[i].confidence;
-
-                            list1.RemoveAt(i);
-                            list2.RemoveAt(i);
-
-                            if (confidence == (int)Confidence.Low)
-                            {
-                                lowConfidenceSimilarImageCount--;
-                            }
-                            else if (confidence == (int)Confidence.Medium)
-                            {
-                                mediumConfidenceSimilarImageCount--;
-                            }
-                            else if (confidence == (int)Confidence.High)
-                            {
-                                highConfidenceSimilarImageCount--;
-                            }
-                            else
-                            {
-                                duplicateImageCount--;
-                            }
-
-                            // Break out of inner loop since we found a match
-                            break;
+                            lowConfidenceSimilarImageCount--;
+                        }
+                        else if (confidence == (int)Confidence.Medium)
+                        {
+                            mediumConfidenceSimilarImageCount--;
+                        }
+                        else if (confidence == (int)Confidence.High)
+                        {
+                            highConfidenceSimilarImageCount--;
+                        }
+                        else
+                        {
+                            duplicateImageCount--;
                         }
                     }
                 }
