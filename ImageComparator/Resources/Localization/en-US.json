@@ -18,7 +18,6 @@
   "Menu.HowToUse": "How To Use",
   "Menu.About": "About",
   "Menu.ViewErrorLog": "View Error Log",
-  
   "Button.AddFolder": "Add Folder",
   "Button.FindDuplicates": "Find Duplicates",
   "Button.Pause": "Pause",
@@ -32,62 +31,50 @@
   "Button.MarkForDeletion": "Mark For Deletion",
   "Button.MarkAsFalsePositive": "Mark As False Positive",
   "Button.RemoveMark": "Remove Mark",
-  
   "ContextMenu.Open": "Open",
   "ContextMenu.OpenFileLocation": "Open File Location",
-  
   "Label.PreviewSelect": "Select a file to preview:",
   "Label.DragDropFolders": "Drag-Drop to add folders:",
-  
   "Console.ComparingWithSubdirs": "Comparing images from {0} and its subdirectories.",
   "Console.ComparingWithoutSubdirs": "Comparing images from {0}.",
   "Console.NoDirectoriesAdded": "No directories added.",
   "Console.DirectoryAdded": "Added {0}",
   "Console.DirectoriesOnly": "Directories only.",
-  
   "Console.SentToRecycleBin": "{0} file(s) have been sent to recycle bin.",
   "Console.FilesDeleted": "{0} file(s) have been deleted.",
   "Console.MarkedAsFalsePositive": "{0} file(s) have been marked as false positive.",
-  
   "Console.Paused": "Paused.",
   "Console.InterruptedByUser": "Interrupted by user.",
   "Console.PathsAddedSuccessfully": "Paths added successfully. {0} images found. Reading files from disk...",
   "Console.ProcessingFiles": "{0}% done, processing files...",
   "Console.ComparingResults": "{0}% done, comparing results...",
   "Console.FilesProcessedComparing": "All files have been processed. Comparing...",
-  
   "Console.AllDone": "All done!",
   "Console.RunTimeHours": "Run time is {0} hours {1} minutes {2} seconds.",
   "Console.RunTimeMinutes": "Run time is {0} minutes {1} seconds.",
   "Console.RunTimeSeconds": "Run time is {0} seconds.",
-  
   "Console.NoDuplicatesFound": "No duplicates found.",
   "Console.DuplicatesFound": "{0} duplicates found.",
   "Console.HighSimilarity": "{0} images found with high similarity.",
   "Console.MediumSimilarity": "{0} images found with medium similarity.",
   "Console.LowSimilarity": "{0} images found with low similarity.",
-  
   "Console.SessionSaved": "Session has been saved to {0}",
   "Console.SessionLoaded": "Session has been loaded from {0}",
   "Console.FalsePositiveDatabaseCleared": "False positive database has been cleared.",
-  
   "Dialog.SaveTitle": "Save Results",
   "Dialog.LoadTitle": "Load Results",
   "Dialog.AddFolderTitle": "Add Folder",
-  
   "Dialog.ClearTitle": "Warning",
   "Dialog.ClearMessage": "Are you sure you want to discard current results? You can save them to continue working on them later.",
   "Dialog.SaveButton": "Save",
   "Dialog.DiscardButton": "Discard",
   "Dialog.CancelButton": "Cancel",
-  
   "Dialog.ApplyTitle": "Warning",
   "Dialog.FilesWillBeDeleted": "{0} file(s) will be deleted.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} result(s) will be marked as false positive and won't be shown in future results.\r\n",
   "Dialog.ContinueConfirmation": "Do you want to continue?",
   "Dialog.YesButton": "Yes",
   "Dialog.NoButton": "No",
-  
   "Dialog.AboutTitle": "About",
   "Dialog.Version": "Version:",
   "Dialog.License": "License:",
@@ -95,15 +82,12 @@
   "Dialog.Description": "Image Comparator is a powerful tool for comparing and analyzing images. It helps you identify similar or duplicate images in your collection.",
   "Dialog.Developer": "Developed by Mustafa Bahadır Şenel",
   "Dialog.CloseButton": "Close",
-  
   "Dialog.HowToUseTitle": "How To Use",
   "Dialog.HowToUseCloseButton": "Close",
-  
   "Dialog.Error": "Error",
   "Dialog.CouldNotOpenLink": "Could not open link: {0}",
   "Dialog.ErrorLoadingHelp": "Error loading help content: {0}",
   "Dialog.HelpFileNotFound": "Error: Could not find help file at {0}",
-  
   "Error.FileNotFound": "File not found: {0}",
   "Error.FolderNotFound": "Folder not found: {0}",
   "Error.UnsupportedFileType": "Unsupported file type: {0}\n\nOnly image files are allowed.",
@@ -111,8 +95,8 @@
   "Error.CannotOpenFile": "Cannot open file:\n{0}",
   "Error.CannotOpenFolder": "Cannot open folder:\n{0}",
   "Error.Title": "Error",
-  "Error.SerializationFailed": "Failed to save settings: {0}",
-  "Error.DeserializationFailed": "Failed to load settings: {0}",
+  "Error.SerializationFailed": "Failed to save session: {0}",
+  "Error.DeserializationFailed": "Failed to load session: {0}",
   "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
   "Error.ProcessingFailed": "Failed to process image {0}: {1}",
   "Error.LogLocation": "Error log: {0}",
