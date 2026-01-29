@@ -101,5 +101,15 @@
   "Dialog.Error": "错误",
   "Dialog.CouldNotOpenLink": "无法打开链接：{0}",
   "Dialog.ErrorLoadingHelp": "加载帮助内容时出错：{0}",
-  "Dialog.HelpFileNotFound": "错误：无法在 {0} 找到帮助文件"
+  "Dialog.HelpFileNotFound": "错误：无法在 {0} 找到帮助文件",
+  
+  "Error.FileNotFound": "找不到文件：{0}",
+  "Error.FolderNotFound": "找不到文件夹：{0}",
+  "Error.UnsupportedFileType": "不支持的文件类型：{0}\n\n仅允许图像文件。",
+  "Error.NoDefaultApp": "没有 {0} 文件的默认应用程序。\n\n{1}",
+  "Error.CannotOpenFile": "无法打开文件：\n{0}",
+  "Error.CannotOpenFolder": "无法打开文件夹：\n{0}",
+  "Error.Title": "错误",
+  "Warning.LargeFile": "此文件非常大（{0} MB）。您确定要打开它吗？",
+  "Warning.Title": "警告"
 }

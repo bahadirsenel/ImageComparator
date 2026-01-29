@@ -101,5 +101,15 @@
   "Dialog.Error": "خطأ",
   "Dialog.CouldNotOpenLink": "تعذر فتح الرابط: {0}",
   "Dialog.ErrorLoadingHelp": "خطأ في تحميل محتوى المساعدة: {0}",
-  "Dialog.HelpFileNotFound": "خطأ: تعذر العثور على ملف المساعدة في {0}"
+  "Dialog.HelpFileNotFound": "خطأ: تعذر العثور على ملف المساعدة في {0}",
+  
+  "Error.FileNotFound": "الملف غير موجود: {0}",
+  "Error.FolderNotFound": "المجلد غير موجود: {0}",
+  "Error.UnsupportedFileType": "نوع ملف غير مدعوم: {0}\n\nيُسمح بملفات الصور فقط.",
+  "Error.NoDefaultApp": "لا يوجد تطبيق افتراضي لملفات {0}.\n\n{1}",
+  "Error.CannotOpenFile": "لا يمكن فتح الملف:\n{0}",
+  "Error.CannotOpenFolder": "لا يمكن فتح المجلد:\n{0}",
+  "Error.Title": "خطأ",
+  "Warning.LargeFile": "هذا الملف كبير جداً ({0} ميجابايت). هل أنت متأكد أنك تريد فتحه؟",
+  "Warning.Title": "تحذير"
 }
