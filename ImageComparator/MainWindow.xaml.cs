@@ -796,17 +796,17 @@ namespace ImageComparator
             // Step 1: Collect files to delete
             var filesToDelete = CollectFilesToDelete();
             
-            // Step 2: Delete files from disk
-            int deletedCount = DeleteFilesFromDisk(filesToDelete);
+            // Step 2: Delete files from disk and get successfully deleted files
+            var deletedFiles = DeleteFilesFromDisk(filesToDelete);
             
             // Step 3: Remove deleted items from lists
-            RemoveDeletedItemsFromLists(filesToDelete);
+            RemoveDeletedItemsFromLists(deletedFiles);
             
             // Step 4: Remove duplicate pairs
             RemoveDuplicatePairs();
             
             // Step 5: Show results to user
-            ReportDeletionResults(deletedCount, filesToDelete.Count);
+            ReportDeletionResults(deletedFiles.Count, filesToDelete.Count);
         }
 
         /// <summary>
@@ -850,16 +850,15 @@ namespace ImageComparator
         /// Deletes files from disk (either permanently or to recycle bin)
         /// </summary>
         /// <param name="filesToDelete">Set of file paths to attempt to delete</param>
-        /// <returns>The count of files that were successfully deleted from the filesystem</returns>
-        private int DeleteFilesFromDisk(HashSet<string> filesToDelete)
+        /// <returns>A set of file paths that were successfully deleted from the filesystem</returns>
+        private HashSet<string> DeleteFilesFromDisk(HashSet<string> filesToDelete)
         {
-            int deletedCount = 0;
+            var deletedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var filePath in filesToDelete)
             {
                 try
                 {
-                    // Check if file exists and delete in same try block to handle race conditions
                     if (File.Exists(filePath))
                     {
                         var recycleOption = deletePermanentlyMenuItem.IsChecked 
@@ -867,7 +866,7 @@ namespace ImageComparator
                             : RecycleOption.SendToRecycleBin;
                         
                         FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, recycleOption);
-                        deletedCount++;
+                        deletedFiles.Add(filePath);
                     }
                 }
                 catch (OutOfMemoryException)
@@ -880,23 +879,23 @@ namespace ImageComparator
                 }
             }
 
-            return deletedCount;
+            return deletedFiles;
         }
 
         /// <summary>
-        /// Removes items from both binding lists where at least one file in the pair was targeted for deletion.
-        /// Uses OR condition: removes a pair if either file1 OR file2 was in the deletion set.
+        /// Removes items from both binding lists where at least one file in the pair was successfully deleted.
+        /// Uses OR condition: removes a pair if either file1 OR file2 was successfully deleted.
         /// This is appropriate for duplicate pairs where deleting either file removes the duplicate relationship.
         /// Time Complexity: O(n) where n is the number of items in binding lists.
         /// </summary>
-        /// <param name="filesToDelete">Set of file paths that were targeted for deletion</param>
-        private void RemoveDeletedItemsFromLists(HashSet<string> filesToDelete)
+        /// <param name="deletedFiles">Set of file paths that were successfully deleted from disk</param>
+        private void RemoveDeletedItemsFromLists(HashSet<string> deletedFiles)
         {
             // Remove from end to avoid index shifting issues
             for (int i = bindingList1.Count - 1; i >= 0; i--)
             {
-                if (filesToDelete.Contains(bindingList1[i].text) || 
-                    filesToDelete.Contains(bindingList2[i].text))
+                if (deletedFiles.Contains(bindingList1[i].text) || 
+                    deletedFiles.Contains(bindingList2[i].text))
                 {
                     bindingList1.RemoveAt(i);
                     bindingList2.RemoveAt(i);
