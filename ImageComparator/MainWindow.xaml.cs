@@ -360,9 +360,27 @@ namespace ImageComparator
 
             if (saveFileDialog.ShowDialog().Value)
             {
-                Serialize(saveFileDialog.FileName);
-                console.Add(LocalizationManager.GetString("Console.SessionSaved", saveFileDialog.FileName));
-                return true;
+                try
+                {
+                    Serialize(saveFileDialog.FileName);
+                    console.Add(LocalizationManager.GetString("Console.SessionSaved", saveFileDialog.FileName));
+                    return true;
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    ErrorLogger.LogError("SaveResults - Serialize", ex);
+                    MessageBox.Show(
+                        LocalizationManager.GetString("Error.SerializationFailed", ex.Message),
+                        LocalizationManager.GetString("Error.Title"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+                    return false;
+                }
             }
             else
             {
@@ -376,8 +394,25 @@ namespace ImageComparator
 
             if (openFileDialog.ShowDialog().Value)
             {
-                Deserialize(openFileDialog.FileName);
-                console.Add(LocalizationManager.GetString("Console.SessionLoaded", openFileDialog.FileName));
+                try
+                {
+                    Deserialize(openFileDialog.FileName);
+                    console.Add(LocalizationManager.GetString("Console.SessionLoaded", openFileDialog.FileName));
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    ErrorLogger.LogError("LoadResultsMenuItem_Click - Deserialize", ex);
+                    MessageBox.Show(
+                        LocalizationManager.GetString("Error.DeserializationFailed", ex.Message),
+                        LocalizationManager.GetString("Error.Title"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+                }
             }
         }
 
@@ -840,7 +875,7 @@ namespace ImageComparator
             var filesToDelete = CollectFilesToDelete();
             
             // Step 2: Delete files from disk and get successfully deleted files
-            var deletedFiles = DeleteFilesFromDisk(filesToDelete);
+            var deletedFiles = DeleteFilesFromDisk(filesToDelete, out var failedDeletions);
             
             // Step 3: Remove deleted items from lists
             RemoveDeletedItemsFromLists(deletedFiles);
@@ -849,7 +884,7 @@ namespace ImageComparator
             RemoveDuplicatePairs();
             
             // Step 5: Show results to user
-            ReportDeletionResults(deletedFiles.Count, filesToDelete.Count);
+            ReportDeletionResults(deletedFiles.Count, filesToDelete.Count, failedDeletions);
         }
 
         /// <summary>
@@ -893,10 +928,12 @@ namespace ImageComparator
         /// Deletes files from disk (either permanently or to recycle bin)
         /// </summary>
         /// <param name="filesToDelete">Set of file paths to attempt to delete</param>
+        /// <param name="failedDeletions">Output list of files that failed to delete with error messages</param>
         /// <returns>A set of file paths that were successfully deleted from the filesystem</returns>
-        private HashSet<string> DeleteFilesFromDisk(HashSet<string> filesToDelete)
+        private HashSet<string> DeleteFilesFromDisk(HashSet<string> filesToDelete, out List<(string path, string error)> failedDeletions)
         {
             var deletedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            failedDeletions = new List<(string path, string error)>();
 
             foreach (var filePath in filesToDelete)
             {
@@ -919,6 +956,7 @@ namespace ImageComparator
                 catch (Exception ex)
                 {
                     ErrorLogger.LogError($"DeleteFilesFromDisk - {Path.GetFileName(filePath)}", ex);
+                    failedDeletions.Add((filePath, ex.Message));
                 }
             }
 
@@ -983,7 +1021,8 @@ namespace ImageComparator
         /// </summary>
         /// <param name="deletedCount">Number of files successfully deleted from disk</param>
         /// <param name="requestedCount">Total number of files that were requested for deletion</param>
-        private void ReportDeletionResults(int deletedCount, int requestedCount)
+        /// <param name="failedDeletions">List of files that failed to delete with error messages</param>
+        private void ReportDeletionResults(int deletedCount, int requestedCount, List<(string path, string error)> failedDeletions)
         {
             if (deletedCount > 0)
             {
@@ -1007,6 +1046,28 @@ namespace ImageComparator
                 {
                     console.Add(LocalizationManager.GetString("Console.FilesDeleted", 0));
                 }
+            }
+
+            // Report any deletion failures to the user
+            if (failedDeletions.Count > 0)
+            {
+                console.Add(LocalizationManager.GetString("Console.DeletionErrors", failedDeletions.Count));
+                
+                // Show detailed error message to user for the first few failures
+                var details = string.Join("\n", failedDeletions.Take(5).Select(f => 
+                    $"  • {Path.GetFileName(f.path)}: {f.error}"));
+                
+                if (failedDeletions.Count > 5)
+                {
+                    details += $"\n  ... and {failedDeletions.Count - 5} more";
+                }
+                
+                MessageBox.Show(
+                    LocalizationManager.GetString("Error.DeletionFailed", failedDeletions.Count, details),
+                    LocalizationManager.GetString("Error.Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
             }
         }
 
