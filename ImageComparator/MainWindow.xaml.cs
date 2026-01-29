@@ -841,14 +841,9 @@ namespace ImageComparator
         /// <returns>True if item should be deleted, false otherwise</returns>
         private bool ShouldDelete(ListViewDataItem item)
         {
-            if (deleteMarkedItems)
-            {
-                return item.state == (int)State.MarkedForDeletion;
-            }
-            else
-            {
-                return item.isChecked;
-            }
+            return deleteMarkedItems 
+                ? item.state == (int)State.MarkedForDeletion 
+                : item.isChecked;
         }
 
         /// <summary>
