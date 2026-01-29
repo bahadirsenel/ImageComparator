@@ -2587,7 +2587,7 @@ namespace ImageComparator
                         new float[] {0.587f, 0.587f, 0.587f, 0, 0},
                         new float[] {0.114f, 0.114f, 0.114f, 0, 0},
                         new float[] {     0,      0,      0, 1, 0},
-                        new float[] {     0,      0,      0, 0, 1}
+                        new float[] {     0,      0,      0, 0, 0}
                     });
                     attributes.SetColorMatrix(colorMatrix);
                     graphics.DrawImage(cloneImage, new Rectangle(0, 0, cloneImage.Width, cloneImage.Height), 0, 0, cloneImage.Width, cloneImage.Height, GraphicsUnit.Pixel, attributes);
