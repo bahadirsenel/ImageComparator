@@ -1865,10 +1865,11 @@ namespace ImageComparator
                 Directory.CreateDirectory(directory);
             }
 
-            Stream stream = File.Open(path, FileMode.Create);
-            BinaryFormatter bformatter = new BinaryFormatter();
-            bformatter.Serialize(stream, this);
-            stream.Close();
+            using (Stream stream = File.Open(path, FileMode.Create))
+            {
+                BinaryFormatter bformatter = new BinaryFormatter();
+                bformatter.Serialize(stream, this);
+            }
         }
 
         public void Deserialize(string path)
@@ -1887,10 +1888,11 @@ namespace ImageComparator
                 return;
             }
 
-            Stream stream = File.Open(path, FileMode.Open);
-            BinaryFormatter bformatter = new BinaryFormatter();
-            mainWindow = (MainWindow)bformatter.Deserialize(stream);
-            stream.Close();
+            using (Stream stream = File.Open(path, FileMode.Open))
+            {
+                BinaryFormatter bformatter = new BinaryFormatter();
+                mainWindow = (MainWindow)bformatter.Deserialize(stream);
+            }
 
             if (opening)
             {
@@ -2467,24 +2469,26 @@ namespace ImageComparator
 
         private void WriteToFile(List<string> input)
         {
-            streamWriter = new StreamWriter(path + @"\Bin\Directories.imc");
-            streamWriter.WriteLine(input.Count);
-
-            for (int i = 0; i < input.Count; i++)
+            using (streamWriter = new StreamWriter(path + @"\Bin\Directories.imc"))
             {
-                streamWriter.WriteLine(input.ElementAt(i));
-            }
-            streamWriter.Close();
+                streamWriter.WriteLine(input.Count);
 
-            streamWriter = new StreamWriter(path + @"\Bin\Filters.imc");
-            streamWriter.WriteLine(includeSubfolders);
-            streamWriter.WriteLine(jpegMenuItemChecked);
-            streamWriter.WriteLine(gifMenuItemChecked);
-            streamWriter.WriteLine(pngMenuItemChecked);
-            streamWriter.WriteLine(bmpMenuItemChecked);
-            streamWriter.WriteLine(tiffMenuItemChecked);
-            streamWriter.WriteLine(icoMenuItemChecked);
-            streamWriter.Close();
+                for (int i = 0; i < input.Count; i++)
+                {
+                    streamWriter.WriteLine(input.ElementAt(i));
+                }
+            }
+
+            using (streamWriter = new StreamWriter(path + @"\Bin\Filters.imc"))
+            {
+                streamWriter.WriteLine(includeSubfolders);
+                streamWriter.WriteLine(jpegMenuItemChecked);
+                streamWriter.WriteLine(gifMenuItemChecked);
+                streamWriter.WriteLine(pngMenuItemChecked);
+                streamWriter.WriteLine(bmpMenuItemChecked);
+                streamWriter.WriteLine(tiffMenuItemChecked);
+                streamWriter.WriteLine(icoMenuItemChecked);
+            }
         }
 
         private void AddFiles(List<string> directory)
@@ -2502,15 +2506,16 @@ namespace ImageComparator
         private void ReadFromFile()
         {
             int count;
-            streamReader = new StreamReader(path + @"\Bin\Results.imc");
-            gotException = bool.Parse(streamReader.ReadLine());
-            count = int.Parse(streamReader.ReadLine());
-
-            for (int i = 0; i < count; i++)
+            using (streamReader = new StreamReader(path + @"\Bin\Results.imc"))
             {
-                files.Add(streamReader.ReadLine());
+                gotException = bool.Parse(streamReader.ReadLine());
+                count = int.Parse(streamReader.ReadLine());
+
+                for (int i = 0; i < count; i++)
+                {
+                    files.Add(streamReader.ReadLine());
+                }
             }
-            streamReader.Close();
             File.Delete(path + @"\Bin\Results.imc");
         }
 
