@@ -96,12 +96,12 @@
   "Error.Title": "Erro",
   "Warning.LargeFile": "Este arquivo é muito grande ({0} MB). Tem certeza de que deseja abri-lo?",
   "Warning.Title": "Aviso",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Exibir registro de erros",
+  "Error.SerializationFailed": "Falha ao salvar sessão: {0}",
+  "Error.DeserializationFailed": "Falha ao carregar sessão: {0}",
+  "Error.DeletionFailed": "Não foi possível excluir {0} arquivo(s):\n\n{1}",
+  "Error.ProcessingFailed": "Falha ao processar imagem {0}: {1}",
+  "Error.LogLocation": "Registro de erros: {0}",
+  "Error.NoErrorLog": "Nenhum registro de erros encontrado. Nenhum erro foi registrado ainda.",
+  "Console.DeletionErrors": "Não foi possível excluir {0} arquivo(s) (ver registro de erros)"
 }

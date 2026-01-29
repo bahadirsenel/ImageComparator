@@ -96,12 +96,12 @@
   "Error.Title": "Feil",
   "Warning.LargeFile": "Denne filen er veldig stor ({0} MB). Er du sikker på at du vil åpne den?",
   "Warning.Title": "Advarsel",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Vis feillogg",
+  "Error.SerializationFailed": "Kunne ikke lagre økt: {0}",
+  "Error.DeserializationFailed": "Kunne ikke laste økt: {0}",
+  "Error.DeletionFailed": "Kunne ikke slette {0} fil(er):\n\n{1}",
+  "Error.ProcessingFailed": "Kunne ikke behandle bilde {0}: {1}",
+  "Error.LogLocation": "Feillogg: {0}",
+  "Error.NoErrorLog": "Ingen feillogg funnet. Ingen feil har blitt logget ennå.",
+  "Console.DeletionErrors": "Kunne ikke slette {0} fil(er) (se feillogg)"
 }

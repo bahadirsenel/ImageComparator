@@ -96,12 +96,12 @@
   "Error.Title": "エラー",
   "Warning.LargeFile": "このファイルは非常に大きいです（{0} MB）。本当に開きますか？",
   "Warning.Title": "警告",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "エラーログを表示",
+  "Error.SerializationFailed": "セッションの保存に失敗しました: {0}",
+  "Error.DeserializationFailed": "セッションの読み込みに失敗しました: {0}",
+  "Error.DeletionFailed": "{0} 個のファイルを削除できませんでした:\n\n{1}",
+  "Error.ProcessingFailed": "画像 {0} の処理に失敗しました: {1}",
+  "Error.LogLocation": "エラーログ: {0}",
+  "Error.NoErrorLog": "エラーログが見つかりません。まだエラーは記録されていません。",
+  "Console.DeletionErrors": "{0} 個のファイルを削除できませんでした（エラーログを参照）"
 }

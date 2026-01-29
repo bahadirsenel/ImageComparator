@@ -96,12 +96,12 @@
   "Error.Title": "त्रुटि",
   "Warning.LargeFile": "यह फ़ाइल बहुत बड़ी है ({0} MB)। क्या आप वाकई इसे खोलना चाहते हैं?",
   "Warning.Title": "चेतावनी",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "त्रुटि लॉग देखें",
+  "Error.SerializationFailed": "सत्र सहेजने में विफल: {0}",
+  "Error.DeserializationFailed": "सत्र लोड करने में विफल: {0}",
+  "Error.DeletionFailed": "{0} फ़ाइल(ें) हटाई नहीं जा सकीं:\n\n{1}",
+  "Error.ProcessingFailed": "छवि {0} संसाधित करने में विफल: {1}",
+  "Error.LogLocation": "त्रुटि लॉग: {0}",
+  "Error.NoErrorLog": "कोई त्रुटि लॉग नहीं मिला। अभी तक कोई त्रुटि लॉग नहीं की गई है।",
+  "Console.DeletionErrors": "{0} फ़ाइल(ें) हटाई नहीं जा सकीं (त्रुटि लॉग देखें)"
 }

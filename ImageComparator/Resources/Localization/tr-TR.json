@@ -96,12 +96,12 @@
   "Error.Title": "Hata",
   "Warning.LargeFile": "Bu dosya çok büyük ({0} MB). Açmak istediğinizden emin misiniz?",
   "Warning.Title": "Uyarı",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Hata Günlüğünü Görüntüle",
+  "Error.SerializationFailed": "Oturum kaydedilemedi: {0}",
+  "Error.DeserializationFailed": "Oturum yüklenemedi: {0}",
+  "Error.DeletionFailed": "{0} dosya silinemedi:\n\n{1}",
+  "Error.ProcessingFailed": "{0} görüntüsü işlenemedi: {1}",
+  "Error.LogLocation": "Hata günlüğü: {0}",
+  "Error.NoErrorLog": "Hata günlüğü bulunamadı. Henüz hiçbir hata kaydedilmedi.",
+  "Console.DeletionErrors": "{0} dosya silinemedi (hata günlüğüne bakın)"
 }

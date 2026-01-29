@@ -96,12 +96,12 @@
   "Error.Title": "خطا",
   "Warning.LargeFile": "این فایل بسیار بزرگ است ({0} مگابایت). آیا مطمئن هستید که می‌خواهید آن را باز کنید؟",
   "Warning.Title": "هشدار",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "مشاهده گزارش خطاها",
+  "Error.SerializationFailed": "ذخیره نشست ناموفق بود: {0}",
+  "Error.DeserializationFailed": "بارگذاری نشست ناموفق بود: {0}",
+  "Error.DeletionFailed": "{0} پرونده حذف نشد:\n\n{1}",
+  "Error.ProcessingFailed": "پردازش تصویر {0} ناموفق بود: {1}",
+  "Error.LogLocation": "گزارش خطاها: {0}",
+  "Error.NoErrorLog": "گزارش خطا یافت نشد. هنوز هیچ خطایی ثبت نشده است.",
+  "Console.DeletionErrors": "{0} پرونده حذف نشد (گزارش خطاها را ببینید)"
 }

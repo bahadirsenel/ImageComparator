@@ -96,12 +96,12 @@
   "Error.Title": "Erreur",
   "Warning.LargeFile": "Ce fichier est très volumineux ({0} Mo). Êtes-vous sûr de vouloir l'ouvrir ?",
   "Warning.Title": "Avertissement",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Afficher le journal des erreurs",
+  "Error.SerializationFailed": "Échec de l'enregistrement de la session : {0}",
+  "Error.DeserializationFailed": "Échec du chargement de la session : {0}",
+  "Error.DeletionFailed": "{0} fichier(s) n'a/ont pas pu être supprimé(s) :\n\n{1}",
+  "Error.ProcessingFailed": "Échec du traitement de l'image {0} : {1}",
+  "Error.LogLocation": "Journal des erreurs : {0}",
+  "Error.NoErrorLog": "Aucun journal d'erreurs trouvé. Aucune erreur n'a encore été enregistrée.",
+  "Console.DeletionErrors": "{0} fichier(s) n'a/ont pas pu être supprimé(s) (voir le journal des erreurs)"
 }

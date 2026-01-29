@@ -96,12 +96,12 @@
   "Error.Title": "Błąd",
   "Warning.LargeFile": "Ten plik jest bardzo duży ({0} MB). Czy na pewno chcesz go otworzyć?",
   "Warning.Title": "Ostrzeżenie",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Wyświetl dziennik błędów",
+  "Error.SerializationFailed": "Nie udało się zapisać sesji: {0}",
+  "Error.DeserializationFailed": "Nie udało się wczytać sesji: {0}",
+  "Error.DeletionFailed": "Nie można usunąć {0} plik(ów):\n\n{1}",
+  "Error.ProcessingFailed": "Nie udało się przetworzyć obrazu {0}: {1}",
+  "Error.LogLocation": "Dziennik błędów: {0}",
+  "Error.NoErrorLog": "Nie znaleziono dziennika błędów. Nie zarejestrowano jeszcze żadnych błędów.",
+  "Console.DeletionErrors": "Nie można usunąć {0} plik(ów) (zobacz dziennik błędów)"
 }

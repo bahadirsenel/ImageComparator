@@ -96,12 +96,12 @@
   "Error.Title": "Fehler",
   "Warning.LargeFile": "Diese Datei ist sehr groß ({0} MB). Sind Sie sicher, dass Sie sie öffnen möchten?",
   "Warning.Title": "Warnung",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Fehlerprotokoll anzeigen",
+  "Error.SerializationFailed": "Sitzung konnte nicht gespeichert werden: {0}",
+  "Error.DeserializationFailed": "Sitzung konnte nicht geladen werden: {0}",
+  "Error.DeletionFailed": "{0} Datei(en) konnte(n) nicht gelöscht werden:\n\n{1}",
+  "Error.ProcessingFailed": "Bild {0} konnte nicht verarbeitet werden: {1}",
+  "Error.LogLocation": "Fehlerprotokoll: {0}",
+  "Error.NoErrorLog": "Kein Fehlerprotokoll gefunden. Es wurden noch keine Fehler protokolliert.",
+  "Console.DeletionErrors": "{0} Datei(en) konnte(n) nicht gelöscht werden (siehe Fehlerprotokoll)"
 }

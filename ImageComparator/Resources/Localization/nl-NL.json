@@ -96,12 +96,12 @@
   "Error.Title": "Fout",
   "Warning.LargeFile": "Dit bestand is erg groot ({0} MB). Weet u zeker dat u het wilt openen?",
   "Warning.Title": "Waarschuwing",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Foutlog weergeven",
+  "Error.SerializationFailed": "Sessie opslaan mislukt: {0}",
+  "Error.DeserializationFailed": "Sessie laden mislukt: {0}",
+  "Error.DeletionFailed": "{0} bestand(en) kon(den) niet worden verwijderd:\n\n{1}",
+  "Error.ProcessingFailed": "Verwerken van afbeelding {0} mislukt: {1}",
+  "Error.LogLocation": "Foutlog: {0}",
+  "Error.NoErrorLog": "Geen foutlog gevonden. Er zijn nog geen fouten geregistreerd.",
+  "Console.DeletionErrors": "{0} bestand(en) kon(den) niet worden verwijderd (zie foutlog)"
 }

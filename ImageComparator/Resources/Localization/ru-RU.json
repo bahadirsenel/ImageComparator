@@ -96,12 +96,12 @@
   "Error.Title": "Ошибка",
   "Warning.LargeFile": "Этот файл очень большой ({0} МБ). Вы уверены, что хотите открыть его?",
   "Warning.Title": "Предупреждение",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Просмотр журнала ошибок",
+  "Error.SerializationFailed": "Не удалось сохранить сеанс: {0}",
+  "Error.DeserializationFailed": "Не удалось загрузить сеанс: {0}",
+  "Error.DeletionFailed": "Не удалось удалить {0} файл(ов):\n\n{1}",
+  "Error.ProcessingFailed": "Не удалось обработать изображение {0}: {1}",
+  "Error.LogLocation": "Журнал ошибок: {0}",
+  "Error.NoErrorLog": "Журнал ошибок не найден. Ошибки еще не регистрировались.",
+  "Console.DeletionErrors": "Не удалось удалить {0} файл(ов) (см. журнал ошибок)"
 }

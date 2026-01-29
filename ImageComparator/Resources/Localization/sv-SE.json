@@ -96,12 +96,12 @@
   "Error.Title": "Fel",
   "Warning.LargeFile": "Denna fil är mycket stor ({0} MB). Är du säker på att du vill öppna den?",
   "Warning.Title": "Varning",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "Visa felloggen",
+  "Error.SerializationFailed": "Kunde inte spara session: {0}",
+  "Error.DeserializationFailed": "Kunde inte ladda session: {0}",
+  "Error.DeletionFailed": "Kunde inte ta bort {0} fil(er):\n\n{1}",
+  "Error.ProcessingFailed": "Kunde inte bearbeta bild {0}: {1}",
+  "Error.LogLocation": "Fellogg: {0}",
+  "Error.NoErrorLog": "Ingen fellogg hittades. Inga fel har loggats ännu.",
+  "Console.DeletionErrors": "Kunde inte ta bort {0} fil(er) (se fellogg)"
 }

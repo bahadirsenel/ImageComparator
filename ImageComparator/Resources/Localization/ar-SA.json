@@ -96,12 +96,12 @@
   "Error.Title": "خطأ",
   "Warning.LargeFile": "هذا الملف كبير جداً ({0} ميجابايت). هل أنت متأكد أنك تريد فتحه؟",
   "Warning.Title": "تحذير",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "عرض سجل الأخطاء",
+  "Error.SerializationFailed": "فشل حفظ الجلسة: {0}",
+  "Error.DeserializationFailed": "فشل تحميل الجلسة: {0}",
+  "Error.DeletionFailed": "تعذر حذف {0} ملف/ملفات:\n\n{1}",
+  "Error.ProcessingFailed": "فشلت معالجة الصورة {0}: {1}",
+  "Error.LogLocation": "سجل الأخطاء: {0}",
+  "Error.NoErrorLog": "لم يتم العثور على سجل للأخطاء. لم يتم تسجيل أي أخطاء بعد.",
+  "Console.DeletionErrors": "تعذر حذف {0} ملف/ملفات (راجع سجل الأخطاء)"
 }

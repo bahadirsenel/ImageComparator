@@ -96,12 +96,12 @@
   "Error.Title": "错误",
   "Warning.LargeFile": "此文件非常大（{0} MB）。您确定要打开它吗？",
   "Warning.Title": "警告",
-  "Menu.ViewErrorLog": "View Error Log",
-  "Error.SerializationFailed": "Failed to save session: {0}",
-  "Error.DeserializationFailed": "Failed to load session: {0}",
-  "Error.DeletionFailed": "{0} file(s) could not be deleted:\n\n{1}",
-  "Error.ProcessingFailed": "Failed to process image {0}: {1}",
-  "Error.LogLocation": "Error log: {0}",
-  "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
-  "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)"
+  "Menu.ViewErrorLog": "查看错误日志",
+  "Error.SerializationFailed": "保存会话失败：{0}",
+  "Error.DeserializationFailed": "加载会话失败：{0}",
+  "Error.DeletionFailed": "无法删除 {0} 个文件：\n\n{1}",
+  "Error.ProcessingFailed": "处理图像 {0} 失败：{1}",
+  "Error.LogLocation": "错误日志：{0}",
+  "Error.NoErrorLog": "未找到错误日志。尚未记录任何错误。",
+  "Console.DeletionErrors": "无法删除 {0} 个文件（请查看错误日志）"
 }
