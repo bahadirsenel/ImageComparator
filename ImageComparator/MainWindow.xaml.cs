@@ -789,7 +789,7 @@ namespace ImageComparator
         /// <summary>
         /// Deletes selected or marked files and removes them from the binding lists.
         /// Optimized implementation using HashSet for O(1) lookups.
-        /// Time Complexity: O(n) where n is the total number of items in binding lists.
+        /// Time Complexity: O(n + m) where n is the total number of items in binding lists and m is the number of unique files to delete.
         /// Space Complexity: O(m) where m is the number of files to delete.
         /// </summary>
         private void DeleteSelectedButton_Click(object sender, RoutedEventArgs e)
@@ -833,6 +833,7 @@ namespace ImageComparator
                         {
                             FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
                         }
+                        // Only increment count after successful deletion
                         deletedCount++;
                     }
                 }
@@ -842,7 +843,7 @@ namespace ImageComparator
                 }
                 catch
                 {
-                    // Silently continue with other files
+                    // Silently continue with other files on deletion errors
                 }
             }
 
@@ -861,11 +862,12 @@ namespace ImageComparator
             for (int i = bindingList1.Count - 1; i >= 0; i--)
             {
                 // Create a normalized pair key - order doesn't matter (A,B) == (B,A)
-                string pair1Key = string.Compare(bindingList1[i].text, bindingList2[i].text, StringComparison.OrdinalIgnoreCase) < 0
+                // Note: Pipe delimiter is safe as Windows prohibits it in file paths
+                string pairKey = string.Compare(bindingList1[i].text, bindingList2[i].text, StringComparison.OrdinalIgnoreCase) < 0
                     ? bindingList1[i].text + "|" + bindingList2[i].text
                     : bindingList2[i].text + "|" + bindingList1[i].text;
 
-                if (seenPairs.Contains(pair1Key))
+                if (seenPairs.Contains(pairKey))
                 {
                     // Duplicate pair found, remove it
                     bindingList1.RemoveAt(i);
@@ -873,7 +875,7 @@ namespace ImageComparator
                 }
                 else
                 {
-                    seenPairs.Add(pair1Key);  // O(1) HashSet add
+                    seenPairs.Add(pairKey);  // O(1) HashSet add
                 }
             }
 
@@ -2159,17 +2161,18 @@ namespace ImageComparator
                 var falsePositivePairs = new HashSet<string>();
                 for (int i = 0; i < falsePositiveList1.Count; i++)
                 {
-                    // Add both directions of the pair (A,B) and (B,A) with normalized keys
-                    string pair1 = string.Compare(falsePositiveList1[i], falsePositiveList2[i], StringComparison.OrdinalIgnoreCase) < 0
+                    // Create normalized pair key - order doesn't matter (A,B) == (B,A)
+                    // Note: Pipe delimiter is safe as SHA256 checksums are hexadecimal without pipe characters
+                    string falsePositivePairKey = string.Compare(falsePositiveList1[i], falsePositiveList2[i], StringComparison.OrdinalIgnoreCase) < 0
                         ? falsePositiveList1[i] + "|" + falsePositiveList2[i]
                         : falsePositiveList2[i] + "|" + falsePositiveList1[i];
-                    falsePositivePairs.Add(pair1);
+                    falsePositivePairs.Add(falsePositivePairKey);
                 }
 
                 // Single pass removal - O(n) with O(1) lookups
                 for (int i = list1.Count - 1; i >= 0; i--)
                 {
-                    // Create normalized pair key
+                    // Create normalized pair key for current item
                     string pairKey = string.Compare(list1[i].sha256Checksum, list2[i].sha256Checksum, StringComparison.OrdinalIgnoreCase) < 0
                         ? list1[i].sha256Checksum + "|" + list2[i].sha256Checksum
                         : list2[i].sha256Checksum + "|" + list1[i].sha256Checksum;
