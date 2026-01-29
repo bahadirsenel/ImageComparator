@@ -187,8 +187,15 @@ namespace ImageComparator.Helpers
                 string fullPath = Path.GetFullPath(filePath);
                 return Path.GetDirectoryName(fullPath);
             }
-            catch
+            catch (Exception ex) when (ex is ArgumentException || ex is PathTooLongException || ex is NotSupportedException)
             {
+                // Expected path-related errors: treat as invalid path
+                return null;
+            }
+            catch (Exception ex) when (!(ex is OutOfMemoryException))
+            {
+                // Unexpected error: log for debugging while preserving null-on-failure behavior
+                Debug.WriteLine($"SafeGetDirectory failed for path '{filePath}': {ex}");
                 return null;
             }
         }
@@ -206,8 +213,10 @@ namespace ImageComparator.Helpers
                 string extension = Path.GetExtension(filePath).ToLowerInvariant();
                 return AllowedImageExtensions.Contains(extension);
             }
-            catch
+            catch (Exception ex)
             {
+                // Log unexpected exceptions for debugging while maintaining safety contract
+                Debug.WriteLine($"IsValidImagePath failed for path '{filePath}': {ex}");
                 return false;
             }
         }
