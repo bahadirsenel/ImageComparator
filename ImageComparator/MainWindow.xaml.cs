@@ -58,6 +58,12 @@ namespace ImageComparator
         string path;
         string currentLanguageCode = "en-US"; // Track current language for serialization
 
+        // Modern threading infrastructure
+        private CancellationTokenSource _cancellationTokenSource;
+        private volatile bool _isPaused;
+        private readonly object _pauseLock = new object();
+        private readonly ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
+
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
         public static DependencyProperty ImagePathProperty2 = DependencyProperty.Register("ImagePath2", typeof(string), typeof(MainWindow), null);
 
@@ -279,6 +285,56 @@ namespace ImageComparator
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            // Unpause threads before cancelling to ensure they can respond
+            lock (_pauseLock)
+            {
+                if (_isPaused)
+                {
+                    _isPaused = false;
+                    _pauseEvent?.Set();
+                }
+            }
+
+            // Cancel any running operations
+            try
+            {
+                _cancellationTokenSource?.Cancel();
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("Window_Closing - Cancel Operations", ex);
+            }
+
+            // Wait for both processThread and worker threads to complete (with timeout)
+            try
+            {
+                bool completed = SpinWait.SpinUntil(() =>
+                    (processThread == null || !processThread.IsAlive) &&
+                    (threadList == null || threadList.All(t => !t.IsAlive)),
+                    TimeSpan.FromSeconds(5)
+                );
+
+                if (!completed)
+                {
+                    ErrorLogger.LogWarning("Window_Closing", "Threads did not complete within timeout");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("Window_Closing - Wait for Threads", ex);
+            }
+
+            // Dispose resources
+            try
+            {
+                _cancellationTokenSource?.Dispose();
+                _pauseEvent?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("Window_Closing - Dispose Resources", ex);
+            }
+
             try
             {
                 Serialize(path + @"\Bin\Image Comparator.json");
@@ -778,6 +834,11 @@ namespace ImageComparator
                 bmpMenuItemChecked = bmpMenuItem.IsChecked;
                 tiffMenuItemChecked = tiffMenuItem.IsChecked;
                 icoMenuItemChecked = icoMenuItem.IsChecked;
+                
+                // Initialize cancellation token and pause state
+                _cancellationTokenSource = new CancellationTokenSource();
+                _isPaused = false;
+                
                 processThread = new Thread(Run);
                 processThread.Start();
             }
@@ -1220,124 +1281,84 @@ namespace ImageComparator
 
         private void PauseButton_Click(object sender, RoutedEventArgs e)
         {
-            if (pauseButton.Tag.Equals("0"))
+            lock (_pauseLock)
             {
-                pauseButton.Tag = "1";
-                pauseButton.Content = LocalizationManager.GetString("Button.Resume");
-                console.Add(LocalizationManager.GetString("Console.Paused"));
+                _isPaused = !_isPaused;
 
-                pausedFirstTime = DateTime.Now.ToFileTime();
-
-                bool otherThreadsRun = false;
-
-                for (int i = 0; i < threadList.Count; i++)
+                if (_isPaused)
                 {
-                    if (threadList.ElementAt(i).IsAlive)
+                    pauseButton.Tag = "1";
+                    pauseButton.Content = LocalizationManager.GetString("Button.Resume");
+                    console.Add(LocalizationManager.GetString("Console.Paused"));
+                    pausedFirstTime = DateTime.Now.ToFileTime();
+                    _pauseEvent.Reset();
+                }
+                else
+                {
+                    pauseButton.Tag = "0";
+                    pauseButton.Content = LocalizationManager.GetString("Button.Pause");
+                    if (console.Count > 0)
                     {
-                        threadList.ElementAt(i).Suspend();
-                        otherThreadsRun = true;
+                        console.RemoveAt(console.Count - 1);
                     }
-                }
+                    pausedSecondTime = DateTime.Now.ToFileTime();
+                    pauseTime += pausedSecondTime - pausedFirstTime;
 
-                if (!otherThreadsRun)
-                {
-                    processThread.Suspend();
-                }
-            }
-            else
-            {
-                pauseButton.Tag = "0";
-                pauseButton.Content = LocalizationManager.GetString("Button.Pause");
-
-                console.RemoveAt(console.Count - 1);
-                pausedSecondTime = DateTime.Now.ToFileTime();
-                pauseTime += pausedSecondTime - pausedFirstTime;
-                bool otherThreadsRun = false;
-
-                for (int i = 0; i < threadList.Count; i++)
-                {
-                    if (threadList.ElementAt(i).ThreadState.Equals(ThreadState.Suspended))
-                    {
-                        threadList.ElementAt(i).Resume();
-                        otherThreadsRun = true;
-                    }
-                }
-
-                if (!otherThreadsRun)
-                {
-                    processThread.Resume();
+                    // Signal all waiting threads to continue
+                    _pauseEvent.Set();
                 }
             }
         }
 
         private void StopButton_Click(object sender, RoutedEventArgs e)
         {
+            // Request cancellation
+            _cancellationTokenSource?.Cancel();
+
+            // Unpause if paused
+            lock (_pauseLock)
+            {
+                if (_isPaused)
+                {
+                    _isPaused = false;
+                    _pauseEvent.Set();
+                }
+            }
+
+            // Update UI immediately
             findDuplicatesButton.Visibility = Visibility.Visible;
             pauseButton.Visibility = Visibility.Collapsed;
             stopButton.Visibility = Visibility.Collapsed;
-
-            try
-            {
-                for (int i = 0; i < threadList.Count; i++)
-                {
-                    if (threadList.ElementAt(i).ThreadState.Equals(ThreadState.Suspended))
-                    {
-                        threadList.ElementAt(i).Resume();
-                    }
-                }
-            }
-            catch (OutOfMemoryException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                ErrorLogger.LogError("StopButton_Click - Resume Threads", ex);
-            }
-
-            try
-            {
-                for (int i = 0; i < threadList.Count; i++)
-                {
-                    try
-                    {
-                        threadList.ElementAt(i).Abort();
-                    }
-                    catch (OutOfMemoryException)
-                    {
-                        throw;
-                    }
-                    catch (Exception ex)
-                    {
-                        ErrorLogger.LogError($"StopButton_Click - Abort Thread {i}", ex);
-                    }
-                }
-            }
-            catch (OutOfMemoryException)
-            {
-                throw;
-            }
-            catch (Exception ex)
-            {
-                ErrorLogger.LogError("StopButton_Click - Abort All Threads", ex);
-            }
-
-            try
-            {
-                processThread.Abort();
-            }
-            catch (ThreadStateException)
-            {
-                processThread.Resume();
-            }
-
             pauseButton.Content = LocalizationManager.GetString("Button.Pause");
 
-            if (pauseButton.Tag.Equals("1"))
+            if (pauseButton.Tag?.Equals("1") == true)
             {
-                console.RemoveAt(console.Count - 1);
+                if (console.Count > 0)
+                {
+                    console.RemoveAt(console.Count - 1);
+                }
             }
 
+            // Wait for both processThread and worker threads to finish gracefully (with timeout)
+            try
+            {
+                bool completed = SpinWait.SpinUntil(() =>
+                    (processThread == null || !processThread.IsAlive) &&
+                    (threadList == null || threadList.All(t => !t.IsAlive)),
+                    TimeSpan.FromSeconds(5)
+                );
+
+                if (!completed)
+                {
+                    ErrorLogger.LogWarning("StopButton", "Threads did not complete within timeout");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("StopButton_Click - Wait for threads", ex);
+            }
+
+            // Cleanup
             directories = new List<string>();
             pauseButton.Tag = "0";
             percentage.Value = 0;
@@ -1347,7 +1368,10 @@ namespace ImageComparator
             list1.Clear();
             list2.Clear();
 
-            console[console.Count - 1] = LocalizationManager.GetString("Console.InterruptedByUser");
+            if (console.Count > 0)
+            {
+                console[console.Count - 1] = LocalizationManager.GetString("Console.InterruptedByUser");
+            }
         }
 
         private void ListView1_KeyDown(object sender, KeyEventArgs e)
@@ -2104,7 +2128,7 @@ namespace ImageComparator
             }
         }
 
-        private void ProcessThreadStart()
+        private void ProcessThreadStart(CancellationToken cancellationToken)
         {
             FastDCT2D fastDCT2D;
             int[,] result;
@@ -2115,8 +2139,23 @@ namespace ImageComparator
             {
                 while (processThreadsiAsync < files.Count)
                 {
+                    // Check for cancellation
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    // Check for pause
+                    WaitWhilePaused(cancellationToken);
+
                     lock (myLock)
                     {
+                        // Double-check after acquiring lock
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            return;
+                        }
+
                         i = processThreadsiAsync;
                         processThreadsiAsync++;
                         percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
@@ -2259,6 +2298,11 @@ namespace ImageComparator
                             ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", ex);
                         }
                     }
+                    catch (OperationCanceledException)
+                    {
+                        // Expected when cancelled
+                        return;
+                    }
                     catch (OutOfMemoryException)
                     {
                         throw;
@@ -2271,15 +2315,49 @@ namespace ImageComparator
             }
         }
 
-        private void CompareResultsThreadStart()
+        /// <summary>
+        /// Wait while paused, checking for cancellation
+        /// </summary>
+        private void WaitWhilePaused(CancellationToken cancellationToken)
+        {
+            while (_isPaused && !cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    _pauseEvent.Wait(100, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // Exit on cancellation
+                    throw;
+                }
+            }
+        }
+
+        private void CompareResultsThreadStart(CancellationToken cancellationToken)
         {
             int i, j;
             bool isDuplicate;
 
             while (compareResultsiAsync < files.Count - 1)
             {
+                // Check for cancellation
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                // Check for pause
+                WaitWhilePaused(cancellationToken);
+
                 lock (myLock)
                 {
+                    // Double-check after acquiring lock
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
                     i = compareResultsiAsync;
                     compareResultsiAsync++;
                     percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
@@ -2302,7 +2380,9 @@ namespace ImageComparator
 
         private void Run()
         {
-            Action updateUI = delegate ()
+            try
+            {
+                Action updateUI = delegate ()
             {
                 // Optimize false positive removal using HashSet for O(1) lookups instead of O(n²) nested loops
                 // Build HashSet of false positive pairs - O(n)
@@ -2452,15 +2532,30 @@ namespace ImageComparator
             resolutionArray = new System.Drawing.Size[files.Count];
             threadList = new List<Thread>();
 
+            // Get cancellation token
+            var cts = _cancellationTokenSource;
+            if (cts == null)
+            {
+                // Cancellation source is not available; abort processing.
+                return;
+            }
+            var token = cts.Token;
+
             for (int i = 0; i < Environment.ProcessorCount; i++)
             {
-                threadList.Add(new Thread(ProcessThreadStart));
+                threadList.Add(new Thread(() => ProcessThreadStart(token)));
                 threadList.ElementAt(i).Start();
             }
 
             for (int i = 0; i < Environment.ProcessorCount; i++)
             {
                 threadList.ElementAt(i).Join();
+            }
+
+            // Check if cancelled
+            if (token.IsCancellationRequested)
+            {
+                return;
             }
 
             threadList = new List<Thread>();
@@ -2468,7 +2563,7 @@ namespace ImageComparator
 
             for (int i = 0; i < Environment.ProcessorCount; i++)
             {
-                threadList.Add(new Thread(CompareResultsThreadStart));
+                threadList.Add(new Thread(() => CompareResultsThreadStart(token)));
                 threadList.ElementAt(i).Start();
             }
 
@@ -2477,9 +2572,37 @@ namespace ImageComparator
                 threadList.ElementAt(i).Join();
             }
 
+            // Check if cancelled before updating UI
+            if (token.IsCancellationRequested)
+            {
+                return;
+            }
+
             percentage.Value = 100;
             Dispatcher.Invoke(DispatcherPriority.Normal, updateConsole2);
             Dispatcher.Invoke(DispatcherPriority.Normal, updateUI);
+            }
+            finally
+            {
+                // Cleanup - only dispose if this is still the same instance
+                var currentCts = _cancellationTokenSource;
+                if (currentCts != null)
+                {
+                    try
+                    {
+                        currentCts.Dispose();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Already disposed, ignore
+                    }
+                    // Only set to null if we disposed the current instance
+                    if (_cancellationTokenSource == currentCts)
+                    {
+                        _cancellationTokenSource = null;
+                    }
+                }
+            }
         }
 
         private void WriteToFile(List<string> input)
