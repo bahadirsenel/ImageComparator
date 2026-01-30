@@ -1747,7 +1747,7 @@ namespace ImageComparator
         {
             try
             {
-                // Klasör yolunu al ve oluştur
+                // Get and create the folder path
                 string directory = System.IO.Path.GetDirectoryName(path);
                 if (!Directory.Exists(directory))
                 {
@@ -1768,13 +1768,13 @@ namespace ImageComparator
                     IncludeSubfolders = includeSubfoldersMenuItem.IsChecked,
                     SkipFilesWithDifferentOrientation = skipFilesWithDifferentOrientationMenuItem.IsChecked,
                     DuplicatesOnly = findExactDuplicatesOnlyMenuItem.IsChecked,
-                    Files = files,
-                    FalsePositiveList1 = falsePositiveList1,
-                    FalsePositiveList2 = falsePositiveList2,
+                    Files = files ?? new List<string>(),
+                    FalsePositiveList1 = falsePositiveList1 ?? new List<string>(),
+                    FalsePositiveList2 = falsePositiveList2 ?? new List<string>(),
                     ResolutionArray = resolutionArray?.Select(s => new SerializableSize(s)).ToArray(),
-                    BindingList1 = bindingList1.Select(item => new SerializableListViewDataItem(item)).ToList(),
-                    BindingList2 = bindingList2.Select(item => new SerializableListViewDataItem(item)).ToList(),
-                    ConsoleMessages = console.ToList()
+                    BindingList1 = bindingList1?.Select(item => new SerializableListViewDataItem(item)).ToList() ?? new List<SerializableListViewDataItem>(),
+                    BindingList2 = bindingList2?.Select(item => new SerializableListViewDataItem(item)).ToList() ?? new List<SerializableListViewDataItem>(),
+                    ConsoleMessages = console?.ToList() ?? new List<string>()
                 };
 
                 var options = new JsonSerializerOptions 
@@ -1800,14 +1800,7 @@ namespace ImageComparator
         {
             try
             {
-                // Klasör yolunu al ve oluştur
-                string directory = System.IO.Path.GetDirectoryName(path);
-                if (!Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                // Dosya yoksa hiçbir şey yapma (ilk kez açılıyorsa)
+                // If file doesn't exist, do nothing (first time opening)
                 if (!File.Exists(path))
                 {
                     opening = false;
@@ -1828,13 +1821,21 @@ namespace ImageComparator
                     throw new InvalidOperationException("Failed to deserialize settings");
                 }
 
+                // Ensure collections are not null
+                settings.Files = settings.Files ?? new List<string>();
+                settings.FalsePositiveList1 = settings.FalsePositiveList1 ?? new List<string>();
+                settings.FalsePositiveList2 = settings.FalsePositiveList2 ?? new List<string>();
+                settings.BindingList1 = settings.BindingList1 ?? new List<SerializableListViewDataItem>();
+                settings.BindingList2 = settings.BindingList2 ?? new List<SerializableListViewDataItem>();
+                settings.ConsoleMessages = settings.ConsoleMessages ?? new List<string>();
+
                 ApplySettings(settings);
             }
             catch (JsonException ex)
             {
                 ErrorLogger.LogError("Deserialize - JSON Parse Error", ex);
                 MessageBox.Show(
-                    "The session file is corrupted or invalid.",
+                    "The session file is corrupted or invalid. Please delete the file and restart the application.",
                     "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error
@@ -1844,6 +1845,12 @@ namespace ImageComparator
             catch (Exception ex) when (!(ex is OutOfMemoryException))
             {
                 ErrorLogger.LogError("Deserialize", ex);
+                MessageBox.Show(
+                    "Failed to load session file. The file may be corrupted.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
                 opening = false;
             }
         }
@@ -1877,10 +1884,18 @@ namespace ImageComparator
                     deletePermanentlyMenuItem.IsEnabled = false;
                 }
 
-                // Set language based on saved currentLanguageCode
+                // Set language based on saved currentLanguageCode with validation
                 string languageToSet = settings.CurrentLanguageCode;
                 
-                if (string.IsNullOrEmpty(languageToSet))
+                // List of valid language codes
+                var validLanguages = new[] { 
+                    "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT", 
+                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "fa-IR", "hi-IN", 
+                    "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK" 
+                };
+                
+                // Validate and default to en-US if null or invalid
+                if (string.IsNullOrEmpty(languageToSet) || !validLanguages.Contains(languageToSet))
                 {
                     languageToSet = "en-US";
                 }
