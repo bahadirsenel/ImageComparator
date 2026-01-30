@@ -297,6 +297,7 @@ namespace ImageComparator
                 {
                     process.Kill();
                 }
+                process?.Dispose();
             }
             catch (OutOfMemoryException)
             {
