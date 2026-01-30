@@ -795,6 +795,7 @@ namespace ImageComparator
                 chineseMenuItem,
                 koreanMenuItem,
                 arabicMenuItem,
+                persianMenuItem,
                 hindiMenuItem,
                 dutchMenuItem,
                 polishMenuItem,
