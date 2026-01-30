@@ -114,7 +114,7 @@ namespace AddFiles
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var directoriesData = JsonSerializer.Deserialize<DirectoriesData>(directoriesJson, options);
                 
-                if (directoriesData?.Directories != null)
+                if (directoriesData != null && directoriesData.Directories != null)
                 {
                     tempDirectories.AddRange(directoriesData.Directories);
                 }

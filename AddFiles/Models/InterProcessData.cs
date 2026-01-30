@@ -7,7 +7,7 @@ namespace AddFiles.Models
     /// </summary>
     public class DirectoriesData
     {
-        public List<string> Directories { get; set; }
+        public List<string> Directories { get; set; } = new List<string>();
     }
 
     /// <summary>
@@ -30,6 +30,6 @@ namespace AddFiles.Models
     public class ResultsData
     {
         public bool GotException { get; set; }
-        public List<string> Files { get; set; }
+        public List<string> Files { get; set; } = new List<string>();
     }
 }
