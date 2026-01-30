@@ -297,7 +297,6 @@ namespace ImageComparator
                 {
                     process.Kill();
                 }
-                process?.Dispose();
             }
             catch (OutOfMemoryException)
             {
@@ -306,6 +305,11 @@ namespace ImageComparator
             catch (Exception ex)
             {
                 ErrorLogger.LogError("Window_Closing - Kill Process", ex);
+            }
+            finally
+            {
+                process?.Dispose();
+                process = null;
             }
 
             try
