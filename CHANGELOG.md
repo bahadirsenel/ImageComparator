@@ -15,7 +15,6 @@ All notable changes to Image Comparator will be documented in this file.
 - **Crash**: Fixed application crash when closing with active processes
 - **Performance**: Optimized duplicate deletion algorithm (540x faster for large result sets)
 - **Memory**: Fixed memory leaks in image processing that could cause resource exhaustion
-- **Bug**: Fixed ColorMatrix grayscale conversion producing incorrect results
 - **Bug**: Fixed pixel coordinate issue in vdHash algorithm
 - **Bug**: File deletion now correctly removes only successfully deleted items from the list
 
