@@ -2507,8 +2507,7 @@ namespace ImageComparator
                 {
                     process.WaitForExit();
                     
-                    // Check for diagnostic files
-                    string markerFile = path + @"\Bin\AddFiles_Started.marker";
+                    // Check for error log files
                     string errorLogFile = path + @"\Bin\AddFiles_Error.log";
                     string tempErrorLog = System.IO.Path.GetTempPath() + "AddFiles_Error.log";
                     
@@ -2521,16 +2520,6 @@ namespace ImageComparator
                     {
                         string errorContent = File.ReadAllText(tempErrorLog);
                         ErrorLogger.LogError("AddFiles.exe Error (from temp)", new Exception($"AddFiles.exe reported error:\n{errorContent}"));
-                    }
-                    else if (!File.Exists(markerFile))
-                    {
-                        ErrorLogger.LogError("AddFiles.exe", new Exception("AddFiles.exe did not start - no marker file found. Check if executable and dependencies exist."));
-                    }
-                    
-                    // Clean up marker file
-                    if (File.Exists(markerFile))
-                    {
-                        try { File.Delete(markerFile); } catch { }
                     }
                 }
                 else
