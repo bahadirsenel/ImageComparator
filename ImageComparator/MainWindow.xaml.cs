@@ -1748,7 +1748,7 @@ namespace ImageComparator
             {
                 // Get and create the folder path
                 string directory = System.IO.Path.GetDirectoryName(path);
-                if (!Directory.Exists(directory))
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
                     Directory.CreateDirectory(directory);
                 }
@@ -1788,7 +1788,7 @@ namespace ImageComparator
             catch (Exception ex) when (!(ex is OutOfMemoryException))
             {
                 ErrorLogger.LogError("Serialize", ex);
-                throw new InvalidOperationException($"Failed to save session: {ex.Message}", ex);
+                throw;
             }
         }
 
@@ -1818,6 +1818,16 @@ namespace ImageComparator
                 if (settings == null)
                 {
                     throw new InvalidOperationException("Failed to deserialize settings");
+                }
+
+                // Validate settings version for forward/backward compatibility
+                const int SupportedVersion = 1;
+                // Treat 0 or missing version as SupportedVersion to avoid breaking older files
+                var loadedVersion = settings.Version;
+                if (loadedVersion != 0 && loadedVersion != SupportedVersion)
+                {
+                    throw new NotSupportedException(
+                        $"Unsupported settings version: {loadedVersion}. Supported version: {SupportedVersion}.");
                 }
 
                 // Ensure collections are not null
@@ -2465,31 +2475,40 @@ namespace ImageComparator
 
         private void WriteToFile(List<string> input)
         {
-            // Create data objects
-            var directoriesData = new DirectoriesData
+            try
             {
-                Directories = input
-            };
+                // Create data objects
+                var directoriesData = new DirectoriesData
+                {
+                    Directories = input
+                };
 
-            var filtersData = new FiltersData
+                var filtersData = new FiltersData
+                {
+                    IncludeSubfolders = includeSubfolders,
+                    JpegFiles = jpegMenuItemChecked,
+                    GifFiles = gifMenuItemChecked,
+                    PngFiles = pngMenuItemChecked,
+                    BmpFiles = bmpMenuItemChecked,
+                    TiffFiles = tiffMenuItemChecked,
+                    IcoFiles = icoMenuItemChecked
+                };
+
+                // Serialize to JSON
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                
+                string directoriesJson = JsonSerializer.Serialize(directoriesData, options);
+                string filtersJson = JsonSerializer.Serialize(filtersData, options);
+                
+                // Write both files - if either fails, both should fail
+                File.WriteAllText(path + @"\Bin\Directories.json", directoriesJson);
+                File.WriteAllText(path + @"\Bin\Filters.json", filtersJson);
+            }
+            catch (Exception ex)
             {
-                IncludeSubfolders = includeSubfolders,
-                JpegFiles = jpegMenuItemChecked,
-                GifFiles = gifMenuItemChecked,
-                PngFiles = pngMenuItemChecked,
-                BmpFiles = bmpMenuItemChecked,
-                TiffFiles = tiffMenuItemChecked,
-                IcoFiles = icoMenuItemChecked
-            };
-
-            // Serialize to JSON
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            
-            string directoriesJson = JsonSerializer.Serialize(directoriesData, options);
-            File.WriteAllText(path + @"\Bin\Directories.json", directoriesJson);
-
-            string filtersJson = JsonSerializer.Serialize(filtersData, options);
-            File.WriteAllText(path + @"\Bin\Filters.json", filtersJson);
+                ErrorLogger.LogError("WriteToFile", ex);
+                throw;
+            }
         }
 
         private void AddFiles(List<string> directory)
@@ -2515,11 +2534,31 @@ namespace ImageComparator
                     {
                         string errorContent = File.ReadAllText(errorLogFile);
                         ErrorLogger.LogError("AddFiles.exe Error", new Exception($"AddFiles.exe reported error:\n{errorContent}"));
+
+                        // Delete error log file after it has been read and logged
+                        try
+                        {
+                            File.Delete(errorLogFile);
+                        }
+                        catch
+                        {
+                            // Ignore any errors during cleanup
+                        }
                     }
                     else if (File.Exists(tempErrorLog))
                     {
                         string errorContent = File.ReadAllText(tempErrorLog);
                         ErrorLogger.LogError("AddFiles.exe Error (from temp)", new Exception($"AddFiles.exe reported error:\n{errorContent}"));
+
+                        // Delete temp error log file after it has been read and logged
+                        try
+                        {
+                            File.Delete(tempErrorLog);
+                        }
+                        catch
+                        {
+                            // Ignore any errors during cleanup
+                        }
                     }
                 }
                 else

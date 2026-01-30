@@ -199,7 +199,6 @@ namespace AddFiles
             }
             catch (Exception ex)
             {
-                gotException = true;
                 // Re-throw so the error gets logged in Main()'s catch block
                 throw new Exception($"ReadFromFile failed: {ex.Message}", ex);
             }
@@ -213,7 +212,10 @@ namespace AddFiles
                         File.Delete(directoriesPath);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Warning: Failed to delete directories file '{directoriesPath}': {ex.Message}");
+                }
                 
                 try
                 {
@@ -222,7 +224,10 @@ namespace AddFiles
                         File.Delete(filtersPath);
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Warning: Failed to delete filters file '{filtersPath}': {ex.Message}");
+                }
             }
         }
 
@@ -253,7 +258,7 @@ namespace AddFiles
                 string jsonString = JsonSerializer.Serialize(resultsData, options);
                 File.WriteAllText(path + @"\Results.json", jsonString);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // If serialization fails, try to write a simple error file
                 try
