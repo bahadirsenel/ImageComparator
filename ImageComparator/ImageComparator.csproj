@@ -110,7 +110,7 @@
     </Reference>
     <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL">
       <HintPath>..\packages\Ookii.Dialogs.1.0\lib\net35\Ookii.Dialogs.Wpf.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="System" />
@@ -388,7 +388,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
@@ -401,6 +403,7 @@
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(SolutionDir)External Tools\*.exe" "$(TargetDir)Bin\" /Y /I
 xcopy "$(SolutionDir)External Tools\*.dll" "$(TargetDir)Bin\" /Y /I
-xcopy "$(SolutionDir)External Tools\*.config" "$(TargetDir)Bin\" /Y /I</PostBuildEvent>
+xcopy "$(SolutionDir)External Tools\*.config" "$(TargetDir)Bin\" /Y /I
+xcopy "$(SolutionDir)packages\Ookii.Dialogs.1.0\lib\net35\Ookii.Dialogs.Wpf.dll" "$(TargetDir)Bin\" /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>
