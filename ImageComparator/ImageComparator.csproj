@@ -404,6 +404,8 @@
     <PostBuildEvent>xcopy "$(SolutionDir)External Tools\*.exe" "$(TargetDir)Bin\" /Y /I
 xcopy "$(SolutionDir)External Tools\*.dll" "$(TargetDir)Bin\" /Y /I
 xcopy "$(SolutionDir)External Tools\*.config" "$(TargetDir)Bin\" /Y /I
+REM Copy Ookii.Dialogs.Wpf.dll to Bin folder (ImageComparator-only dependency)
+REM Note: Update path if Ookii.Dialogs package version changes from 1.0 or target framework changes from net35
 xcopy "$(SolutionDir)packages\Ookii.Dialogs.1.0\lib\net35\Ookii.Dialogs.Wpf.dll" "$(TargetDir)Bin\" /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>
