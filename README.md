@@ -118,8 +118,11 @@ Go to Options > Deletion Method to choose:
 - **Click and Drag**: Pan around zoomed images
 
 ### Saving and Loading Results
-- **File > Save Results**: Saves your current findings to continue later
+- **File > Save Results**: Saves your current findings to continue later in a secure JSON format (`.json`)
 - **File > Load Results**: Loads previously saved results
+- **Legacy File Support**: The application can automatically migrate older `.mff` session files to the new secure JSON format
+
+**Note**: Starting from version 2.0, session files are saved in JSON format (`.json`) instead of the older binary format (`.mff`). This change improves security and prevents potential vulnerabilities. When you open an old `.mff` file, you'll be prompted to migrate it to the new format.
 
 ## How It Works
 
@@ -145,6 +148,7 @@ This approach allows the application to detect:
 - **Discrete Cosine Transform**: Perceptual image hashing algorithm
 - **Ookii Dialogs**: Modern folder browser dialogs
 - **System.Drawing**: Image loading and processing
+- **System.Text.Json**: Secure JSON serialization for session files
 - **System.Web.Extensions**: JSON serialization (JavaScriptSerializer) for settings and localization
 - **Microsoft.VisualBasic**: File operations (Recycle Bin functionality)
 
