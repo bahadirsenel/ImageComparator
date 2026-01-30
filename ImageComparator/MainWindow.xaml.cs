@@ -1747,6 +1747,10 @@ namespace ImageComparator
             previewImage2.ReleaseMouseCapture();
         }
 
+        /// <summary>
+        /// Legacy serialization constructor - only used for backward compatibility with old .mff files
+        /// </summary>
+        [Obsolete("Legacy support only - retained for backward compatibility with BinaryFormatter deserialization")]
         protected MainWindow(SerializationInfo info, StreamingContext ctxt)
         {
             jpegMenuItemChecked = (bool)info.GetValue("jpegMenuItemChecked", typeof(bool));
@@ -1791,6 +1795,10 @@ namespace ImageComparator
             console = (ObservableCollection<string>)info.GetValue("console", typeof(ObservableCollection<string>));
         }
 
+        /// <summary>
+        /// Legacy serialization method - only used for backward compatibility with old .mff files
+        /// </summary>
+        [Obsolete("Legacy support only - retained for backward compatibility with BinaryFormatter serialization")]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("jpegMenuItemChecked", jpegMenuItem.IsChecked);
@@ -1840,13 +1848,13 @@ namespace ImageComparator
                     IncludeSubfolders = includeSubfoldersMenuItem.IsChecked,
                     SkipFilesWithDifferentOrientation = skipFilesWithDifferentOrientationMenuItem.IsChecked,
                     DuplicatesOnly = findExactDuplicatesOnlyMenuItem.IsChecked,
-                    Files = files,
-                    FalsePositiveList1 = falsePositiveList1,
-                    FalsePositiveList2 = falsePositiveList2,
+                    Files = files ?? new List<string>(),
+                    FalsePositiveList1 = falsePositiveList1 ?? new List<string>(),
+                    FalsePositiveList2 = falsePositiveList2 ?? new List<string>(),
                     ResolutionArray = resolutionArray?.Select(s => new SerializableSize(s)).ToArray(),
-                    BindingList1 = bindingList1.Select(item => new SerializableListViewDataItem(item)).ToList(),
-                    BindingList2 = bindingList2.Select(item => new SerializableListViewDataItem(item)).ToList(),
-                    ConsoleMessages = console.ToList()
+                    BindingList1 = bindingList1?.Select(item => new SerializableListViewDataItem(item)).ToList() ?? new List<SerializableListViewDataItem>(),
+                    BindingList2 = bindingList2?.Select(item => new SerializableListViewDataItem(item)).ToList() ?? new List<SerializableListViewDataItem>(),
+                    ConsoleMessages = console?.ToList() ?? new List<string>()
                 };
 
                 var options = new JsonSerializerOptions 
@@ -1879,14 +1887,7 @@ namespace ImageComparator
         {
             try
             {
-                // Klasör yolunu al ve oluştur
-                string directory = System.IO.Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
-                // Dosya yoksa hiçbir şey yapma (ilk kez açılıyorsa)
+                // Check if file exists first
                 if (!File.Exists(path))
                 {
                     opening = false;
@@ -1978,6 +1979,16 @@ namespace ImageComparator
                     return firstByte != '{' && firstByte != '[';
                 }
             }
+            catch (IOException ex)
+            {
+                ErrorLogger.LogError("IsBinaryFormat - IO Error", ex);
+                return false;
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                ErrorLogger.LogError("IsBinaryFormat - Access Denied", ex);
+                return false;
+            }
             catch
             {
                 return false;
@@ -1986,12 +1997,28 @@ namespace ImageComparator
 
         /// <summary>
         /// Deserialize old binary format and auto-migrate
+        /// WARNING: This method uses BinaryFormatter which has known security vulnerabilities.
+        /// Only use with trusted files. This method will be removed in a future version.
         /// </summary>
         [Obsolete("Legacy support only - will be removed in future version")]
         private void DeserializeLegacyFormat(string path)
         {
             try
             {
+                // Validate file size to prevent resource exhaustion (limit to 100MB)
+                var fileInfo = new FileInfo(path);
+                if (fileInfo.Length > 100 * 1024 * 1024)
+                {
+                    MessageBox.Show(
+                        "The legacy file is too large to migrate safely. Please contact support.",
+                        LocalizationManager.GetString("Error.Title"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+                    opening = false;
+                    return;
+                }
+
                 #pragma warning disable SYSLIB0011 // BinaryFormatter is obsolete
                 using (Stream stream = File.Open(path, FileMode.Open))
                 {
@@ -2003,9 +2030,19 @@ namespace ImageComparator
                 // Convert to AppSettings format
                 var settings = ConvertLegacyToSettings(mainWindow);
                 
-                // Immediately save in new format
+                // Construct new JSON file path
                 string directory = System.IO.Path.GetDirectoryName(path);
                 string filename = System.IO.Path.GetFileNameWithoutExtension(path);
+                
+                if (string.IsNullOrEmpty(directory))
+                {
+                    directory = Environment.CurrentDirectory;
+                }
+                if (string.IsNullOrEmpty(filename))
+                {
+                    filename = "migrated_session";
+                }
+                
                 string newPath = System.IO.Path.Combine(directory, filename + ".json");
                 
                 var result = MessageBox.Show(
@@ -2095,7 +2132,15 @@ namespace ImageComparator
                 falsePositiveList1 = settings.FalsePositiveList1 ?? new List<string>();
                 falsePositiveList2 = settings.FalsePositiveList2 ?? new List<string>();
 
-                if (!settings.SendsToRecycleBin)
+                // Update recycle bin settings
+                if (settings.SendsToRecycleBin)
+                {
+                    sendToRecycleBinMenuItem.IsChecked = true;
+                    deletePermanentlyMenuItem.IsChecked = false;
+                    sendToRecycleBinMenuItem.IsEnabled = false;
+                    deletePermanentlyMenuItem.IsEnabled = true;
+                }
+                else
                 {
                     sendToRecycleBinMenuItem.IsChecked = false;
                     deletePermanentlyMenuItem.IsChecked = true;
