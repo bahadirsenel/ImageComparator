@@ -1,9 +1,9 @@
 using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 
-namespace ImageComparator.Helpers
+namespace Common.Helpers
 {
     /// <summary>
     /// Centralized error logging for diagnostics and debugging
@@ -11,8 +11,7 @@ namespace ImageComparator.Helpers
     public static class ErrorLogger
     {
         private static readonly string LogDirectory = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "ImageComparator",
+            AppDomain.CurrentDomain.BaseDirectory,
             "Logs"
         );
 
@@ -43,7 +42,7 @@ namespace ImageComparator.Helpers
             if (ex == null) return;
 
             string message = FormatErrorMessage(context, ex);
-            
+
             // Always write to debug output
             Debug.WriteLine(message);
 
@@ -81,14 +80,14 @@ namespace ImageComparator.Helpers
             sb.AppendLine($"Exception Type: {ex.GetType().FullName}");
             sb.AppendLine($"Message: {ex.Message}");
             sb.AppendLine($"Stack Trace:\n{ex.StackTrace}");
-            
+
             if (ex.InnerException != null)
             {
                 sb.AppendLine($"\nInner Exception: {ex.InnerException.GetType().FullName}");
                 sb.AppendLine($"Inner Message: {ex.InnerException.Message}");
                 sb.AppendLine($"Inner Stack Trace:\n{ex.InnerException.StackTrace}");
             }
-            
+
             sb.AppendLine(new string('-', 80));
             return sb.ToString();
         }
@@ -103,10 +102,10 @@ namespace ImageComparator.Helpers
                 lock (_logLock)
                 {
                     string logFile = Path.Combine(
-                        LogDirectory, 
+                        LogDirectory,
                         $"{logType}_{DateTime.Now:yyyyMMdd}.log"
                     );
-                    
+
                     File.AppendAllText(logFile, message + "\n");
                 }
             }

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using AddFiles.Models;
+using Common.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using AddFiles.Models;
 
 namespace AddFiles
 {
@@ -22,7 +23,7 @@ namespace AddFiles
         {
             // Initialize path to a default so we can always write logs
             path = Directory.GetCurrentDirectory();
-            
+
             try
             {
                 // Try to get the actual path from command line args
@@ -31,7 +32,7 @@ namespace AddFiles
                 {
                     path = exePath.Substring(0, exePath.LastIndexOf("\\"));
                 }
-                
+
                 ReadFromFile();
                 AddFiles();
             }
@@ -39,33 +40,9 @@ namespace AddFiles
             {
                 // Mark that an exception occurred
                 gotException = true;
-                
-                // Try to write error details to a log file for debugging
-                try
-                {
-                    string errorLog = path + @"\AddFiles_Error.log";
-                    File.WriteAllText(errorLog, $"[{DateTime.Now}] ERROR in AddFiles.exe\r\n" +
-                                                 $"Exception Type: {ex.GetType().FullName}\r\n" +
-                                                 $"Message: {ex.Message}\r\n" +
-                                                 $"Stack Trace:\r\n{ex.StackTrace}\r\n");
-                }
-                catch (Exception logEx)
-                {
-                    // Try one more time with a hardcoded temp path
-                    try
-                    {
-                        string tempLog = System.IO.Path.GetTempPath() + "AddFiles_Error.log";
-                        File.WriteAllText(tempLog, $"[{DateTime.Now}] ERROR in AddFiles.exe\r\n" +
-                                                    $"Exception Type: {ex.GetType().FullName}\r\n" +
-                                                    $"Message: {ex.Message}\r\n" +
-                                                    $"Stack Trace:\r\n{ex.StackTrace}\r\n" +
-                                                    $"Log Exception: {logEx.Message}\r\n");
-                    }
-                    catch
-                    {
-                        // Nothing more we can do
-                    }
-                }
+
+                // Use centralized error logger
+                ErrorLogger.LogError("AddFiles.Main", ex);
             }
             finally
             {
@@ -104,6 +81,7 @@ namespace AddFiles
                     catch (UnauthorizedAccessException)
                     {
                         gotException = true;
+                        ErrorLogger.LogWarning("AddFiles.AddFiles", $"Unauthorized access to directory: {tempDirectories.ElementAt(0)}");
                     }
                     catch (DirectoryNotFoundException)
                     {
@@ -133,6 +111,7 @@ namespace AddFiles
                     catch (UnauthorizedAccessException)
                     {
                         gotException = true;
+                        ErrorLogger.LogWarning("AddFiles.AddFiles", $"Unauthorized access to directory: {tempDirectories.ElementAt(i)}");
                     }
                 }
             }
@@ -154,7 +133,7 @@ namespace AddFiles
         {
             string directoriesPath = path + @"\Directories.json";
             string filtersPath = path + @"\Filters.json";
-            
+
             try
             {
                 // Check if input files exist (they should be created by MainWindow)
@@ -163,7 +142,7 @@ namespace AddFiles
                     string missingFiles = "";
                     if (!File.Exists(directoriesPath)) missingFiles += "Directories.json ";
                     if (!File.Exists(filtersPath)) missingFiles += "Filters.json ";
-                    
+
                     throw new FileNotFoundException(
                         $"AddFiles.exe requires input files that are missing: {missingFiles}\r\n" +
                         $"Expected location: {path}\r\n" +
@@ -171,12 +150,12 @@ namespace AddFiles
                         $"If you need to test it manually, create these JSON files first."
                     );
                 }
-                
+
                 // Read Directories.json
                 string directoriesJson = File.ReadAllText(directoriesPath);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var directoriesData = JsonSerializer.Deserialize<DirectoriesData>(directoriesJson, options);
-                
+
                 if (directoriesData != null && directoriesData.Directories != null)
                 {
                     tempDirectories.AddRange(directoriesData.Directories);
@@ -185,7 +164,7 @@ namespace AddFiles
                 // Read Filters.json
                 string filtersJson = File.ReadAllText(filtersPath);
                 var filtersData = JsonSerializer.Deserialize<FiltersData>(filtersJson, options);
-                
+
                 if (filtersData != null)
                 {
                     includeSubfolders = filtersData.IncludeSubfolders;
@@ -212,11 +191,11 @@ namespace AddFiles
                         File.Delete(directoriesPath);
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Console.Error.WriteLine($"Warning: Failed to delete directories file '{directoriesPath}': {ex.Message}");
+                    ErrorLogger.LogWarning("AddFiles.ReadFromFile.Cleanup", $"Failed to delete directories file '{directoriesPath}'");
                 }
-                
+
                 try
                 {
                     if (File.Exists(filtersPath))
@@ -224,9 +203,9 @@ namespace AddFiles
                         File.Delete(filtersPath);
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
-                    Console.Error.WriteLine($"Warning: Failed to delete filters file '{filtersPath}': {ex.Message}");
+                    ErrorLogger.LogWarning("AddFiles.ReadFromFile.Cleanup", $"Failed to delete filters file '{filtersPath}'");
                 }
             }
         }
@@ -245,7 +224,7 @@ namespace AddFiles
                     path = Directory.GetCurrentDirectory();
                 }
             }
-            
+
             try
             {
                 var resultsData = new ResultsData
@@ -258,8 +237,11 @@ namespace AddFiles
                 string jsonString = JsonSerializer.Serialize(resultsData, options);
                 File.WriteAllText(path + @"\Results.json", jsonString);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                // Log the error
+                ErrorLogger.LogError("AddFiles.WriteToFile", ex);
+
                 // If serialization fails, try to write a simple error file
                 try
                 {
@@ -274,14 +256,17 @@ namespace AddFiles
                 }
                 catch
                 {
+                    ErrorLogger.LogWarning("AddFiles.WriteToFile.Fallback", "Failed to write fallback Results.json");
+
                     // Last resort: write a minimal file
                     try
                     {
                         File.WriteAllText(path + @"\Results.json", "{\"GotException\":true,\"Files\":[]}");
                     }
-                    catch
+                    catch (Exception finalEx)
                     {
                         // Nothing more we can do
+                        ErrorLogger.LogError("AddFiles.WriteToFile.Final", finalEx);
                     }
                 }
             }

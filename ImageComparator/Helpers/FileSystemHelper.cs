@@ -11,7 +11,7 @@ namespace ImageComparator.Helpers
     /// </summary>
     public static class FileSystemHelper
     {
-        private static readonly string[] AllowedImageExtensions = 
+        private static readonly string[] AllowedImageExtensions =
         {
             ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".ico"
         };
@@ -25,7 +25,7 @@ namespace ImageComparator.Helpers
         {
             string fullPath = null;
             string extension = null;
-            
+
             try
             {
                 // Validate input
@@ -36,7 +36,7 @@ namespace ImageComparator.Helpers
 
                 // Normalize path (prevents traversal attacks)
                 fullPath = Path.GetFullPath(filePath);
-                
+
                 // Get extension early for use in error messages
                 extension = Path.GetExtension(fullPath).ToLowerInvariant();
 
@@ -74,7 +74,7 @@ namespace ImageComparator.Helpers
                         MessageBoxButton.YesNo,
                         MessageBoxImage.Warning
                     );
-                    
+
                     if (result != MessageBoxResult.Yes)
                     {
                         return false;
