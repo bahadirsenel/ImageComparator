@@ -1,4 +1,5 @@
-﻿using DiscreteCosineTransform;
+﻿using Common.Helpers;
+using DiscreteCosineTransform;
 using ImageComparator.Helpers;
 using ImageComparator.Models;
 using Microsoft.VisualBasic.FileIO;
@@ -678,7 +679,7 @@ namespace ImageComparator
             try
             {
                 string logPath = ErrorLogger.GetCurrentLogPath();
-                
+
                 if (File.Exists(logPath))
                 {
                     System.Diagnostics.Process.Start("notepad.exe", logPath);
@@ -822,13 +823,13 @@ namespace ImageComparator
                 gifMenuItem.IsEnabled = true;
                 tiffMenuItem.IsEnabled = true;
                 icoMenuItem.IsEnabled = true;
-                
+
                 // Enable language menu items (disable the checked one)
                 foreach (var languageMenuItem in languageMenuItems)
                 {
                     languageMenuItem.IsEnabled = !languageMenuItem.IsChecked;
                 }
-                
+
                 includeSubfoldersMenuItem.IsEnabled = true;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = true;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = true;
@@ -852,13 +853,13 @@ namespace ImageComparator
                 gifMenuItem.IsEnabled = false;
                 tiffMenuItem.IsEnabled = false;
                 icoMenuItem.IsEnabled = false;
-                
+
                 // Disable all language menu items
                 foreach (var languageMenuItem in languageMenuItems)
                 {
                     languageMenuItem.IsEnabled = false;
                 }
-                
+
                 includeSubfoldersMenuItem.IsEnabled = false;
                 skipFilesWithDifferentOrientationMenuItem.IsEnabled = false;
                 findExactDuplicatesOnlyMenuItem.IsEnabled = false;
@@ -878,16 +879,16 @@ namespace ImageComparator
         {
             // Step 1: Collect files to delete
             var filesToDelete = CollectFilesToDelete();
-            
+
             // Step 2: Delete files from disk and get successfully deleted files
             var deletedFiles = DeleteFilesFromDisk(filesToDelete, out var failedDeletions);
-            
+
             // Step 3: Remove deleted items from lists
             RemoveDeletedItemsFromLists(deletedFiles);
-            
+
             // Step 4: Remove duplicate pairs
             RemoveDuplicatePairs();
-            
+
             // Step 5: Show results to user
             ReportDeletionResults(deletedFiles.Count, filesToDelete.Count, failedDeletions);
         }
@@ -924,8 +925,8 @@ namespace ImageComparator
         /// <returns>True if item should be deleted, false otherwise</returns>
         private bool ShouldDelete(ListViewDataItem item)
         {
-            return deleteMarkedItems 
-                ? item.state == (int)State.MarkedForDeletion 
+            return deleteMarkedItems
+                ? item.state == (int)State.MarkedForDeletion
                 : item.isChecked;
         }
 
@@ -946,10 +947,10 @@ namespace ImageComparator
                 {
                     if (File.Exists(filePath))
                     {
-                        var recycleOption = deletePermanentlyMenuItem.IsChecked 
-                            ? RecycleOption.DeletePermanently 
+                        var recycleOption = deletePermanentlyMenuItem.IsChecked
+                            ? RecycleOption.DeletePermanently
                             : RecycleOption.SendToRecycleBin;
-                        
+
                         FileSystem.DeleteFile(filePath, UIOption.OnlyErrorDialogs, recycleOption);
                         deletedFiles.Add(filePath);
                     }
@@ -980,7 +981,7 @@ namespace ImageComparator
             // Remove from end to avoid index shifting issues
             for (int i = bindingList1.Count - 1; i >= 0; i--)
             {
-                if (deletedFiles.Contains(bindingList1[i].text) || 
+                if (deletedFiles.Contains(bindingList1[i].text) ||
                     deletedFiles.Contains(bindingList2[i].text))
                 {
                     bindingList1.RemoveAt(i);
@@ -1057,16 +1058,16 @@ namespace ImageComparator
             if (failedDeletions.Count > 0)
             {
                 console.Add(LocalizationManager.GetString("Console.DeletionErrors", failedDeletions.Count));
-                
+
                 // Show detailed error message to user for the first few failures
-                var details = string.Join("\n", failedDeletions.Take(5).Select(f => 
+                var details = string.Join("\n", failedDeletions.Take(5).Select(f =>
                     $"  • {Path.GetFileName(f.path)}: {f.error}"));
-                
+
                 if (failedDeletions.Count > 5)
                 {
                     details += $"\n  ... and {failedDeletions.Count - 5} more";
                 }
-                
+
                 MessageBox.Show(
                     LocalizationManager.GetString("Error.DeletionFailed", failedDeletions.Count, details),
                     LocalizationManager.GetString("Error.Title"),
@@ -1784,12 +1785,12 @@ namespace ImageComparator
                     ConsoleMessages = console?.ToList() ?? new List<string>()
                 };
 
-                var options = new JsonSerializerOptions 
-                { 
+                var options = new JsonSerializerOptions
+                {
                     WriteIndented = true,
                     PropertyNameCaseInsensitive = true
                 };
-                
+
                 string jsonString = JsonSerializer.Serialize(settings, options);
                 File.WriteAllText(path, jsonString);
             }
@@ -1815,12 +1816,12 @@ namespace ImageComparator
                 }
 
                 string jsonString = File.ReadAllText(path);
-                
-                var options = new JsonSerializerOptions 
-                { 
-                    PropertyNameCaseInsensitive = true 
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
                 };
-                
+
                 var settings = JsonSerializer.Deserialize<AppSettings>(jsonString, options);
 
                 if (settings == null)
@@ -1903,23 +1904,23 @@ namespace ImageComparator
 
                 // Set language based on saved currentLanguageCode with validation
                 string languageToSet = settings.CurrentLanguageCode;
-                
+
                 // List of valid language codes
-                var validLanguages = new[] { 
-                    "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT", 
-                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "fa-IR", "hi-IN", 
-                    "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK" 
+                var validLanguages = new[] {
+                    "en-US", "tr-TR", "ja-JP", "es-ES", "fr-FR", "de-DE", "it-IT",
+                    "pt-BR", "ru-RU", "zh-CN", "ko-KR", "ar-SA", "fa-IR", "hi-IN",
+                    "nl-NL", "pl-PL", "sv-SE", "nb-NO", "da-DK"
                 };
-                
+
                 // Validate and default to en-US if null or invalid
                 if (string.IsNullOrEmpty(languageToSet) || !validLanguages.Contains(languageToSet))
                 {
                     languageToSet = "en-US";
                 }
-                
+
                 // Set menu states for the language
                 SetLanguageMenuStates(languageToSet);
-                
+
                 currentLanguageCode = languageToSet;
                 LocalizationManager.SetLanguage(languageToSet);
                 UpdateUI();
@@ -1935,11 +1936,11 @@ namespace ImageComparator
                 console = new ObservableCollection<string>(settings.ConsoleMessages);
                 files = settings.Files;
                 resolutionArray = settings.ResolutionArray?.Select(s => s.ToSize()).ToArray();
-                
+
                 listView1.ItemsSource = bindingList1;
                 listView2.ItemsSource = bindingList2;
                 outputListView.ItemsSource = console;
-                
+
                 addFolderButton.Visibility = Visibility.Hidden;
                 findDuplicatesButton.Visibility = Visibility.Hidden;
                 clearResultsButton.Visibility = Visibility.Visible;
@@ -2504,10 +2505,10 @@ namespace ImageComparator
 
                 // Serialize to JSON
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                
+
                 string directoriesJson = JsonSerializer.Serialize(directoriesData, options);
                 string filtersJson = JsonSerializer.Serialize(filtersData, options);
-                
+
                 // Write both files - if either fails, both should fail
                 File.WriteAllText(path + @"\Bin\Directories.json", directoriesJson);
                 File.WriteAllText(path + @"\Bin\Filters.json", filtersJson);
@@ -2526,18 +2527,18 @@ namespace ImageComparator
             processStartInfo.RedirectStandardOutput = false;
             processStartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             processStartInfo.UseShellExecute = true;
-            
+
             try
             {
                 process = System.Diagnostics.Process.Start(processStartInfo);
                 if (process != null)
                 {
                     process.WaitForExit();
-                    
+
                     // Check for error log files
                     string errorLogFile = path + @"\Bin\AddFiles_Error.log";
                     string tempErrorLog = System.IO.Path.GetTempPath() + "AddFiles_Error.log";
-                    
+
                     if (File.Exists(errorLogFile))
                     {
                         string errorContent = File.ReadAllText(errorLogFile);
@@ -2578,14 +2579,14 @@ namespace ImageComparator
             {
                 ErrorLogger.LogError("AddFiles.exe Start", ex);
             }
-            
+
             ReadFromFile();
         }
 
         private void ReadFromFile()
         {
             string resultsPath = path + @"\Bin\Results.json";
-            
+
             try
             {
                 // Check if file exists before trying to read
@@ -2594,11 +2595,11 @@ namespace ImageComparator
                     ErrorLogger.LogError("ReadFromFile - Results", new FileNotFoundException($"Results.json not found at {resultsPath}. AddFiles.exe may have failed."));
                     return;
                 }
-                
+
                 string jsonString = File.ReadAllText(resultsPath);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var resultsData = JsonSerializer.Deserialize<ResultsData>(jsonString, options);
-                
+
                 if (resultsData != null)
                 {
                     gotException = resultsData.GotException;
@@ -2607,7 +2608,7 @@ namespace ImageComparator
                         files.AddRange(resultsData.Files);
                     }
                 }
-                
+
                 File.Delete(resultsPath);
             }
             catch (Exception ex)
@@ -2637,7 +2638,7 @@ namespace ImageComparator
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
                 }
-                
+
                 return destImage;
             }
             catch
@@ -2650,7 +2651,7 @@ namespace ImageComparator
         private Bitmap ConvertToGrayscale(Bitmap inputImage)
         {
             Bitmap cloneImage = (Bitmap)inputImage.Clone();
-            
+
             try
             {
                 using (Graphics graphics = Graphics.FromImage(cloneImage))
@@ -2666,7 +2667,7 @@ namespace ImageComparator
                     attributes.SetColorMatrix(colorMatrix);
                     graphics.DrawImage(cloneImage, new Rectangle(0, 0, cloneImage.Width, cloneImage.Height), 0, 0, cloneImage.Width, cloneImage.Height, GraphicsUnit.Pixel, attributes);
                 }
-                
+
                 return cloneImage;
             }
             catch
