@@ -293,7 +293,10 @@ namespace ImageComparator
 
             try
             {
-                process?.Kill();
+                if (process != null && !process.HasExited)
+                {
+                    process.Kill();
+                }
             }
             catch (OutOfMemoryException)
             {
