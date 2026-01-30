@@ -67,11 +67,12 @@ Image Comparator is a WPF-based tool that helps you identify duplicate and simil
 2. Open `ImageComparator.sln` in Visual Studio
 3. Restore NuGet packages
 4. Build the solution (F6 or Build → Build Solution)
-   - This will build both the main ImageComparator project and the AddFiles helper tool
+   - This will build all three projects: ImageComparator (main application), Common (shared utilities), and AddFiles (helper tool)
    - AddFiles.exe is a console application used for file enumeration and will be placed in the `ImageComparator/bin/Debug/Bin/` or `ImageComparator/bin/Release/Bin/` directory
+   - Common.dll provides shared utilities including the ErrorLogger for centralized logging
 5. The main executable will be in `ImageComparator/bin/Debug/` or `ImageComparator/bin/Release/`
 
-**Note**: The AddFiles project is a helper tool that performs file system operations. It must be built along with the main application for the software to function correctly.
+**Note**: The AddFiles project is a helper tool that performs file system operations, and the Common project provides shared utilities used by both ImageComparator and AddFiles. All projects must be built together for the software to function correctly.
 
 ## Usage
 
@@ -172,6 +173,10 @@ ImageComparator/
 │   └── packages.config           # NuGet package references
 ├── AddFiles/                     # Helper console application
 │   ├── Program.cs                # File enumeration tool
+│   └── Properties/               # Assembly info
+├── Common/                       # Shared utilities library
+│   ├── Helpers/                  # Common helper classes
+│   │   └── ErrorLogger.cs        # Centralized error and warning logging
 │   └── Properties/               # Assembly info
 ├── ImageComparator.sln           # Visual Studio solution
 ├── LICENSE.txt                   # GPL v3.0 License
