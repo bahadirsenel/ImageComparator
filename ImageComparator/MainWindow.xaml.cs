@@ -1,5 +1,6 @@
 ﻿using DiscreteCosineTransform;
 using ImageComparator.Helpers;
+using ImageComparator.Models;
 using Microsoft.VisualBasic.FileIO;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -11,9 +12,8 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,8 +24,7 @@ using System.Windows.Threading;
 
 namespace ImageComparator
 {
-    [Serializable]
-    public partial class MainWindow : Window, ISerializable
+    public partial class MainWindow : Window
     {
         #region Variables
         System.Diagnostics.Process process;
@@ -42,8 +41,6 @@ namespace ImageComparator
         List<ListViewDataItem> list1 = new List<ListViewDataItem>();
         List<ListViewDataItem> list2 = new List<ListViewDataItem>();
         List<Thread> threadList;
-        StreamWriter streamWriter;
-        StreamReader streamReader;
         object myLock = new object();
         object myLock2 = new object();
         MyInt percentage = new MyInt();
@@ -132,7 +129,6 @@ namespace ImageComparator
         }
         #endregion
 
-        [Serializable]
         public class ListViewDataItem : INotifyPropertyChanged
         {
             private bool selected;
@@ -230,13 +226,13 @@ namespace ImageComparator
             folderBrowserDialog.ShowNewFolderButton = true;
 
             saveFileDialog = new VistaSaveFileDialog();
-            saveFileDialog.DefaultExt = "mff";
-            saveFileDialog.Filter = "*.mff|*.mff";
+            saveFileDialog.DefaultExt = "json";
+            saveFileDialog.Filter = "JSON Files (*.json)|*.json";
             saveFileDialog.AddExtension = true;
 
             openFileDialog = new VistaOpenFileDialog();
-            openFileDialog.DefaultExt = "mff";
-            openFileDialog.Filter = "*.mff|*.mff";
+            openFileDialog.DefaultExt = "json";
+            openFileDialog.Filter = "JSON Files (*.json)|*.json";
             openFileDialog.AddExtension = true;
 
             previewImage1.RenderTransform = new TransformGroup
@@ -257,7 +253,7 @@ namespace ImageComparator
 
             try
             {
-                Deserialize(path + @"\Bin\Image Comparator.imc");
+                Deserialize(path + @"\Bin\Image Comparator.json");
             }
             catch (OutOfMemoryException)
             {
@@ -284,7 +280,7 @@ namespace ImageComparator
         {
             try
             {
-                Serialize(path + @"\Bin\Image Comparator.imc");
+                Serialize(path + @"\Bin\Image Comparator.json");
             }
             catch (OutOfMemoryException)
             {
@@ -310,7 +306,7 @@ namespace ImageComparator
 
             try
             {
-                File.Delete(path + @"\Bin\Results.imc");
+                File.Delete(path + @"\Bin\Results.json");
             }
             catch (OutOfMemoryException)
             {
@@ -318,12 +314,12 @@ namespace ImageComparator
             }
             catch (Exception ex)
             {
-                ErrorLogger.LogError("Window_Closing - Delete Results.imc", ex);
+                ErrorLogger.LogError("Window_Closing - Delete Results.json", ex);
             }
 
             try
             {
-                File.Delete(path + @"\Bin\Directories.imc");
+                File.Delete(path + @"\Bin\Directories.json");
             }
             catch (OutOfMemoryException)
             {
@@ -331,12 +327,12 @@ namespace ImageComparator
             }
             catch (Exception ex)
             {
-                ErrorLogger.LogError("Window_Closing - Delete Directories.imc", ex);
+                ErrorLogger.LogError("Window_Closing - Delete Directories.json", ex);
             }
 
             try
             {
-                File.Delete(path + @"\Bin\Filters.imc");
+                File.Delete(path + @"\Bin\Filters.json");
             }
             catch (OutOfMemoryException)
             {
@@ -344,7 +340,7 @@ namespace ImageComparator
             }
             catch (Exception ex)
             {
-                ErrorLogger.LogError("Window_Closing - Delete Filters.imc", ex);
+                ErrorLogger.LogError("Window_Closing - Delete Filters.json", ex);
             }
             Environment.Exit(0);
         }
@@ -629,7 +625,7 @@ namespace ImageComparator
 
             try
             {
-                Serialize(path + @"\Bin\Image Comparator.imc");
+                Serialize(path + @"\Bin\Image Comparator.json");
             }
             catch (OutOfMemoryException)
             {
@@ -799,6 +795,7 @@ namespace ImageComparator
                 chineseMenuItem,
                 koreanMenuItem,
                 arabicMenuItem,
+                persianMenuItem,
                 hindiMenuItem,
                 dutchMenuItem,
                 polishMenuItem,
@@ -1742,18 +1739,162 @@ namespace ImageComparator
             previewImage2.ReleaseMouseCapture();
         }
 
-        protected MainWindow(SerializationInfo info, StreamingContext ctxt)
+        /// <summary>
+        /// Safely serialize application state to JSON format
+        /// </summary>
+        public void Serialize(string path)
         {
-            jpegMenuItemChecked = (bool)info.GetValue("jpegMenuItemChecked", typeof(bool));
-            gifMenuItemChecked = (bool)info.GetValue("gifMenuItemChecked", typeof(bool));
-            pngMenuItemChecked = (bool)info.GetValue("pngMenuItemChecked", typeof(bool));
-            bmpMenuItemChecked = (bool)info.GetValue("bmpMenuItemChecked", typeof(bool));
-            tiffMenuItemChecked = (bool)info.GetValue("tiffMenuItemChecked", typeof(bool));
-            icoMenuItemChecked = (bool)info.GetValue("icoMenuItemChecked", typeof(bool));
-            sendsToRecycleBin = (bool)info.GetValue("sendsToRecycleBin", typeof(bool));
             try
             {
-                currentLanguageCode = (string)info.GetValue("currentLanguageCode", typeof(string));
+                // Get and create the folder path
+                string directory = System.IO.Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
+
+                var settings = new AppSettings
+                {
+                    Version = 1,
+                    JpegMenuItemChecked = jpegMenuItem.IsChecked,
+                    GifMenuItemChecked = gifMenuItem.IsChecked,
+                    PngMenuItemChecked = pngMenuItem.IsChecked,
+                    BmpMenuItemChecked = bmpMenuItem.IsChecked,
+                    TiffMenuItemChecked = tiffMenuItem.IsChecked,
+                    IcoMenuItemChecked = icoMenuItem.IsChecked,
+                    SendsToRecycleBin = sendToRecycleBinMenuItem.IsChecked,
+                    CurrentLanguageCode = currentLanguageCode,
+                    IncludeSubfolders = includeSubfoldersMenuItem.IsChecked,
+                    SkipFilesWithDifferentOrientation = skipFilesWithDifferentOrientationMenuItem.IsChecked,
+                    DuplicatesOnly = findExactDuplicatesOnlyMenuItem.IsChecked,
+                    Files = files ?? new List<string>(),
+                    FalsePositiveList1 = falsePositiveList1 ?? new List<string>(),
+                    FalsePositiveList2 = falsePositiveList2 ?? new List<string>(),
+                    ResolutionArray = resolutionArray?.Select(s => new SerializableSize(s)).ToArray(),
+                    BindingList1 = bindingList1?.Select(item => new SerializableListViewDataItem(item)).ToList() ?? new List<SerializableListViewDataItem>(),
+                    BindingList2 = bindingList2?.Select(item => new SerializableListViewDataItem(item)).ToList() ?? new List<SerializableListViewDataItem>(),
+                    ConsoleMessages = console?.ToList() ?? new List<string>()
+                };
+
+                var options = new JsonSerializerOptions 
+                { 
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                
+                string jsonString = JsonSerializer.Serialize(settings, options);
+                File.WriteAllText(path, jsonString);
+            }
+            catch (Exception ex) when (!(ex is OutOfMemoryException))
+            {
+                ErrorLogger.LogError("Serialize", ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Safely deserialize application state from JSON format
+        /// </summary>
+        public void Deserialize(string path)
+        {
+            try
+            {
+                // If file doesn't exist, do nothing (first time opening)
+                if (!File.Exists(path))
+                {
+                    opening = false;
+                    return;
+                }
+
+                string jsonString = File.ReadAllText(path);
+                
+                var options = new JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true 
+                };
+                
+                var settings = JsonSerializer.Deserialize<AppSettings>(jsonString, options);
+
+                if (settings == null)
+                {
+                    throw new InvalidOperationException("Failed to deserialize settings");
+                }
+
+                // Validate settings version for forward/backward compatibility
+                const int SupportedVersion = 1;
+                // Treat 0 or missing version as SupportedVersion to avoid breaking older files
+                var loadedVersion = settings.Version;
+                if (loadedVersion != 0 && loadedVersion != SupportedVersion)
+                {
+                    throw new NotSupportedException(
+                        $"Unsupported settings version: {loadedVersion}. Supported version: {SupportedVersion}.");
+                }
+
+                // Ensure collections are not null
+                settings.Files = settings.Files ?? new List<string>();
+                settings.FalsePositiveList1 = settings.FalsePositiveList1 ?? new List<string>();
+                settings.FalsePositiveList2 = settings.FalsePositiveList2 ?? new List<string>();
+                settings.BindingList1 = settings.BindingList1 ?? new List<SerializableListViewDataItem>();
+                settings.BindingList2 = settings.BindingList2 ?? new List<SerializableListViewDataItem>();
+                settings.ConsoleMessages = settings.ConsoleMessages ?? new List<string>();
+
+                ApplySettings(settings);
+            }
+            catch (JsonException ex)
+            {
+                ErrorLogger.LogError("Deserialize - JSON Parse Error", ex);
+                MessageBox.Show(
+                    "The session file is corrupted or invalid. Please delete the file and restart the application.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                opening = false;
+            }
+            catch (Exception ex) when (!(ex is OutOfMemoryException))
+            {
+                ErrorLogger.LogError("Deserialize", ex);
+                MessageBox.Show(
+                    "Failed to load session file. The file may be corrupted.",
+                    "Error",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                opening = false;
+            }
+        }
+
+        /// <summary>
+        /// Apply settings to UI
+        /// </summary>
+        private void ApplySettings(AppSettings settings)
+        {
+            if (opening)
+            {
+                opening = false;
+
+                skipFilesWithDifferentOrientationMenuItem.IsChecked = settings.SkipFilesWithDifferentOrientation;
+                findExactDuplicatesOnlyMenuItem.IsChecked = settings.DuplicatesOnly;
+                includeSubfoldersMenuItem.IsChecked = settings.IncludeSubfolders;
+                jpegMenuItem.IsChecked = settings.JpegMenuItemChecked;
+                gifMenuItem.IsChecked = settings.GifMenuItemChecked;
+                pngMenuItem.IsChecked = settings.PngMenuItemChecked;
+                bmpMenuItem.IsChecked = settings.BmpMenuItemChecked;
+                tiffMenuItem.IsChecked = settings.TiffMenuItemChecked;
+                icoMenuItem.IsChecked = settings.IcoMenuItemChecked;
+                falsePositiveList1 = settings.FalsePositiveList1;
+                falsePositiveList2 = settings.FalsePositiveList2;
+
+                if (!settings.SendsToRecycleBin)
+                {
+                    sendToRecycleBinMenuItem.IsChecked = false;
+                    deletePermanentlyMenuItem.IsChecked = true;
+                    sendToRecycleBinMenuItem.IsEnabled = true;
+                    deletePermanentlyMenuItem.IsEnabled = false;
+                }
+
+                // Set language based on saved currentLanguageCode with validation
+                string languageToSet = settings.CurrentLanguageCode;
                 
                 // List of valid language codes
                 var validLanguages = new[] { 
@@ -1763,117 +1904,7 @@ namespace ImageComparator
                 };
                 
                 // Validate and default to en-US if null or invalid
-                if (string.IsNullOrEmpty(currentLanguageCode) || !validLanguages.Contains(currentLanguageCode))
-                {
-                    currentLanguageCode = "en-US";
-                }
-            }
-            catch (Exception ex)
-            {
-                // Default to English if field doesn't exist or there's any serialization error
-                ErrorLogger.LogError("Deserialize - Get Language Code", ex);
-                currentLanguageCode = "en-US";
-            }
-            includeSubfolders = (bool)info.GetValue("includeSubfolders", typeof(bool));
-            skipFilesWithDifferentOrientation = (bool)info.GetValue("skipFilesWithDifferentOrientation", typeof(bool));
-            duplicatesOnly = (bool)info.GetValue("duplicatesOnly", typeof(bool));
-            files = (List<string>)info.GetValue("files", typeof(List<string>));
-            falsePositiveList1 = (List<string>)info.GetValue("falsePositiveList1", typeof(List<string>));
-            falsePositiveList2 = (List<string>)info.GetValue("falsePositiveList2", typeof(List<string>));
-            resolutionArray = (System.Drawing.Size[])info.GetValue("resolutionArray", typeof(System.Drawing.Size[]));
-            bindingList1 = (ObservableCollection<ListViewDataItem>)info.GetValue("bindingList1", typeof(ObservableCollection<ListViewDataItem>));
-            bindingList2 = (ObservableCollection<ListViewDataItem>)info.GetValue("bindingList2", typeof(ObservableCollection<ListViewDataItem>));
-            console = (ObservableCollection<string>)info.GetValue("console", typeof(ObservableCollection<string>));
-        }
-
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("jpegMenuItemChecked", jpegMenuItem.IsChecked);
-            info.AddValue("gifMenuItemChecked", gifMenuItem.IsChecked);
-            info.AddValue("pngMenuItemChecked", pngMenuItem.IsChecked);
-            info.AddValue("bmpMenuItemChecked", bmpMenuItem.IsChecked);
-            info.AddValue("tiffMenuItemChecked", tiffMenuItem.IsChecked);
-            info.AddValue("icoMenuItemChecked", icoMenuItem.IsChecked);
-            info.AddValue("sendsToRecycleBin", sendToRecycleBinMenuItem.IsChecked);
-            info.AddValue("currentLanguageCode", currentLanguageCode);
-            info.AddValue("includeSubfolders", includeSubfoldersMenuItem.IsChecked);
-            info.AddValue("skipFilesWithDifferentOrientation", skipFilesWithDifferentOrientationMenuItem.IsChecked);
-            info.AddValue("duplicatesOnly", findExactDuplicatesOnlyMenuItem.IsChecked);
-            info.AddValue("files", files);
-            info.AddValue("falsePositiveList1", falsePositiveList1);
-            info.AddValue("falsePositiveList2", falsePositiveList2);
-            info.AddValue("resolutionArray", resolutionArray);
-            info.AddValue("bindingList1", bindingList1);
-            info.AddValue("bindingList2", bindingList2);
-            info.AddValue("console", console);
-        }
-
-        public void Serialize(string path)
-        {
-            // Klasör yolunu al ve oluştur
-            string directory = System.IO.Path.GetDirectoryName(path);
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            using (Stream stream = File.Open(path, FileMode.Create))
-            {
-                BinaryFormatter bformatter = new BinaryFormatter();
-                bformatter.Serialize(stream, this);
-            }
-        }
-
-        public void Deserialize(string path)
-        {
-            // Klasör yolunu al ve oluştur
-            string directory = System.IO.Path.GetDirectoryName(path);
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-
-            // Dosya yoksa hiçbir şey yapma (ilk kez açılıyorsa)
-            if (!File.Exists(path))
-            {
-                opening = false;
-                return;
-            }
-
-            using (Stream stream = File.Open(path, FileMode.Open))
-            {
-                BinaryFormatter bformatter = new BinaryFormatter();
-                mainWindow = (MainWindow)bformatter.Deserialize(stream);
-            }
-
-            if (opening)
-            {
-                opening = false;
-
-                skipFilesWithDifferentOrientationMenuItem.IsChecked = mainWindow.skipFilesWithDifferentOrientation;
-                findExactDuplicatesOnlyMenuItem.IsChecked = mainWindow.duplicatesOnly;
-                includeSubfoldersMenuItem.IsChecked = mainWindow.includeSubfolders;
-                jpegMenuItem.IsChecked = mainWindow.jpegMenuItemChecked;
-                gifMenuItem.IsChecked = mainWindow.gifMenuItemChecked;
-                pngMenuItem.IsChecked = mainWindow.pngMenuItemChecked;
-                bmpMenuItem.IsChecked = mainWindow.bmpMenuItemChecked;
-                tiffMenuItem.IsChecked = mainWindow.tiffMenuItemChecked;
-                icoMenuItem.IsChecked = mainWindow.icoMenuItemChecked;
-                falsePositiveList1 = mainWindow.falsePositiveList1;
-                falsePositiveList2 = mainWindow.falsePositiveList2;
-
-                if (!mainWindow.sendsToRecycleBin)
-                {
-                    sendToRecycleBinMenuItem.IsChecked = false;
-                    deletePermanentlyMenuItem.IsChecked = true;
-                    sendToRecycleBinMenuItem.IsEnabled = true;
-                    deletePermanentlyMenuItem.IsEnabled = false;
-                }
-
-                // Set language based on saved currentLanguageCode
-                string languageToSet = mainWindow.currentLanguageCode;
-                
-                if (string.IsNullOrEmpty(languageToSet))
+                if (string.IsNullOrEmpty(languageToSet) || !validLanguages.Contains(languageToSet))
                 {
                     languageToSet = "en-US";
                 }
@@ -1887,14 +1918,20 @@ namespace ImageComparator
             }
             else
             {
-                bindingList1 = mainWindow.bindingList1;
-                bindingList2 = mainWindow.bindingList2;
-                console = mainWindow.console;
-                files = mainWindow.files;
-                resolutionArray = mainWindow.resolutionArray;
+                bindingList1 = new ObservableCollection<ListViewDataItem>(
+                    settings.BindingList1.Select(item => item.ToListViewDataItem())
+                );
+                bindingList2 = new ObservableCollection<ListViewDataItem>(
+                    settings.BindingList2.Select(item => item.ToListViewDataItem())
+                );
+                console = new ObservableCollection<string>(settings.ConsoleMessages);
+                files = settings.Files;
+                resolutionArray = settings.ResolutionArray?.Select(s => s.ToSize()).ToArray();
+                
                 listView1.ItemsSource = bindingList1;
                 listView2.ItemsSource = bindingList2;
                 outputListView.ItemsSource = console;
+                
                 addFolderButton.Visibility = Visibility.Hidden;
                 findDuplicatesButton.Visibility = Visibility.Hidden;
                 clearResultsButton.Visibility = Visibility.Visible;
@@ -1906,7 +1943,6 @@ namespace ImageComparator
                 removeMarkButton.IsEnabled = true;
                 saveResultsMenuItem.IsEnabled = true;
             }
-            mainWindow = null;
         }
 
         private void UpdateUI()
@@ -2011,7 +2047,7 @@ namespace ImageComparator
 
                 try
                 {
-                    Serialize(path + @"\Bin\Image Comparator.imc");
+                    Serialize(path + @"\Bin\Image Comparator.json");
                 }
                 catch (OutOfMemoryException)
                 {
@@ -2439,25 +2475,39 @@ namespace ImageComparator
 
         private void WriteToFile(List<string> input)
         {
-            using (streamWriter = new StreamWriter(path + @"\Bin\Directories.imc"))
+            try
             {
-                streamWriter.WriteLine(input.Count);
-
-                for (int i = 0; i < input.Count; i++)
+                // Create data objects
+                var directoriesData = new DirectoriesData
                 {
-                    streamWriter.WriteLine(input.ElementAt(i));
-                }
-            }
+                    Directories = input
+                };
 
-            using (streamWriter = new StreamWriter(path + @"\Bin\Filters.imc"))
+                var filtersData = new FiltersData
+                {
+                    IncludeSubfolders = includeSubfolders,
+                    JpegFiles = jpegMenuItemChecked,
+                    GifFiles = gifMenuItemChecked,
+                    PngFiles = pngMenuItemChecked,
+                    BmpFiles = bmpMenuItemChecked,
+                    TiffFiles = tiffMenuItemChecked,
+                    IcoFiles = icoMenuItemChecked
+                };
+
+                // Serialize to JSON
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                
+                string directoriesJson = JsonSerializer.Serialize(directoriesData, options);
+                string filtersJson = JsonSerializer.Serialize(filtersData, options);
+                
+                // Write both files - if either fails, both should fail
+                File.WriteAllText(path + @"\Bin\Directories.json", directoriesJson);
+                File.WriteAllText(path + @"\Bin\Filters.json", filtersJson);
+            }
+            catch (Exception ex)
             {
-                streamWriter.WriteLine(includeSubfolders);
-                streamWriter.WriteLine(jpegMenuItemChecked);
-                streamWriter.WriteLine(gifMenuItemChecked);
-                streamWriter.WriteLine(pngMenuItemChecked);
-                streamWriter.WriteLine(bmpMenuItemChecked);
-                streamWriter.WriteLine(tiffMenuItemChecked);
-                streamWriter.WriteLine(icoMenuItemChecked);
+                ErrorLogger.LogError("WriteToFile", ex);
+                throw;
             }
         }
 
@@ -2468,25 +2518,94 @@ namespace ImageComparator
             processStartInfo.RedirectStandardOutput = false;
             processStartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             processStartInfo.UseShellExecute = true;
-            process = System.Diagnostics.Process.Start(processStartInfo);
-            process.WaitForExit();
+            
+            try
+            {
+                process = System.Diagnostics.Process.Start(processStartInfo);
+                if (process != null)
+                {
+                    process.WaitForExit();
+                    
+                    // Check for error log files
+                    string errorLogFile = path + @"\Bin\AddFiles_Error.log";
+                    string tempErrorLog = System.IO.Path.GetTempPath() + "AddFiles_Error.log";
+                    
+                    if (File.Exists(errorLogFile))
+                    {
+                        string errorContent = File.ReadAllText(errorLogFile);
+                        ErrorLogger.LogError("AddFiles.exe Error", new Exception($"AddFiles.exe reported error:\n{errorContent}"));
+
+                        // Delete error log file after it has been read and logged
+                        try
+                        {
+                            File.Delete(errorLogFile);
+                        }
+                        catch
+                        {
+                            // Ignore any errors during cleanup
+                        }
+                    }
+                    else if (File.Exists(tempErrorLog))
+                    {
+                        string errorContent = File.ReadAllText(tempErrorLog);
+                        ErrorLogger.LogError("AddFiles.exe Error (from temp)", new Exception($"AddFiles.exe reported error:\n{errorContent}"));
+
+                        // Delete temp error log file after it has been read and logged
+                        try
+                        {
+                            File.Delete(tempErrorLog);
+                        }
+                        catch
+                        {
+                            // Ignore any errors during cleanup
+                        }
+                    }
+                }
+                else
+                {
+                    ErrorLogger.LogError("AddFiles.exe", new Exception("Failed to start AddFiles.exe process"));
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("AddFiles.exe Start", ex);
+            }
+            
             ReadFromFile();
         }
 
         private void ReadFromFile()
         {
-            int count;
-            using (streamReader = new StreamReader(path + @"\Bin\Results.imc"))
+            string resultsPath = path + @"\Bin\Results.json";
+            
+            try
             {
-                gotException = bool.Parse(streamReader.ReadLine());
-                count = int.Parse(streamReader.ReadLine());
-
-                for (int i = 0; i < count; i++)
+                // Check if file exists before trying to read
+                if (!File.Exists(resultsPath))
                 {
-                    files.Add(streamReader.ReadLine());
+                    ErrorLogger.LogError("ReadFromFile - Results", new FileNotFoundException($"Results.json not found at {resultsPath}. AddFiles.exe may have failed."));
+                    return;
                 }
+                
+                string jsonString = File.ReadAllText(resultsPath);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var resultsData = JsonSerializer.Deserialize<ResultsData>(jsonString, options);
+                
+                if (resultsData != null)
+                {
+                    gotException = resultsData.GotException;
+                    if (resultsData.Files != null)
+                    {
+                        files.AddRange(resultsData.Files);
+                    }
+                }
+                
+                File.Delete(resultsPath);
             }
-            File.Delete(path + @"\Bin\Results.imc");
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("ReadFromFile - Results", ex);
+            }
         }
 
         private Bitmap ResizeImage(System.Drawing.Image image, int width, int height)

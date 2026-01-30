@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using AddFiles.Models;
 
 namespace AddFiles
 {
@@ -12,19 +14,64 @@ namespace AddFiles
         static readonly List<String> tempDirectories = new List<String>();
         static List<String> tempFiles = new List<String>();
         static bool includeSubfolders, jpegFiles, gifFiles, pngFiles, bmpFiles, tiffFiles, icoFiles, gotException = false;
-        static StreamWriter streamWriter;
-        static StreamReader streamReader;
-        static int count;
         static String ext, path;
         #endregion variables
 
         [STAThread]
         static void Main()
         {
-            path = Environment.GetCommandLineArgs().ElementAt(0).Substring(0, Environment.GetCommandLineArgs().ElementAt(0).LastIndexOf("\\"));
-            ReadFromFile();
-            AddFiles();
-            WriteToFile();
+            // Initialize path to a default so we can always write logs
+            path = Directory.GetCurrentDirectory();
+            
+            try
+            {
+                // Try to get the actual path from command line args
+                string exePath = Environment.GetCommandLineArgs().ElementAt(0);
+                if (!string.IsNullOrEmpty(exePath) && exePath.Contains("\\"))
+                {
+                    path = exePath.Substring(0, exePath.LastIndexOf("\\"));
+                }
+                
+                ReadFromFile();
+                AddFiles();
+            }
+            catch (Exception ex)
+            {
+                // Mark that an exception occurred
+                gotException = true;
+                
+                // Try to write error details to a log file for debugging
+                try
+                {
+                    string errorLog = path + @"\AddFiles_Error.log";
+                    File.WriteAllText(errorLog, $"[{DateTime.Now}] ERROR in AddFiles.exe\r\n" +
+                                                 $"Exception Type: {ex.GetType().FullName}\r\n" +
+                                                 $"Message: {ex.Message}\r\n" +
+                                                 $"Stack Trace:\r\n{ex.StackTrace}\r\n");
+                }
+                catch (Exception logEx)
+                {
+                    // Try one more time with a hardcoded temp path
+                    try
+                    {
+                        string tempLog = System.IO.Path.GetTempPath() + "AddFiles_Error.log";
+                        File.WriteAllText(tempLog, $"[{DateTime.Now}] ERROR in AddFiles.exe\r\n" +
+                                                    $"Exception Type: {ex.GetType().FullName}\r\n" +
+                                                    $"Message: {ex.Message}\r\n" +
+                                                    $"Stack Trace:\r\n{ex.StackTrace}\r\n" +
+                                                    $"Log Exception: {logEx.Message}\r\n");
+                    }
+                    catch
+                    {
+                        // Nothing more we can do
+                    }
+                }
+            }
+            finally
+            {
+                // Always write Results.json, even if there was an error
+                WriteToFile();
+            }
         }
 
         private static void AddFiles()
@@ -105,41 +152,139 @@ namespace AddFiles
 
         private static void ReadFromFile()
         {
-            streamReader = new StreamReader(path + @"\Directories.imc");
-            count = int.Parse(streamReader.ReadLine());
-
-            for (int i = 0; i < count; i++)
+            string directoriesPath = path + @"\Directories.json";
+            string filtersPath = path + @"\Filters.json";
+            
+            try
             {
-                tempDirectories.Add(streamReader.ReadLine());
+                // Check if input files exist (they should be created by MainWindow)
+                if (!File.Exists(directoriesPath) || !File.Exists(filtersPath))
+                {
+                    string missingFiles = "";
+                    if (!File.Exists(directoriesPath)) missingFiles += "Directories.json ";
+                    if (!File.Exists(filtersPath)) missingFiles += "Filters.json ";
+                    
+                    throw new FileNotFoundException(
+                        $"AddFiles.exe requires input files that are missing: {missingFiles}\r\n" +
+                        $"Expected location: {path}\r\n" +
+                        $"This program is designed to be called by ImageComparator.exe, not run directly.\r\n" +
+                        $"If you need to test it manually, create these JSON files first."
+                    );
+                }
+                
+                // Read Directories.json
+                string directoriesJson = File.ReadAllText(directoriesPath);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var directoriesData = JsonSerializer.Deserialize<DirectoriesData>(directoriesJson, options);
+                
+                if (directoriesData != null && directoriesData.Directories != null)
+                {
+                    tempDirectories.AddRange(directoriesData.Directories);
+                }
+
+                // Read Filters.json
+                string filtersJson = File.ReadAllText(filtersPath);
+                var filtersData = JsonSerializer.Deserialize<FiltersData>(filtersJson, options);
+                
+                if (filtersData != null)
+                {
+                    includeSubfolders = filtersData.IncludeSubfolders;
+                    jpegFiles = filtersData.JpegFiles;
+                    gifFiles = filtersData.GifFiles;
+                    pngFiles = filtersData.PngFiles;
+                    bmpFiles = filtersData.BmpFiles;
+                    tiffFiles = filtersData.TiffFiles;
+                    icoFiles = filtersData.IcoFiles;
+                }
             }
-
-            streamReader.Close();
-            File.Delete(path + @"\Directories.imc");
-
-            streamReader = new StreamReader(path + @"\Filters.imc");
-            includeSubfolders = bool.Parse(streamReader.ReadLine());
-            jpegFiles = bool.Parse(streamReader.ReadLine());
-            gifFiles = bool.Parse(streamReader.ReadLine());
-            pngFiles = bool.Parse(streamReader.ReadLine());
-            bmpFiles = bool.Parse(streamReader.ReadLine());
-            tiffFiles = bool.Parse(streamReader.ReadLine());
-            icoFiles = bool.Parse(streamReader.ReadLine());
-            streamReader.Close();
-            File.Delete(path + @"\Filters.imc");
+            catch (Exception ex)
+            {
+                // Re-throw so the error gets logged in Main()'s catch block
+                throw new Exception($"ReadFromFile failed: {ex.Message}", ex);
+            }
+            finally
+            {
+                // Always delete the files, even if there was an error
+                try
+                {
+                    if (File.Exists(directoriesPath))
+                    {
+                        File.Delete(directoriesPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Warning: Failed to delete directories file '{directoriesPath}': {ex.Message}");
+                }
+                
+                try
+                {
+                    if (File.Exists(filtersPath))
+                    {
+                        File.Delete(filtersPath);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Warning: Failed to delete filters file '{filtersPath}': {ex.Message}");
+                }
+            }
         }
 
         private static void WriteToFile()
         {
-            streamWriter = new StreamWriter(path + @"\Results.imc");
-            streamWriter.WriteLine(gotException);
-            streamWriter.WriteLine(files.Count);
-
-            for (int i = 0; i < files.Count; i++)
+            // Defensive: If path is null or empty, try to determine it
+            if (string.IsNullOrEmpty(path))
             {
-                streamWriter.WriteLine(files.ElementAt(i));
+                try
+                {
+                    path = Environment.GetCommandLineArgs().ElementAt(0).Substring(0, Environment.GetCommandLineArgs().ElementAt(0).LastIndexOf("\\"));
+                }
+                catch
+                {
+                    path = Directory.GetCurrentDirectory();
+                }
             }
+            
+            try
+            {
+                var resultsData = new ResultsData
+                {
+                    GotException = gotException,
+                    Files = files
+                };
 
-            streamWriter.Close();
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = JsonSerializer.Serialize(resultsData, options);
+                File.WriteAllText(path + @"\Results.json", jsonString);
+            }
+            catch (Exception)
+            {
+                // If serialization fails, try to write a simple error file
+                try
+                {
+                    var resultsData = new ResultsData
+                    {
+                        GotException = true,
+                        Files = new List<string>()
+                    };
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    string jsonString = JsonSerializer.Serialize(resultsData, options);
+                    File.WriteAllText(path + @"\Results.json", jsonString);
+                }
+                catch
+                {
+                    // Last resort: write a minimal file
+                    try
+                    {
+                        File.WriteAllText(path + @"\Results.json", "{\"GotException\":true,\"Files\":[]}");
+                    }
+                    catch
+                    {
+                        // Nothing more we can do
+                    }
+                }
+            }
         }
     }
 }
