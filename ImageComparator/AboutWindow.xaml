@@ -25,7 +25,7 @@
         <!-- Version -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,5">
             <TextBlock Name="versionLabel" Text="Version:" FontSize="14" FontWeight="SemiBold" Margin="0,0,5,0"/>
-            <TextBlock Text="1.0.1" FontSize="14"/>
+            <TextBlock Text="1.1.0" FontSize="14"/>
         </StackPanel>
 
         <!-- License -->
