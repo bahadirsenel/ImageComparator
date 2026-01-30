@@ -131,7 +131,6 @@ namespace ImageComparator
         }
         #endregion
 
-        [Serializable]
         public class ListViewDataItem : INotifyPropertyChanged
         {
             private bool selected;
