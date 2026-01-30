@@ -23,13 +23,6 @@ namespace AddFiles
             // Initialize path to a default so we can always write logs
             path = Directory.GetCurrentDirectory();
             
-            // Write a marker file to confirm AddFiles.exe started
-            try
-            {
-                File.WriteAllText(path + @"\AddFiles_Started.marker", DateTime.Now.ToString());
-            }
-            catch { }
-            
             try
             {
                 // Try to get the actual path from command line args
