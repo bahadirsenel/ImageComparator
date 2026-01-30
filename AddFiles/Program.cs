@@ -104,10 +104,13 @@ namespace AddFiles
 
         private static void ReadFromFile()
         {
+            string directoriesPath = path + @"\Directories.json";
+            string filtersPath = path + @"\Filters.json";
+            
             try
             {
                 // Read Directories.json
-                string directoriesJson = File.ReadAllText(path + @"\Directories.json");
+                string directoriesJson = File.ReadAllText(directoriesPath);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var directoriesData = JsonSerializer.Deserialize<DirectoriesData>(directoriesJson, options);
                 
@@ -115,11 +118,9 @@ namespace AddFiles
                 {
                     tempDirectories.AddRange(directoriesData.Directories);
                 }
-                
-                File.Delete(path + @"\Directories.json");
 
                 // Read Filters.json
-                string filtersJson = File.ReadAllText(path + @"\Filters.json");
+                string filtersJson = File.ReadAllText(filtersPath);
                 var filtersData = JsonSerializer.Deserialize<FiltersData>(filtersJson, options);
                 
                 if (filtersData != null)
@@ -132,12 +133,31 @@ namespace AddFiles
                     tiffFiles = filtersData.TiffFiles;
                     icoFiles = filtersData.IcoFiles;
                 }
-                
-                File.Delete(path + @"\Filters.json");
             }
             catch (Exception)
             {
                 gotException = true;
+            }
+            finally
+            {
+                // Always delete the files, even if there was an error
+                try
+                {
+                    if (File.Exists(directoriesPath))
+                    {
+                        File.Delete(directoriesPath);
+                    }
+                }
+                catch { }
+                
+                try
+                {
+                    if (File.Exists(filtersPath))
+                    {
+                        File.Delete(filtersPath);
+                    }
+                }
+                catch { }
             }
         }
 
