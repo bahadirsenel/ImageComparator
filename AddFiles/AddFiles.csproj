@@ -196,6 +196,7 @@
   -->
   <PropertyGroup>
     <PostBuildEvent>xcopy "$(TargetDir)*.exe" "$(SolutionDir)External Tools\" /Y /I
-xcopy "$(TargetDir)*.dll" "$(SolutionDir)External Tools\" /Y /I</PostBuildEvent>
+xcopy "$(TargetDir)*.dll" "$(SolutionDir)External Tools\" /Y /I
+xcopy "$(TargetDir)*.config" "$(SolutionDir)External Tools\" /Y /I</PostBuildEvent>
   </PropertyGroup>
 </Project>
