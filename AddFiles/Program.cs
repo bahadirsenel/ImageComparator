@@ -20,9 +20,25 @@ namespace AddFiles
         [STAThread]
         static void Main()
         {
+            // Initialize path to a default so we can always write logs
+            path = Directory.GetCurrentDirectory();
+            
+            // Write a marker file to confirm AddFiles.exe started
             try
             {
-                path = Environment.GetCommandLineArgs().ElementAt(0).Substring(0, Environment.GetCommandLineArgs().ElementAt(0).LastIndexOf("\\"));
+                File.WriteAllText(path + @"\AddFiles_Started.marker", DateTime.Now.ToString());
+            }
+            catch { }
+            
+            try
+            {
+                // Try to get the actual path from command line args
+                string exePath = Environment.GetCommandLineArgs().ElementAt(0);
+                if (!string.IsNullOrEmpty(exePath) && exePath.Contains("\\"))
+                {
+                    path = exePath.Substring(0, exePath.LastIndexOf("\\"));
+                }
+                
                 ReadFromFile();
                 AddFiles();
             }
@@ -40,9 +56,22 @@ namespace AddFiles
                                                  $"Message: {ex.Message}\r\n" +
                                                  $"Stack Trace:\r\n{ex.StackTrace}\r\n");
                 }
-                catch
+                catch (Exception logEx)
                 {
-                    // If we can't write the log, just continue
+                    // Try one more time with a hardcoded temp path
+                    try
+                    {
+                        string tempLog = System.IO.Path.GetTempPath() + "AddFiles_Error.log";
+                        File.WriteAllText(tempLog, $"[{DateTime.Now}] ERROR in AddFiles.exe\r\n" +
+                                                    $"Exception Type: {ex.GetType().FullName}\r\n" +
+                                                    $"Message: {ex.Message}\r\n" +
+                                                    $"Stack Trace:\r\n{ex.StackTrace}\r\n" +
+                                                    $"Log Exception: {logEx.Message}\r\n");
+                    }
+                    catch
+                    {
+                        // Nothing more we can do
+                    }
                 }
             }
             finally

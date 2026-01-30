@@ -2498,8 +2498,50 @@ namespace ImageComparator
             processStartInfo.RedirectStandardOutput = false;
             processStartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
             processStartInfo.UseShellExecute = true;
-            process = System.Diagnostics.Process.Start(processStartInfo);
-            process.WaitForExit();
+            
+            try
+            {
+                process = System.Diagnostics.Process.Start(processStartInfo);
+                if (process != null)
+                {
+                    process.WaitForExit();
+                    
+                    // Check for diagnostic files
+                    string markerFile = path + @"\Bin\AddFiles_Started.marker";
+                    string errorLogFile = path + @"\Bin\AddFiles_Error.log";
+                    string tempErrorLog = System.IO.Path.GetTempPath() + "AddFiles_Error.log";
+                    
+                    if (File.Exists(errorLogFile))
+                    {
+                        string errorContent = File.ReadAllText(errorLogFile);
+                        ErrorLogger.LogError("AddFiles.exe Error", new Exception($"AddFiles.exe reported error:\n{errorContent}"));
+                    }
+                    else if (File.Exists(tempErrorLog))
+                    {
+                        string errorContent = File.ReadAllText(tempErrorLog);
+                        ErrorLogger.LogError("AddFiles.exe Error (from temp)", new Exception($"AddFiles.exe reported error:\n{errorContent}"));
+                    }
+                    else if (!File.Exists(markerFile))
+                    {
+                        ErrorLogger.LogError("AddFiles.exe", new Exception("AddFiles.exe did not start - no marker file found. Check if executable and dependencies exist."));
+                    }
+                    
+                    // Clean up marker file
+                    if (File.Exists(markerFile))
+                    {
+                        try { File.Delete(markerFile); } catch { }
+                    }
+                }
+                else
+                {
+                    ErrorLogger.LogError("AddFiles.exe", new Exception("Failed to start AddFiles.exe process"));
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("AddFiles.exe Start", ex);
+            }
+            
             ReadFromFile();
         }
 
