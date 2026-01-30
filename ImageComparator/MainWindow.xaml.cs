@@ -60,9 +60,9 @@ namespace ImageComparator
 
         // Modern threading infrastructure
         private CancellationTokenSource _cancellationTokenSource;
-        private bool _isPaused;
+        private volatile bool _isPaused;
         private readonly object _pauseLock = new object();
-        private readonly SemaphoreSlim _pauseSemaphore = new SemaphoreSlim(0);
+        private readonly ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
 
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
         public static DependencyProperty ImagePathProperty2 = DependencyProperty.Register("ImagePath2", typeof(string), typeof(MainWindow), null);
@@ -285,6 +285,16 @@ namespace ImageComparator
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+            // Unpause threads before cancelling to ensure they can respond
+            lock (_pauseLock)
+            {
+                if (_isPaused)
+                {
+                    _isPaused = false;
+                    _pauseEvent?.Set();
+                }
+            }
+
             // Cancel any running operations
             try
             {
@@ -295,12 +305,18 @@ namespace ImageComparator
                 ErrorLogger.LogError("Window_Closing - Cancel Operations", ex);
             }
 
-            // Wait for threads to complete (with timeout)
+            // Wait for both processThread and worker threads to complete (with timeout)
             try
             {
-                if (threadList != null && threadList.Any(t => t.IsAlive))
+                bool completed = SpinWait.SpinUntil(() =>
+                    (processThread == null || !processThread.IsAlive) &&
+                    (threadList == null || threadList.All(t => !t.IsAlive)),
+                    TimeSpan.FromSeconds(5)
+                );
+
+                if (!completed)
                 {
-                    SpinWait.SpinUntil(() => threadList.All(t => !t.IsAlive), TimeSpan.FromSeconds(5));
+                    ErrorLogger.LogWarning("Window_Closing", "Threads did not complete within timeout");
                 }
             }
             catch (Exception ex)
@@ -312,7 +328,7 @@ namespace ImageComparator
             try
             {
                 _cancellationTokenSource?.Dispose();
-                _pauseSemaphore?.Dispose();
+                _pauseEvent?.Dispose();
             }
             catch (Exception ex)
             {
@@ -1275,17 +1291,21 @@ namespace ImageComparator
                     pauseButton.Content = LocalizationManager.GetString("Button.Resume");
                     console.Add(LocalizationManager.GetString("Console.Paused"));
                     pausedFirstTime = DateTime.Now.ToFileTime();
+                    _pauseEvent.Reset();
                 }
                 else
                 {
                     pauseButton.Tag = "0";
                     pauseButton.Content = LocalizationManager.GetString("Button.Pause");
-                    console.RemoveAt(console.Count - 1);
+                    if (console.Count > 0)
+                    {
+                        console.RemoveAt(console.Count - 1);
+                    }
                     pausedSecondTime = DateTime.Now.ToFileTime();
                     pauseTime += pausedSecondTime - pausedFirstTime;
 
                     // Signal all waiting threads to continue
-                    _pauseSemaphore.Release(Environment.ProcessorCount * 2);
+                    _pauseEvent.Set();
                 }
             }
         }
@@ -1301,7 +1321,7 @@ namespace ImageComparator
                 if (_isPaused)
                 {
                     _isPaused = false;
-                    _pauseSemaphore.Release(Environment.ProcessorCount * 2);
+                    _pauseEvent.Set();
                 }
             }
 
@@ -1311,16 +1331,20 @@ namespace ImageComparator
             stopButton.Visibility = Visibility.Collapsed;
             pauseButton.Content = LocalizationManager.GetString("Button.Pause");
 
-            if (pauseButton.Tag.Equals("1"))
+            if (pauseButton.Tag?.Equals("1") == true)
             {
-                console.RemoveAt(console.Count - 1);
+                if (console.Count > 0)
+                {
+                    console.RemoveAt(console.Count - 1);
+                }
             }
 
-            // Wait for threads to finish gracefully (with timeout)
+            // Wait for both processThread and worker threads to finish gracefully (with timeout)
             try
             {
                 bool completed = SpinWait.SpinUntil(() =>
-                    threadList == null || threadList.All(t => !t.IsAlive),
+                    (processThread == null || !processThread.IsAlive) &&
+                    (threadList == null || threadList.All(t => !t.IsAlive)),
                     TimeSpan.FromSeconds(5)
                 );
 
@@ -1344,7 +1368,10 @@ namespace ImageComparator
             list1.Clear();
             list2.Clear();
 
-            console[console.Count - 1] = LocalizationManager.GetString("Console.InterruptedByUser");
+            if (console.Count > 0)
+            {
+                console[console.Count - 1] = LocalizationManager.GetString("Console.InterruptedByUser");
+            }
         }
 
         private void ListView1_KeyDown(object sender, KeyEventArgs e)
@@ -2297,7 +2324,7 @@ namespace ImageComparator
             {
                 try
                 {
-                    _pauseSemaphore.Wait(100, cancellationToken);
+                    _pauseEvent.Wait(100, cancellationToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -2506,7 +2533,13 @@ namespace ImageComparator
             threadList = new List<Thread>();
 
             // Get cancellation token
-            var token = _cancellationTokenSource.Token;
+            var cts = _cancellationTokenSource;
+            if (cts == null)
+            {
+                // Cancellation source is not available; abort processing.
+                return;
+            }
+            var token = cts.Token;
 
             for (int i = 0; i < Environment.ProcessorCount; i++)
             {
@@ -2551,9 +2584,24 @@ namespace ImageComparator
             }
             finally
             {
-                // Cleanup
-                _cancellationTokenSource?.Dispose();
-                _cancellationTokenSource = null;
+                // Cleanup - only dispose if this is still the same instance
+                var currentCts = _cancellationTokenSource;
+                if (currentCts != null)
+                {
+                    try
+                    {
+                        currentCts.Dispose();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Already disposed, ignore
+                    }
+                    // Only set to null if we disposed the current instance
+                    if (_cancellationTokenSource == currentCts)
+                    {
+                        _cancellationTokenSource = null;
+                    }
+                }
             }
         }
 
