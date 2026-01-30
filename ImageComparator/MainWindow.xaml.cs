@@ -1,5 +1,6 @@
 ﻿using DiscreteCosineTransform;
 using ImageComparator.Helpers;
+using ImageComparator.Models;
 using Microsoft.VisualBasic.FileIO;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -14,6 +15,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
+using System.Text.Json;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -59,6 +61,9 @@ namespace ImageComparator
         public bool gotException = false, skipFilesWithDifferentOrientation = true, duplicatesOnly = false, comparing = false, includeSubfolders, jpegMenuItemChecked, gifMenuItemChecked, pngMenuItemChecked, bmpMenuItemChecked, tiffMenuItemChecked, icoMenuItemChecked, sendsToRecycleBin, opening = true, deleteMarkedItems = false;
         string path;
         string currentLanguageCode = "en-US"; // Track current language for serialization
+
+        // Serialization version for future compatibility
+        private const int CurrentSettingsVersion = 1;
 
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
         public static DependencyProperty ImagePathProperty2 = DependencyProperty.Register("ImagePath2", typeof(string), typeof(MainWindow), null);
@@ -230,13 +235,13 @@ namespace ImageComparator
             folderBrowserDialog.ShowNewFolderButton = true;
 
             saveFileDialog = new VistaSaveFileDialog();
-            saveFileDialog.DefaultExt = "mff";
-            saveFileDialog.Filter = "*.mff|*.mff";
+            saveFileDialog.DefaultExt = "json";
+            saveFileDialog.Filter = "JSON Files (*.json)|*.json|Legacy Files (*.mff)|*.mff";
             saveFileDialog.AddExtension = true;
 
             openFileDialog = new VistaOpenFileDialog();
-            openFileDialog.DefaultExt = "mff";
-            openFileDialog.Filter = "*.mff|*.mff";
+            openFileDialog.DefaultExt = "json";
+            openFileDialog.Filter = "Session Files|*.json;*.mff|JSON Files (*.json)|*.json|Legacy Files (*.mff)|*.mff";
             openFileDialog.AddExtension = true;
 
             previewImage1.RenderTransform = new TransformGroup
@@ -1808,61 +1813,289 @@ namespace ImageComparator
             info.AddValue("console", console);
         }
 
+        /// <summary>
+        /// Safely serialize application state to JSON format
+        /// </summary>
         public void Serialize(string path)
         {
-            // Klasör yolunu al ve oluştur
-            string directory = System.IO.Path.GetDirectoryName(path);
-            if (!Directory.Exists(directory))
+            try
             {
-                Directory.CreateDirectory(directory);
-            }
+                string directory = System.IO.Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
 
-            using (Stream stream = File.Open(path, FileMode.Create))
+                var settings = new AppSettings
+                {
+                    Version = CurrentSettingsVersion,
+                    JpegMenuItemChecked = jpegMenuItem.IsChecked,
+                    GifMenuItemChecked = gifMenuItem.IsChecked,
+                    PngMenuItemChecked = pngMenuItem.IsChecked,
+                    BmpMenuItemChecked = bmpMenuItem.IsChecked,
+                    TiffMenuItemChecked = tiffMenuItem.IsChecked,
+                    IcoMenuItemChecked = icoMenuItem.IsChecked,
+                    SendsToRecycleBin = sendToRecycleBinMenuItem.IsChecked,
+                    CurrentLanguageCode = currentLanguageCode,
+                    IncludeSubfolders = includeSubfoldersMenuItem.IsChecked,
+                    SkipFilesWithDifferentOrientation = skipFilesWithDifferentOrientationMenuItem.IsChecked,
+                    DuplicatesOnly = findExactDuplicatesOnlyMenuItem.IsChecked,
+                    Files = files,
+                    FalsePositiveList1 = falsePositiveList1,
+                    FalsePositiveList2 = falsePositiveList2,
+                    ResolutionArray = resolutionArray?.Select(s => new SerializableSize(s)).ToArray(),
+                    BindingList1 = bindingList1.Select(item => new SerializableListViewDataItem(item)).ToList(),
+                    BindingList2 = bindingList2.Select(item => new SerializableListViewDataItem(item)).ToList(),
+                    ConsoleMessages = console.ToList()
+                };
+
+                var options = new JsonSerializerOptions 
+                { 
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true
+                };
+                
+                string jsonString = JsonSerializer.Serialize(settings, options);
+                File.WriteAllText(path, jsonString);
+                
+                console.Add(LocalizationManager.GetString("Console.SessionSaved", path));
+            }
+            catch (Exception ex) when (!(ex is OutOfMemoryException))
             {
-                BinaryFormatter bformatter = new BinaryFormatter();
-                bformatter.Serialize(stream, this);
+                ErrorLogger.LogError("Serialize", ex);
+                MessageBox.Show(
+                    LocalizationManager.GetString("Error.SerializationFailed", ex.Message),
+                    LocalizationManager.GetString("Error.Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
             }
         }
 
+        /// <summary>
+        /// Safely deserialize application state from JSON format with backward compatibility
+        /// </summary>
         public void Deserialize(string path)
         {
-            // Klasör yolunu al ve oluştur
-            string directory = System.IO.Path.GetDirectoryName(path);
-            if (!Directory.Exists(directory))
+            try
             {
-                Directory.CreateDirectory(directory);
-            }
+                // Klasör yolunu al ve oluştur
+                string directory = System.IO.Path.GetDirectoryName(path);
+                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+                {
+                    Directory.CreateDirectory(directory);
+                }
 
-            // Dosya yoksa hiçbir şey yapma (ilk kez açılıyorsa)
-            if (!File.Exists(path))
+                // Dosya yoksa hiçbir şey yapma (ilk kez açılıyorsa)
+                if (!File.Exists(path))
+                {
+                    opening = false;
+                    return;
+                }
+
+                // Check if file is old binary format or new JSON format
+                if (IsBinaryFormat(path))
+                {
+                    // Migrate old format
+                    DeserializeLegacyFormat(path);
+                    return;
+                }
+
+                string jsonString = File.ReadAllText(path);
+                
+                var options = new JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true 
+                };
+                
+                var settings = JsonSerializer.Deserialize<AppSettings>(jsonString, options);
+
+                if (settings == null)
+                {
+                    throw new InvalidOperationException("Failed to deserialize settings");
+                }
+
+                // Validate version
+                if (settings.Version > CurrentSettingsVersion)
+                {
+                    MessageBox.Show(
+                        LocalizationManager.GetString("Error.NewerFileVersion"),
+                        LocalizationManager.GetString("Error.Title"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning
+                    );
+                    opening = false;
+                    return;
+                }
+
+                ApplySettings(settings);
+                
+                console.Add(LocalizationManager.GetString("Console.SessionLoaded", path));
+            }
+            catch (JsonException ex)
             {
+                ErrorLogger.LogError("Deserialize - JSON Parse Error", ex);
+                MessageBox.Show(
+                    LocalizationManager.GetString("Error.InvalidSessionFile"),
+                    LocalizationManager.GetString("Error.Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
                 opening = false;
-                return;
             }
-
-            using (Stream stream = File.Open(path, FileMode.Open))
+            catch (Exception ex) when (!(ex is OutOfMemoryException))
             {
-                BinaryFormatter bformatter = new BinaryFormatter();
-                mainWindow = (MainWindow)bformatter.Deserialize(stream);
+                ErrorLogger.LogError("Deserialize", ex);
+                MessageBox.Show(
+                    LocalizationManager.GetString("Error.DeserializationFailed", ex.Message),
+                    LocalizationManager.GetString("Error.Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                opening = false;
             }
+        }
 
+        /// <summary>
+        /// Detect if file is old binary format
+        /// </summary>
+        private bool IsBinaryFormat(string path)
+        {
+            try
+            {
+                using (var stream = File.OpenRead(path))
+                {
+                    if (stream.Length < 2) return false;
+                    
+                    // Check for JSON opening brace
+                    int firstByte = stream.ReadByte();
+                    // Skip whitespace
+                    while (firstByte == ' ' || firstByte == '\t' || firstByte == '\r' || firstByte == '\n')
+                    {
+                        firstByte = stream.ReadByte();
+                        if (firstByte == -1) return false;
+                    }
+                    return firstByte != '{' && firstByte != '[';
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Deserialize old binary format and auto-migrate
+        /// </summary>
+        [Obsolete("Legacy support only - will be removed in future version")]
+        private void DeserializeLegacyFormat(string path)
+        {
+            try
+            {
+                #pragma warning disable SYSLIB0011 // BinaryFormatter is obsolete
+                using (Stream stream = File.Open(path, FileMode.Open))
+                {
+                    BinaryFormatter bformatter = new BinaryFormatter();
+                    mainWindow = (MainWindow)bformatter.Deserialize(stream);
+                }
+                #pragma warning restore SYSLIB0011
+
+                // Convert to AppSettings format
+                var settings = ConvertLegacyToSettings(mainWindow);
+                
+                // Immediately save in new format
+                string directory = System.IO.Path.GetDirectoryName(path);
+                string filename = System.IO.Path.GetFileNameWithoutExtension(path);
+                string newPath = System.IO.Path.Combine(directory, filename + ".json");
+                
+                var result = MessageBox.Show(
+                    LocalizationManager.GetString("Dialog.MigrateLegacyFile", newPath),
+                    LocalizationManager.GetString("Dialog.Migration"),
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Information
+                );
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    ApplySettings(settings);
+                    Serialize(newPath);
+                    
+                    MessageBox.Show(
+                        LocalizationManager.GetString("Dialog.MigrationComplete", newPath),
+                        LocalizationManager.GetString("Dialog.Success"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+                }
+                else
+                {
+                    ApplySettings(settings);
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("DeserializeLegacyFormat", ex);
+                MessageBox.Show(
+                    LocalizationManager.GetString("Error.LegacyMigrationFailed"),
+                    LocalizationManager.GetString("Error.Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+                opening = false;
+            }
+        }
+
+        /// <summary>
+        /// Convert legacy MainWindow to AppSettings
+        /// </summary>
+        private AppSettings ConvertLegacyToSettings(MainWindow legacy)
+        {
+            return new AppSettings
+            {
+                Version = CurrentSettingsVersion,
+                JpegMenuItemChecked = legacy.jpegMenuItemChecked,
+                GifMenuItemChecked = legacy.gifMenuItemChecked,
+                PngMenuItemChecked = legacy.pngMenuItemChecked,
+                BmpMenuItemChecked = legacy.bmpMenuItemChecked,
+                TiffMenuItemChecked = legacy.tiffMenuItemChecked,
+                IcoMenuItemChecked = legacy.icoMenuItemChecked,
+                SendsToRecycleBin = legacy.sendsToRecycleBin,
+                CurrentLanguageCode = legacy.currentLanguageCode ?? "en-US",
+                IncludeSubfolders = legacy.includeSubfolders,
+                SkipFilesWithDifferentOrientation = legacy.skipFilesWithDifferentOrientation,
+                DuplicatesOnly = legacy.duplicatesOnly,
+                Files = legacy.files ?? new List<string>(),
+                FalsePositiveList1 = legacy.falsePositiveList1 ?? new List<string>(),
+                FalsePositiveList2 = legacy.falsePositiveList2 ?? new List<string>(),
+                ResolutionArray = legacy.resolutionArray?.Select(s => new SerializableSize(s)).ToArray(),
+                BindingList1 = legacy.bindingList1?.Select(item => new SerializableListViewDataItem(item)).ToList() ?? new List<SerializableListViewDataItem>(),
+                BindingList2 = legacy.bindingList2?.Select(item => new SerializableListViewDataItem(item)).ToList() ?? new List<SerializableListViewDataItem>(),
+                ConsoleMessages = legacy.console?.ToList() ?? new List<string>()
+            };
+        }
+
+        /// <summary>
+        /// Apply settings to UI
+        /// </summary>
+        private void ApplySettings(AppSettings settings)
+        {
             if (opening)
             {
                 opening = false;
+                
+                skipFilesWithDifferentOrientationMenuItem.IsChecked = settings.SkipFilesWithDifferentOrientation;
+                findExactDuplicatesOnlyMenuItem.IsChecked = settings.DuplicatesOnly;
+                includeSubfoldersMenuItem.IsChecked = settings.IncludeSubfolders;
+                jpegMenuItem.IsChecked = settings.JpegMenuItemChecked;
+                gifMenuItem.IsChecked = settings.GifMenuItemChecked;
+                pngMenuItem.IsChecked = settings.PngMenuItemChecked;
+                bmpMenuItem.IsChecked = settings.BmpMenuItemChecked;
+                tiffMenuItem.IsChecked = settings.TiffMenuItemChecked;
+                icoMenuItem.IsChecked = settings.IcoMenuItemChecked;
+                falsePositiveList1 = settings.FalsePositiveList1 ?? new List<string>();
+                falsePositiveList2 = settings.FalsePositiveList2 ?? new List<string>();
 
-                skipFilesWithDifferentOrientationMenuItem.IsChecked = mainWindow.skipFilesWithDifferentOrientation;
-                findExactDuplicatesOnlyMenuItem.IsChecked = mainWindow.duplicatesOnly;
-                includeSubfoldersMenuItem.IsChecked = mainWindow.includeSubfolders;
-                jpegMenuItem.IsChecked = mainWindow.jpegMenuItemChecked;
-                gifMenuItem.IsChecked = mainWindow.gifMenuItemChecked;
-                pngMenuItem.IsChecked = mainWindow.pngMenuItemChecked;
-                bmpMenuItem.IsChecked = mainWindow.bmpMenuItemChecked;
-                tiffMenuItem.IsChecked = mainWindow.tiffMenuItemChecked;
-                icoMenuItem.IsChecked = mainWindow.icoMenuItemChecked;
-                falsePositiveList1 = mainWindow.falsePositiveList1;
-                falsePositiveList2 = mainWindow.falsePositiveList2;
-
-                if (!mainWindow.sendsToRecycleBin)
+                if (!settings.SendsToRecycleBin)
                 {
                     sendToRecycleBinMenuItem.IsChecked = false;
                     deletePermanentlyMenuItem.IsChecked = true;
@@ -1870,31 +2103,34 @@ namespace ImageComparator
                     deletePermanentlyMenuItem.IsEnabled = false;
                 }
 
-                // Set language based on saved currentLanguageCode
-                string languageToSet = mainWindow.currentLanguageCode;
-                
+                string languageToSet = settings.CurrentLanguageCode;
                 if (string.IsNullOrEmpty(languageToSet))
                 {
                     languageToSet = "en-US";
                 }
                 
-                // Set menu states for the language
                 SetLanguageMenuStates(languageToSet);
-                
                 currentLanguageCode = languageToSet;
                 LocalizationManager.SetLanguage(languageToSet);
                 UpdateUI();
             }
             else
             {
-                bindingList1 = mainWindow.bindingList1;
-                bindingList2 = mainWindow.bindingList2;
-                console = mainWindow.console;
-                files = mainWindow.files;
-                resolutionArray = mainWindow.resolutionArray;
+                bindingList1 = new ObservableCollection<ListViewDataItem>(
+                    settings.BindingList1?.Select(item => item.ToListViewDataItem()) ?? new List<ListViewDataItem>()
+                );
+                bindingList2 = new ObservableCollection<ListViewDataItem>(
+                    settings.BindingList2?.Select(item => item.ToListViewDataItem()) ?? new List<ListViewDataItem>()
+                );
+                console = new ObservableCollection<string>(settings.ConsoleMessages ?? new List<string>());
+                files = settings.Files ?? new List<string>();
+                resolutionArray = settings.ResolutionArray?.Select(s => s.ToSize()).ToArray();
+                
                 listView1.ItemsSource = bindingList1;
                 listView2.ItemsSource = bindingList2;
                 outputListView.ItemsSource = console;
+                
+                // UI updates...
                 addFolderButton.Visibility = Visibility.Hidden;
                 findDuplicatesButton.Visibility = Visibility.Hidden;
                 clearResultsButton.Visibility = Visibility.Visible;

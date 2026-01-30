@@ -103,5 +103,12 @@
   "Error.NoErrorLog": "No error log found. No errors have been logged yet.",
   "Console.DeletionErrors": "{0} file(s) could not be deleted (see error log)",
   "Warning.LargeFile": "This file is very large ({0} MB). Are you sure you want to open it?",
-  "Warning.Title": "Warning"
+  "Warning.Title": "Warning",
+  "Error.NewerFileVersion": "This session file was created with a newer version of Image Comparator. Please update the application to open this file.",
+  "Error.InvalidSessionFile": "The session file is corrupted or invalid. Please check the file and try again.",
+  "Dialog.MigrateLegacyFile": "This session file uses an old format. Would you like to migrate it to the new, more secure format?\n\nNew file will be saved as:\n{0}",
+  "Dialog.Migration": "File Migration",
+  "Dialog.MigrationComplete": "Migration successful! The file has been saved to:\n{0}\n\nYou can now safely delete the old file.",
+  "Error.LegacyMigrationFailed": "Failed to migrate legacy session file. The file may be corrupted or incompatible.",
+  "Dialog.Success": "Success"
 }
