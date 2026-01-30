@@ -105,7 +105,7 @@ namespace AddFiles
 
         private static void ReadFromFile()
         {
-            streamReader = new StreamReader(path + @"\Directories.imc");
+            streamReader = new StreamReader(path + @"\Directories.json");
             count = int.Parse(streamReader.ReadLine());
 
             for (int i = 0; i < count; i++)
@@ -114,9 +114,9 @@ namespace AddFiles
             }
 
             streamReader.Close();
-            File.Delete(path + @"\Directories.imc");
+            File.Delete(path + @"\Directories.json");
 
-            streamReader = new StreamReader(path + @"\Filters.imc");
+            streamReader = new StreamReader(path + @"\Filters.json");
             includeSubfolders = bool.Parse(streamReader.ReadLine());
             jpegFiles = bool.Parse(streamReader.ReadLine());
             gifFiles = bool.Parse(streamReader.ReadLine());
@@ -125,12 +125,12 @@ namespace AddFiles
             tiffFiles = bool.Parse(streamReader.ReadLine());
             icoFiles = bool.Parse(streamReader.ReadLine());
             streamReader.Close();
-            File.Delete(path + @"\Filters.imc");
+            File.Delete(path + @"\Filters.json");
         }
 
         private static void WriteToFile()
         {
-            streamWriter = new StreamWriter(path + @"\Results.imc");
+            streamWriter = new StreamWriter(path + @"\Results.json");
             streamWriter.WriteLine(gotException);
             streamWriter.WriteLine(files.Count);
 

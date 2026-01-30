@@ -228,13 +228,13 @@ namespace ImageComparator
             folderBrowserDialog.ShowNewFolderButton = true;
 
             saveFileDialog = new VistaSaveFileDialog();
-            saveFileDialog.DefaultExt = "mff";
-            saveFileDialog.Filter = "*.mff|*.mff";
+            saveFileDialog.DefaultExt = "json";
+            saveFileDialog.Filter = "JSON Files (*.json)|*.json";
             saveFileDialog.AddExtension = true;
 
             openFileDialog = new VistaOpenFileDialog();
-            openFileDialog.DefaultExt = "mff";
-            openFileDialog.Filter = "*.mff|*.mff";
+            openFileDialog.DefaultExt = "json";
+            openFileDialog.Filter = "JSON Files (*.json)|*.json";
             openFileDialog.AddExtension = true;
 
             previewImage1.RenderTransform = new TransformGroup
@@ -255,7 +255,7 @@ namespace ImageComparator
 
             try
             {
-                Deserialize(path + @"\Bin\Image Comparator.imc");
+                Deserialize(path + @"\Bin\Image Comparator.json");
             }
             catch (OutOfMemoryException)
             {
@@ -282,7 +282,7 @@ namespace ImageComparator
         {
             try
             {
-                Serialize(path + @"\Bin\Image Comparator.imc");
+                Serialize(path + @"\Bin\Image Comparator.json");
             }
             catch (OutOfMemoryException)
             {
@@ -308,7 +308,7 @@ namespace ImageComparator
 
             try
             {
-                File.Delete(path + @"\Bin\Results.imc");
+                File.Delete(path + @"\Bin\Results.json");
             }
             catch (OutOfMemoryException)
             {
@@ -316,12 +316,12 @@ namespace ImageComparator
             }
             catch (Exception ex)
             {
-                ErrorLogger.LogError("Window_Closing - Delete Results.imc", ex);
+                ErrorLogger.LogError("Window_Closing - Delete Results.json", ex);
             }
 
             try
             {
-                File.Delete(path + @"\Bin\Directories.imc");
+                File.Delete(path + @"\Bin\Directories.json");
             }
             catch (OutOfMemoryException)
             {
@@ -329,12 +329,12 @@ namespace ImageComparator
             }
             catch (Exception ex)
             {
-                ErrorLogger.LogError("Window_Closing - Delete Directories.imc", ex);
+                ErrorLogger.LogError("Window_Closing - Delete Directories.json", ex);
             }
 
             try
             {
-                File.Delete(path + @"\Bin\Filters.imc");
+                File.Delete(path + @"\Bin\Filters.json");
             }
             catch (OutOfMemoryException)
             {
@@ -342,7 +342,7 @@ namespace ImageComparator
             }
             catch (Exception ex)
             {
-                ErrorLogger.LogError("Window_Closing - Delete Filters.imc", ex);
+                ErrorLogger.LogError("Window_Closing - Delete Filters.json", ex);
             }
             Environment.Exit(0);
         }
@@ -627,7 +627,7 @@ namespace ImageComparator
 
             try
             {
-                Serialize(path + @"\Bin\Image Comparator.imc");
+                Serialize(path + @"\Bin\Image Comparator.json");
             }
             catch (OutOfMemoryException)
             {
@@ -2038,7 +2038,7 @@ namespace ImageComparator
 
                 try
                 {
-                    Serialize(path + @"\Bin\Image Comparator.imc");
+                    Serialize(path + @"\Bin\Image Comparator.json");
                 }
                 catch (OutOfMemoryException)
                 {
@@ -2466,7 +2466,7 @@ namespace ImageComparator
 
         private void WriteToFile(List<string> input)
         {
-            using (streamWriter = new StreamWriter(path + @"\Bin\Directories.imc"))
+            using (streamWriter = new StreamWriter(path + @"\Bin\Directories.json"))
             {
                 streamWriter.WriteLine(input.Count);
 
@@ -2476,7 +2476,7 @@ namespace ImageComparator
                 }
             }
 
-            using (streamWriter = new StreamWriter(path + @"\Bin\Filters.imc"))
+            using (streamWriter = new StreamWriter(path + @"\Bin\Filters.json"))
             {
                 streamWriter.WriteLine(includeSubfolders);
                 streamWriter.WriteLine(jpegMenuItemChecked);
@@ -2503,7 +2503,7 @@ namespace ImageComparator
         private void ReadFromFile()
         {
             int count;
-            using (streamReader = new StreamReader(path + @"\Bin\Results.imc"))
+            using (streamReader = new StreamReader(path + @"\Bin\Results.json"))
             {
                 gotException = bool.Parse(streamReader.ReadLine());
                 count = int.Parse(streamReader.ReadLine());
@@ -2513,7 +2513,7 @@ namespace ImageComparator
                     files.Add(streamReader.ReadLine());
                 }
             }
-            File.Delete(path + @"\Bin\Results.imc");
+            File.Delete(path + @"\Bin\Results.json");
         }
 
         private Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
