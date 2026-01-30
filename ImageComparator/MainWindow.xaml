@@ -94,6 +94,12 @@
                         <Image Source="Resources/lightbulb_32.png" Width="24" Height="24"/>
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Name="viewErrorLogMenuItem" Header="View Error Log" Click="ViewErrorLogMenuItem_Click">
+                    <MenuItem.Icon>
+                        <Image Source="Resources/info_button_32.png" Width="24" Height="24"/>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator />
                 <MenuItem Name="aboutMenuItem" Header="About" Click="AboutMenuItem_Click">
                     <MenuItem.Icon>
                         <Image Source="Resources/info_button_32.png" Width="24" Height="24"/>

@@ -17,7 +17,6 @@
   "Menu.Help": "सहायता",
   "Menu.HowToUse": "उपयोग कैसे करें",
   "Menu.About": "के बारे में",
-  
   "Button.AddFolder": "फ़ोल्डर जोड़ें",
   "Button.FindDuplicates": "डुप्लिकेट खोजें",
   "Button.Pause": "रोकें",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "हटाने के लिए चिह्नित करें",
   "Button.MarkAsFalsePositive": "गलत सकारात्मक के रूप में चिह्नित करें",
   "Button.RemoveMark": "चिह्न हटाएं",
-  
   "ContextMenu.Open": "खोलें",
   "ContextMenu.OpenFileLocation": "फ़ाइल स्थान खोलें",
-  
   "Label.PreviewSelect": "पूर्वावलोकन के लिए एक फ़ाइल चुनें:",
   "Label.DragDropFolders": "फ़ोल्डर जोड़ने के लिए ड्रैग-ड्रॉप करें:",
-  
   "Console.ComparingWithSubdirs": "{0} और इसकी उपनिर्देशिकाओं से छवियों की तुलना की जा रही है।",
   "Console.ComparingWithoutSubdirs": "{0} से छवियों की तुलना की जा रही है।",
   "Console.NoDirectoriesAdded": "कोई निर्देशिका नहीं जोड़ी गई।",
   "Console.DirectoryAdded": "{0} जोड़ा गया",
   "Console.DirectoriesOnly": "केवल निर्देशिकाएं।",
-  
   "Console.SentToRecycleBin": "{0} फ़ाइल(ें) रीसायकल बिन में भेजी गई हैं।",
   "Console.FilesDeleted": "{0} फ़ाइल(ें) हटाई गई हैं।",
   "Console.MarkedAsFalsePositive": "{0} फ़ाइल(ें) को गलत सकारात्मक के रूप में चिह्नित किया गया है।",
-  
   "Console.Paused": "रोका गया।",
   "Console.InterruptedByUser": "उपयोगकर्ता द्वारा बाधित।",
   "Console.PathsAddedSuccessfully": "पथ सफलतापूर्वक जोड़े गए। {0} छवियां मिलीं। डिस्क से फ़ाइलें पढ़ी जा रही हैं...",
   "Console.ProcessingFiles": "{0}% पूर्ण, फ़ाइलों की प्रक्रिया की जा रही है...",
   "Console.ComparingResults": "{0}% पूर्ण, परिणामों की तुलना की जा रही है...",
   "Console.FilesProcessedComparing": "सभी फ़ाइलें संसाधित हो चुकी हैं। तुलना की जा रही है...",
-  
   "Console.AllDone": "सब पूरा हो गया!",
   "Console.RunTimeHours": "रन टाइम {0} घंटे {1} मिनट {2} सेकंड है।",
   "Console.RunTimeMinutes": "रन टाइम {0} मिनट {1} सेकंड है।",
   "Console.RunTimeSeconds": "रन टाइम {0} सेकंड है।",
-  
   "Console.NoDuplicatesFound": "कोई डुप्लिकेट नहीं मिला।",
   "Console.DuplicatesFound": "{0} डुप्लिकेट मिले।",
   "Console.HighSimilarity": "{0} छवियां उच्च समानता के साथ मिलीं।",
   "Console.MediumSimilarity": "{0} छवियां मध्यम समानता के साथ मिलीं।",
   "Console.LowSimilarity": "{0} छवियां कम समानता के साथ मिलीं।",
-  
   "Console.SessionSaved": "सत्र {0} में सहेजा गया है",
   "Console.SessionLoaded": "सत्र {0} से लोड किया गया है",
   "Console.FalsePositiveDatabaseCleared": "गलत सकारात्मक डेटाबेस साफ़ कर दिया गया है।",
-  
   "Dialog.SaveTitle": "परिणाम सहेजें",
   "Dialog.LoadTitle": "परिणाम लोड करें",
   "Dialog.AddFolderTitle": "फ़ोल्डर जोड़ें",
-  
   "Dialog.ClearTitle": "चेतावनी",
   "Dialog.ClearMessage": "क्या आप वाकई वर्तमान परिणामों को त्यागना चाहते हैं? आप उन्हें बाद में काम जारी रखने के लिए सहेज सकते हैं।",
   "Dialog.SaveButton": "सहेजें",
   "Dialog.DiscardButton": "त्यागें",
   "Dialog.CancelButton": "रद्द करें",
-  
   "Dialog.ApplyTitle": "चेतावनी",
   "Dialog.FilesWillBeDeleted": "{0} फ़ाइल(ें) हटाई जाएंगी।\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} परिणाम को गलत सकारात्मक के रूप में चिह्नित किया जाएगा और भविष्य के परिणामों में नहीं दिखाया जाएगा।\r\n",
   "Dialog.ContinueConfirmation": "क्या आप जारी रखना चाहते हैं?",
   "Dialog.YesButton": "हां",
   "Dialog.NoButton": "नहीं",
-  
   "Dialog.AboutTitle": "के बारे में",
   "Dialog.Version": "संस्करण:",
   "Dialog.License": "लाइसेंस:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator छवियों की तुलना और विश्लेषण के लिए एक शक्तिशाली उपकरण है। यह आपके संग्रह में समान या डुप्लिकेट छवियों की पहचान करने में आपकी मदद करता है।",
   "Dialog.Developer": "Mustafa Bahadır Şenel द्वारा विकसित",
   "Dialog.CloseButton": "बंद करें",
-  
   "Dialog.HowToUseTitle": "उपयोग कैसे करें",
   "Dialog.HowToUseCloseButton": "बंद करें",
-  
   "Dialog.Error": "त्रुटि",
   "Dialog.CouldNotOpenLink": "लिंक नहीं खोला जा सका: {0}",
   "Dialog.ErrorLoadingHelp": "सहायता सामग्री लोड करने में त्रुटि: {0}",
   "Dialog.HelpFileNotFound": "त्रुटि: {0} पर सहायता फ़ाइल नहीं मिली",
-  
   "Error.FileNotFound": "फ़ाइल नहीं मिली: {0}",
   "Error.FolderNotFound": "फ़ोल्डर नहीं मिला: {0}",
   "Error.UnsupportedFileType": "असमर्थित फ़ाइल प्रकार: {0}\n\nकेवल छवि फ़ाइलों की अनुमति है।",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "फ़ोल्डर नहीं खोला जा सकता:\n{0}",
   "Error.Title": "त्रुटि",
   "Warning.LargeFile": "यह फ़ाइल बहुत बड़ी है ({0} MB)। क्या आप वाकई इसे खोलना चाहते हैं?",
-  "Warning.Title": "चेतावनी"
+  "Warning.Title": "चेतावनी",
+  "Menu.ViewErrorLog": "त्रुटि लॉग देखें",
+  "Error.SerializationFailed": "सत्र सहेजने में विफल: {0}",
+  "Error.DeserializationFailed": "सत्र लोड करने में विफल: {0}",
+  "Error.DeletionFailed": "{0} फ़ाइल(ें) हटाई नहीं जा सकीं:\n\n{1}",
+  "Error.ProcessingFailed": "छवि {0} संसाधित करने में विफल: {1}",
+  "Error.LogLocation": "त्रुटि लॉग: {0}",
+  "Error.NoErrorLog": "कोई त्रुटि लॉग नहीं मिला। अभी तक कोई त्रुटि लॉग नहीं की गई है।",
+  "Console.DeletionErrors": "{0} फ़ाइल(ें) हटाई नहीं जा सकीं (त्रुटि लॉग देखें)"
 }

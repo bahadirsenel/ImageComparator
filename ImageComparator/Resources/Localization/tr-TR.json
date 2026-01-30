@@ -17,7 +17,6 @@
   "Menu.Help": "Yardım",
   "Menu.HowToUse": "Nasıl Kullanılır",
   "Menu.About": "Hakkında",
-  
   "Button.AddFolder": "Klasör Ekle",
   "Button.FindDuplicates": "Kopyaları Bul",
   "Button.Pause": "Duraklat",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "Silinecek Olarak İşaretle",
   "Button.MarkAsFalsePositive": "Hatalı Sonuç Olarak İşaretle",
   "Button.RemoveMark": "İşareti Kaldır",
-  
   "ContextMenu.Open": "Aç",
   "ContextMenu.OpenFileLocation": "Dosya Konumunu Aç",
-  
   "Label.PreviewSelect": "Görüntülemek için bir dosya seçin:",
   "Label.DragDropFolders": "Klasör eklemek için sürükle-bırak:",
-  
   "Console.ComparingWithSubdirs": "{0} konumundaki ve alt klasörlerindeki resimler karşılaştırılıyor.",
   "Console.ComparingWithoutSubdirs": "{0} konumundaki resimler karşılaştırılıyor.",
   "Console.NoDirectoriesAdded": "Klasör eklenmedi.",
   "Console.DirectoryAdded": "Klasör eklendi: {0}",
   "Console.DirectoriesOnly": "Sadece klasörler eklenebilir.",
-  
   "Console.SentToRecycleBin": "{0} dosya geri dönüşüm kutusuna gönderildi.",
   "Console.FilesDeleted": "{0} dosya silindi.",
   "Console.MarkedAsFalsePositive": "{0} dosya hatalı sonuç olarak işaretlendi.",
-  
   "Console.Paused": "Duraklatıldı.",
   "Console.InterruptedByUser": "Kullanıcı tarafından durduruldu.",
   "Console.PathsAddedSuccessfully": "Konumlar başarıyla eklendi. {0} resim dosyası bulundu. Dosyalar okunuyor...",
   "Console.ProcessingFiles": "{0}% tamamlandı, dosyalar işleniyor...",
   "Console.ComparingResults": "{0}% tamamlandı, karşılaştırma yapılıyor...",
   "Console.FilesProcessedComparing": "Bütün dosyalar işlendi. Karşılaştırma yapılıyor...",
-  
   "Console.AllDone": "Tamamlandı!",
   "Console.RunTimeHours": "Çalışma süresi: {0} saat {1} dakika {2} saniye.",
   "Console.RunTimeMinutes": "Çalışma süresi: {0} dakika {1} saniye.",
   "Console.RunTimeSeconds": "Çalışma süresi: {0} saniye.",
-  
   "Console.NoDuplicatesFound": "Hiç kopya bulunamadı.",
   "Console.DuplicatesFound": "{0} kopya bulundu.",
   "Console.HighSimilarity": "{0} yüksek benzerlikte resim bulundu.",
   "Console.MediumSimilarity": "{0} orta benzerlikte resim bulundu.",
   "Console.LowSimilarity": "{0} düşük benzerlikte resim bulundu.",
-  
   "Console.SessionSaved": "Oturum şuraya kaydedildi: {0}",
   "Console.SessionLoaded": "Oturum şuradan yüklendi: {0}",
   "Console.FalsePositiveDatabaseCleared": "Hatalı sonuç veritabanı temizlendi.",
-  
   "Dialog.SaveTitle": "Sonuçları Kaydet",
   "Dialog.LoadTitle": "Sonuçları Yükle",
   "Dialog.AddFolderTitle": "Klasör Ekle",
-  
   "Dialog.ClearTitle": "Uyarı",
   "Dialog.ClearMessage": "Sonuçları temizlemek istediğinize emin misiniz? Sonuçlarınızı kaydedip daha sonra üzerlerinde çalışmaya devam edebilirsiniz.",
   "Dialog.SaveButton": "Kaydet",
   "Dialog.DiscardButton": "Temizle",
   "Dialog.CancelButton": "İptal",
-  
   "Dialog.ApplyTitle": "Uyarı",
   "Dialog.FilesWillBeDeleted": "{0} dosya silinecek.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} sonuç hatalı olarak işaretlenecek ve daha sonraki aramalarınızda gösterilmeyecek.\r\n",
   "Dialog.ContinueConfirmation": "Devam etmek istiyor musunuz?",
   "Dialog.YesButton": "Evet",
   "Dialog.NoButton": "Hayır",
-  
   "Dialog.AboutTitle": "Hakkında",
   "Dialog.Version": "Sürüm:",
   "Dialog.License": "Lisans:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator, görselleri karşılaştırmak ve analiz etmek için güçlü bir araçtır. Koleksiyonunuzdaki benzer veya yinelenen görselleri belirlemenize yardımcı olur.",
   "Dialog.Developer": "Geliştirici: Mustafa Bahadır Şenel",
   "Dialog.CloseButton": "Kapat",
-  
   "Dialog.HowToUseTitle": "Nasıl Kullanılır",
   "Dialog.HowToUseCloseButton": "Kapat",
-  
   "Dialog.Error": "Hata",
   "Dialog.CouldNotOpenLink": "Link açılamadı: {0}",
   "Dialog.ErrorLoadingHelp": "Yardım içeriği yüklenirken hata oluştu: {0}",
   "Dialog.HelpFileNotFound": "Hata: Yardım dosyası bulunamadı: {0}",
-  
   "Error.FileNotFound": "Dosya bulunamadı: {0}",
   "Error.FolderNotFound": "Klasör bulunamadı: {0}",
   "Error.UnsupportedFileType": "Desteklenmeyen dosya türü: {0}\n\nYalnızca resim dosyalarına izin verilir.",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "Klasör açılamıyor:\n{0}",
   "Error.Title": "Hata",
   "Warning.LargeFile": "Bu dosya çok büyük ({0} MB). Açmak istediğinizden emin misiniz?",
-  "Warning.Title": "Uyarı"
+  "Warning.Title": "Uyarı",
+  "Menu.ViewErrorLog": "Hata Günlüğünü Görüntüle",
+  "Error.SerializationFailed": "Oturum kaydedilemedi: {0}",
+  "Error.DeserializationFailed": "Oturum yüklenemedi: {0}",
+  "Error.DeletionFailed": "{0} dosya silinemedi:\n\n{1}",
+  "Error.ProcessingFailed": "{0} görüntüsü işlenemedi: {1}",
+  "Error.LogLocation": "Hata günlüğü: {0}",
+  "Error.NoErrorLog": "Hata günlüğü bulunamadı. Henüz hiçbir hata kaydedilmedi.",
+  "Console.DeletionErrors": "{0} dosya silinemedi (hata günlüğüne bakın)"
 }

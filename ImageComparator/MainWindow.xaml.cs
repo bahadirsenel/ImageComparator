@@ -263,14 +263,18 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("MainWindow_Constructor - Deserialize", ex);
                 opening = false;
             }
 
             // Initialize localization based on menu selection
             currentLanguageCode = GetCurrentLanguageFromMenu();
             LocalizationManager.SetLanguage(currentLanguageCode);
+
+            // Clean up old error logs (async to not block startup)
+            System.Threading.Tasks.Task.Run(() => ErrorLogger.CleanupOldLogs());
 
             UpdateUI();
             outputListView.ItemsSource = console;
@@ -286,8 +290,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Serialize", ex);
             }
 
             try
@@ -298,8 +303,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Kill Process", ex);
             }
 
             try
@@ -310,8 +316,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Delete Results.imc", ex);
             }
 
             try
@@ -322,8 +329,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Delete Directories.imc", ex);
             }
 
             try
@@ -334,8 +342,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("Window_Closing - Delete Filters.imc", ex);
             }
             Environment.Exit(0);
         }
@@ -351,9 +360,27 @@ namespace ImageComparator
 
             if (saveFileDialog.ShowDialog().Value)
             {
-                Serialize(saveFileDialog.FileName);
-                console.Add(LocalizationManager.GetString("Console.SessionSaved", saveFileDialog.FileName));
-                return true;
+                try
+                {
+                    Serialize(saveFileDialog.FileName);
+                    console.Add(LocalizationManager.GetString("Console.SessionSaved", saveFileDialog.FileName));
+                    return true;
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    ErrorLogger.LogError("SaveResults - Serialize", ex);
+                    MessageBox.Show(
+                        LocalizationManager.GetString("Error.SerializationFailed", ex.Message),
+                        LocalizationManager.GetString("Error.Title"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+                    return false;
+                }
             }
             else
             {
@@ -367,8 +394,25 @@ namespace ImageComparator
 
             if (openFileDialog.ShowDialog().Value)
             {
-                Deserialize(openFileDialog.FileName);
-                console.Add(LocalizationManager.GetString("Console.SessionLoaded", openFileDialog.FileName));
+                try
+                {
+                    Deserialize(openFileDialog.FileName);
+                    console.Add(LocalizationManager.GetString("Console.SessionLoaded", openFileDialog.FileName));
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    ErrorLogger.LogError("LoadResultsMenuItem_Click - Deserialize", ex);
+                    MessageBox.Show(
+                        LocalizationManager.GetString("Error.DeserializationFailed", ex.Message),
+                        LocalizationManager.GetString("Error.Title"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error
+                    );
+                }
             }
         }
 
@@ -591,8 +635,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("ClearFalsePositiveDatabaseButton_Click - Serialize", ex);
             }
 
             if (count > 0)
@@ -622,6 +667,38 @@ namespace ImageComparator
         {
             HowToUseWindow howToUseWindow = new HowToUseWindow();
             howToUseWindow.ShowDialog();
+        }
+
+        private void ViewErrorLogMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string logPath = ErrorLogger.GetCurrentLogPath();
+                
+                if (File.Exists(logPath))
+                {
+                    System.Diagnostics.Process.Start("notepad.exe", logPath);
+                }
+                else
+                {
+                    MessageBox.Show(
+                        LocalizationManager.GetString("Error.NoErrorLog"),
+                        LocalizationManager.GetString("Error.Title"),
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Information
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("ViewErrorLogMenuItem_Click", ex);
+                MessageBox.Show(
+                    LocalizationManager.GetString("Error.CannotOpenFile", ex.Message),
+                    LocalizationManager.GetString("Error.Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error
+                );
+            }
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
@@ -798,7 +875,7 @@ namespace ImageComparator
             var filesToDelete = CollectFilesToDelete();
             
             // Step 2: Delete files from disk and get successfully deleted files
-            var deletedFiles = DeleteFilesFromDisk(filesToDelete);
+            var deletedFiles = DeleteFilesFromDisk(filesToDelete, out var failedDeletions);
             
             // Step 3: Remove deleted items from lists
             RemoveDeletedItemsFromLists(deletedFiles);
@@ -807,7 +884,7 @@ namespace ImageComparator
             RemoveDuplicatePairs();
             
             // Step 5: Show results to user
-            ReportDeletionResults(deletedFiles.Count, filesToDelete.Count);
+            ReportDeletionResults(deletedFiles.Count, filesToDelete.Count, failedDeletions);
         }
 
         /// <summary>
@@ -851,10 +928,12 @@ namespace ImageComparator
         /// Deletes files from disk (either permanently or to recycle bin)
         /// </summary>
         /// <param name="filesToDelete">Set of file paths to attempt to delete</param>
+        /// <param name="failedDeletions">Output list of files that failed to delete with error messages</param>
         /// <returns>A set of file paths that were successfully deleted from the filesystem</returns>
-        private HashSet<string> DeleteFilesFromDisk(HashSet<string> filesToDelete)
+        private HashSet<string> DeleteFilesFromDisk(HashSet<string> filesToDelete, out List<(string path, string error)> failedDeletions)
         {
             var deletedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            failedDeletions = new List<(string path, string error)>();
 
             foreach (var filePath in filesToDelete)
             {
@@ -874,9 +953,10 @@ namespace ImageComparator
                 {
                     throw;
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Silently continue with other files on deletion errors
+                    ErrorLogger.LogError($"DeleteFilesFromDisk - {Path.GetFileName(filePath)}", ex);
+                    failedDeletions.Add((filePath, ex.Message));
                 }
             }
 
@@ -941,7 +1021,8 @@ namespace ImageComparator
         /// </summary>
         /// <param name="deletedCount">Number of files successfully deleted from disk</param>
         /// <param name="requestedCount">Total number of files that were requested for deletion</param>
-        private void ReportDeletionResults(int deletedCount, int requestedCount)
+        /// <param name="failedDeletions">List of files that failed to delete with error messages</param>
+        private void ReportDeletionResults(int deletedCount, int requestedCount, List<(string path, string error)> failedDeletions)
         {
             if (deletedCount > 0)
             {
@@ -965,6 +1046,28 @@ namespace ImageComparator
                 {
                     console.Add(LocalizationManager.GetString("Console.FilesDeleted", 0));
                 }
+            }
+
+            // Report any deletion failures to the user
+            if (failedDeletions.Count > 0)
+            {
+                console.Add(LocalizationManager.GetString("Console.DeletionErrors", failedDeletions.Count));
+                
+                // Show detailed error message to user for the first few failures
+                var details = string.Join("\n", failedDeletions.Take(5).Select(f => 
+                    $"  • {Path.GetFileName(f.path)}: {f.error}"));
+                
+                if (failedDeletions.Count > 5)
+                {
+                    details += $"\n  ... and {failedDeletions.Count - 5} more";
+                }
+                
+                MessageBox.Show(
+                    LocalizationManager.GetString("Error.DeletionFailed", failedDeletions.Count, details),
+                    LocalizationManager.GetString("Error.Title"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning
+                );
             }
         }
 
@@ -1181,8 +1284,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("StopButton_Click - Resume Threads", ex);
             }
 
             try
@@ -1197,8 +1301,9 @@ namespace ImageComparator
                     {
                         throw;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        ErrorLogger.LogError($"StopButton_Click - Abort Thread {i}", ex);
                     }
                 }
             }
@@ -1206,8 +1311,9 @@ namespace ImageComparator
             {
                 throw;
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("StopButton_Click - Abort All Threads", ex);
             }
 
             try
@@ -1662,9 +1768,10 @@ namespace ImageComparator
                     currentLanguageCode = "en-US";
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Default to English if field doesn't exist
+                // Default to English if field doesn't exist or there's any serialization error
+                ErrorLogger.LogError("Deserialize - Get Language Code", ex);
                 currentLanguageCode = "en-US";
             }
             includeSubfolders = (bool)info.GetValue("includeSubfolders", typeof(bool));
@@ -1822,6 +1929,7 @@ namespace ImageComparator
             resetToDefaultsMenuItem.Header = LocalizationManager.GetString("Menu.ResetToDefaults");
             helpMenuItem.Header = LocalizationManager.GetString("Menu.Help");
             howToUseMenuItem.Header = LocalizationManager.GetString("Menu.HowToUse");
+            viewErrorLogMenuItem.Header = LocalizationManager.GetString("Menu.ViewErrorLog");
             aboutMenuItem.Header = LocalizationManager.GetString("Menu.About");
 
             // Update buttons
@@ -2101,16 +2209,18 @@ namespace ImageComparator
                         {
                             throw;
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", ex);
                         }
                     }
                     catch (OutOfMemoryException)
                     {
                         throw;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
                     }
                 }
             }

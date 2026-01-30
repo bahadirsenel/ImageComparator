@@ -17,7 +17,6 @@
   "Menu.Help": "Aiuto",
   "Menu.HowToUse": "Come Usare",
   "Menu.About": "Informazioni",
-  
   "Button.AddFolder": "Aggiungi Cartella",
   "Button.FindDuplicates": "Trova Duplicati",
   "Button.Pause": "Pausa",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "Segna per Eliminazione",
   "Button.MarkAsFalsePositive": "Segna come Falso Positivo",
   "Button.RemoveMark": "Rimuovi Segno",
-  
   "ContextMenu.Open": "Apri",
   "ContextMenu.OpenFileLocation": "Apri Percorso File",
-  
   "Label.PreviewSelect": "Seleziona un file per l'anteprima:",
   "Label.DragDropFolders": "Trascina e rilascia per aggiungere cartelle:",
-  
   "Console.ComparingWithSubdirs": "Confronto immagini da {0} e dalle sue sottodirectory.",
   "Console.ComparingWithoutSubdirs": "Confronto immagini da {0}.",
   "Console.NoDirectoriesAdded": "Nessuna directory aggiunta.",
   "Console.DirectoryAdded": "Aggiunto {0}",
   "Console.DirectoriesOnly": "Solo directory.",
-  
   "Console.SentToRecycleBin": "{0} file sono stati inviati al cestino.",
   "Console.FilesDeleted": "{0} file sono stati eliminati.",
   "Console.MarkedAsFalsePositive": "{0} file sono stati segnati come falsi positivi.",
-  
   "Console.Paused": "In pausa.",
   "Console.InterruptedByUser": "Interrotto dall'utente.",
   "Console.PathsAddedSuccessfully": "Percorsi aggiunti con successo. {0} immagini trovate. Lettura file dal disco...",
   "Console.ProcessingFiles": "{0}% completato, elaborazione file...",
   "Console.ComparingResults": "{0}% completato, confronto risultati...",
   "Console.FilesProcessedComparing": "Tutti i file sono stati elaborati. Confronto in corso...",
-  
   "Console.AllDone": "Tutto fatto!",
   "Console.RunTimeHours": "Il tempo di esecuzione è {0} ore {1} minuti {2} secondi.",
   "Console.RunTimeMinutes": "Il tempo di esecuzione è {0} minuti {1} secondi.",
   "Console.RunTimeSeconds": "Il tempo di esecuzione è {0} secondi.",
-  
   "Console.NoDuplicatesFound": "Nessun duplicato trovato.",
   "Console.DuplicatesFound": "{0} duplicati trovati.",
   "Console.HighSimilarity": "{0} immagini trovate con alta somiglianza.",
   "Console.MediumSimilarity": "{0} immagini trovate con media somiglianza.",
   "Console.LowSimilarity": "{0} immagini trovate con bassa somiglianza.",
-  
   "Console.SessionSaved": "La sessione è stata salvata in {0}",
   "Console.SessionLoaded": "La sessione è stata caricata da {0}",
   "Console.FalsePositiveDatabaseCleared": "Il database dei falsi positivi è stato cancellato.",
-  
   "Dialog.SaveTitle": "Salva Risultati",
   "Dialog.LoadTitle": "Carica Risultati",
   "Dialog.AddFolderTitle": "Aggiungi Cartella",
-  
   "Dialog.ClearTitle": "Avviso",
   "Dialog.ClearMessage": "Sei sicuro di voler scartare i risultati attuali? Puoi salvarli per continuare a lavorarci in seguito.",
   "Dialog.SaveButton": "Salva",
   "Dialog.DiscardButton": "Scarta",
   "Dialog.CancelButton": "Annulla",
-  
   "Dialog.ApplyTitle": "Avviso",
   "Dialog.FilesWillBeDeleted": "{0} file saranno eliminati.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} risultato/i saranno segnati come falsi positivi e non verranno mostrati nei risultati futuri.\r\n",
   "Dialog.ContinueConfirmation": "Vuoi continuare?",
   "Dialog.YesButton": "Sì",
   "Dialog.NoButton": "No",
-  
   "Dialog.AboutTitle": "Informazioni",
   "Dialog.Version": "Versione:",
   "Dialog.License": "Licenza:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator è uno strumento potente per confrontare e analizzare immagini. Ti aiuta a identificare immagini simili o duplicate nella tua collezione.",
   "Dialog.Developer": "Sviluppato da Mustafa Bahadır Şenel",
   "Dialog.CloseButton": "Chiudi",
-  
   "Dialog.HowToUseTitle": "Come Usare",
   "Dialog.HowToUseCloseButton": "Chiudi",
-  
   "Dialog.Error": "Errore",
   "Dialog.CouldNotOpenLink": "Impossibile aprire il collegamento: {0}",
   "Dialog.ErrorLoadingHelp": "Errore nel caricamento del contenuto della guida: {0}",
   "Dialog.HelpFileNotFound": "Errore: Impossibile trovare il file della guida in {0}",
-  
   "Error.FileNotFound": "File non trovato: {0}",
   "Error.FolderNotFound": "Cartella non trovata: {0}",
   "Error.UnsupportedFileType": "Tipo di file non supportato: {0}\n\nSono consentiti solo file immagine.",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "Impossibile aprire la cartella:\n{0}",
   "Error.Title": "Errore",
   "Warning.LargeFile": "Questo file è molto grande ({0} MB). Sei sicuro di volerlo aprire?",
-  "Warning.Title": "Avviso"
+  "Warning.Title": "Avviso",
+  "Menu.ViewErrorLog": "Visualizza registro errori",
+  "Error.SerializationFailed": "Impossibile salvare la sessione: {0}",
+  "Error.DeserializationFailed": "Impossibile caricare la sessione: {0}",
+  "Error.DeletionFailed": "Impossibile eliminare {0} file:\n\n{1}",
+  "Error.ProcessingFailed": "Impossibile elaborare l'immagine {0}: {1}",
+  "Error.LogLocation": "Registro errori: {0}",
+  "Error.NoErrorLog": "Nessun registro errori trovato. Non sono ancora stati registrati errori.",
+  "Console.DeletionErrors": "Impossibile eliminare {0} file (vedere registro errori)"
 }

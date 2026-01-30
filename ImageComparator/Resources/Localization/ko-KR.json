@@ -17,7 +17,6 @@
   "Menu.Help": "도움말",
   "Menu.HowToUse": "사용 방법",
   "Menu.About": "정보",
-  
   "Button.AddFolder": "폴더 추가",
   "Button.FindDuplicates": "중복 찾기",
   "Button.Pause": "일시정지",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "삭제 표시",
   "Button.MarkAsFalsePositive": "오탐으로 표시",
   "Button.RemoveMark": "표시 제거",
-  
   "ContextMenu.Open": "열기",
   "ContextMenu.OpenFileLocation": "파일 위치 열기",
-  
   "Label.PreviewSelect": "미리 볼 파일을 선택하세요:",
   "Label.DragDropFolders": "폴더를 추가하려면 드래그-드롭:",
-  
   "Console.ComparingWithSubdirs": "{0} 및 하위 디렉터리의 이미지를 비교하는 중입니다.",
   "Console.ComparingWithoutSubdirs": "{0}의 이미지를 비교하는 중입니다.",
   "Console.NoDirectoriesAdded": "추가된 디렉터리가 없습니다.",
   "Console.DirectoryAdded": "{0} 추가됨",
   "Console.DirectoriesOnly": "디렉터리만 가능합니다.",
-  
   "Console.SentToRecycleBin": "{0}개 파일이 휴지통으로 보내졌습니다.",
   "Console.FilesDeleted": "{0}개 파일이 삭제되었습니다.",
   "Console.MarkedAsFalsePositive": "{0}개 파일이 오탐으로 표시되었습니다.",
-  
   "Console.Paused": "일시정지됨.",
   "Console.InterruptedByUser": "사용자가 중단함.",
   "Console.PathsAddedSuccessfully": "경로가 성공적으로 추가되었습니다. {0}개의 이미지를 찾았습니다. 디스크에서 파일을 읽는 중...",
   "Console.ProcessingFiles": "{0}% 완료, 파일 처리 중...",
   "Console.ComparingResults": "{0}% 완료, 결과 비교 중...",
   "Console.FilesProcessedComparing": "모든 파일이 처리되었습니다. 비교 중...",
-  
   "Console.AllDone": "모두 완료!",
   "Console.RunTimeHours": "실행 시간은 {0}시간 {1}분 {2}초입니다.",
   "Console.RunTimeMinutes": "실행 시간은 {0}분 {1}초입니다.",
   "Console.RunTimeSeconds": "실행 시간은 {0}초입니다.",
-  
   "Console.NoDuplicatesFound": "중복을 찾지 못했습니다.",
   "Console.DuplicatesFound": "{0}개의 중복을 찾았습니다.",
   "Console.HighSimilarity": "높은 유사도를 가진 {0}개의 이미지를 찾았습니다.",
   "Console.MediumSimilarity": "중간 유사도를 가진 {0}개의 이미지를 찾았습니다.",
   "Console.LowSimilarity": "낮은 유사도를 가진 {0}개의 이미지를 찾았습니다.",
-  
   "Console.SessionSaved": "세션이 {0}에 저장되었습니다",
   "Console.SessionLoaded": "세션이 {0}에서 로드되었습니다",
   "Console.FalsePositiveDatabaseCleared": "오탐 데이터베이스가 지워졌습니다.",
-  
   "Dialog.SaveTitle": "결과 저장",
   "Dialog.LoadTitle": "결과 불러오기",
   "Dialog.AddFolderTitle": "폴더 추가",
-  
   "Dialog.ClearTitle": "경고",
   "Dialog.ClearMessage": "현재 결과를 폐기하시겠습니까? 나중에 계속 작업하려면 저장할 수 있습니다.",
   "Dialog.SaveButton": "저장",
   "Dialog.DiscardButton": "폐기",
   "Dialog.CancelButton": "취소",
-  
   "Dialog.ApplyTitle": "경고",
   "Dialog.FilesWillBeDeleted": "{0}개 파일이 삭제됩니다.\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0}개 결과가 오탐으로 표시되며 향후 결과에 표시되지 않습니다.\r\n",
   "Dialog.ContinueConfirmation": "계속하시겠습니까?",
   "Dialog.YesButton": "예",
   "Dialog.NoButton": "아니오",
-  
   "Dialog.AboutTitle": "정보",
   "Dialog.Version": "버전:",
   "Dialog.License": "라이선스:",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator는 이미지를 비교하고 분석하는 강력한 도구입니다. 컬렉션에서 유사하거나 중복된 이미지를 식별하는 데 도움이 됩니다.",
   "Dialog.Developer": "Mustafa Bahadır Şenel이 개발함",
   "Dialog.CloseButton": "닫기",
-  
   "Dialog.HowToUseTitle": "사용 방법",
   "Dialog.HowToUseCloseButton": "닫기",
-  
   "Dialog.Error": "오류",
   "Dialog.CouldNotOpenLink": "링크를 열 수 없습니다: {0}",
   "Dialog.ErrorLoadingHelp": "도움말 콘텐츠 로드 오류: {0}",
   "Dialog.HelpFileNotFound": "오류: {0}에서 도움말 파일을 찾을 수 없습니다",
-  
   "Error.FileNotFound": "파일을 찾을 수 없음: {0}",
   "Error.FolderNotFound": "폴더를 찾을 수 없음: {0}",
   "Error.UnsupportedFileType": "지원되지 않는 파일 형식: {0}\n\n이미지 파일만 허용됩니다.",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "폴더를 열 수 없습니다:\n{0}",
   "Error.Title": "오류",
   "Warning.LargeFile": "이 파일은 매우 큽니다({0} MB). 정말 열시겠습니까?",
-  "Warning.Title": "경고"
+  "Warning.Title": "경고",
+  "Menu.ViewErrorLog": "오류 로그 보기",
+  "Error.SerializationFailed": "세션 저장 실패: {0}",
+  "Error.DeserializationFailed": "세션 로드 실패: {0}",
+  "Error.DeletionFailed": "{0}개 파일을 삭제할 수 없습니다:\n\n{1}",
+  "Error.ProcessingFailed": "이미지 {0} 처리 실패: {1}",
+  "Error.LogLocation": "오류 로그: {0}",
+  "Error.NoErrorLog": "오류 로그를 찾을 수 없습니다. 아직 오류가 기록되지 않았습니다.",
+  "Console.DeletionErrors": "{0}개 파일을 삭제할 수 없습니다 (오류 로그 참조)"
 }

@@ -17,7 +17,6 @@
   "Menu.Help": "帮助",
   "Menu.HowToUse": "如何使用",
   "Menu.About": "关于",
-  
   "Button.AddFolder": "添加文件夹",
   "Button.FindDuplicates": "查找重复项",
   "Button.Pause": "暂停",
@@ -31,62 +30,50 @@
   "Button.MarkForDeletion": "标记为删除",
   "Button.MarkAsFalsePositive": "标记为误报",
   "Button.RemoveMark": "移除标记",
-  
   "ContextMenu.Open": "打开",
   "ContextMenu.OpenFileLocation": "打开文件位置",
-  
   "Label.PreviewSelect": "选择要预览的文件：",
   "Label.DragDropFolders": "拖放以添加文件夹：",
-  
   "Console.ComparingWithSubdirs": "正在比较 {0} 及其子目录中的图像。",
   "Console.ComparingWithoutSubdirs": "正在比较 {0} 中的图像。",
   "Console.NoDirectoriesAdded": "未添加目录。",
   "Console.DirectoryAdded": "已添加 {0}",
   "Console.DirectoriesOnly": "仅限目录。",
-  
   "Console.SentToRecycleBin": "{0} 个文件已发送到回收站。",
   "Console.FilesDeleted": "{0} 个文件已被删除。",
   "Console.MarkedAsFalsePositive": "{0} 个文件已标记为误报。",
-  
   "Console.Paused": "已暂停。",
   "Console.InterruptedByUser": "被用户中断。",
   "Console.PathsAddedSuccessfully": "路径添加成功。找到 {0} 张图像。正在从磁盘读取文件...",
   "Console.ProcessingFiles": "{0}% 完成，正在处理文件...",
   "Console.ComparingResults": "{0}% 完成，正在比较结果...",
   "Console.FilesProcessedComparing": "所有文件已处理完毕。正在比较...",
-  
   "Console.AllDone": "全部完成！",
   "Console.RunTimeHours": "运行时间为 {0} 小时 {1} 分钟 {2} 秒。",
   "Console.RunTimeMinutes": "运行时间为 {0} 分钟 {1} 秒。",
   "Console.RunTimeSeconds": "运行时间为 {0} 秒。",
-  
   "Console.NoDuplicatesFound": "未找到重复项。",
   "Console.DuplicatesFound": "找到 {0} 个重复项。",
   "Console.HighSimilarity": "找到 {0} 张高度相似的图像。",
   "Console.MediumSimilarity": "找到 {0} 张中度相似的图像。",
   "Console.LowSimilarity": "找到 {0} 张低度相似的图像。",
-  
   "Console.SessionSaved": "会话已保存到 {0}",
   "Console.SessionLoaded": "会话已从 {0} 加载",
   "Console.FalsePositiveDatabaseCleared": "误报数据库已清除。",
-  
   "Dialog.SaveTitle": "保存结果",
   "Dialog.LoadTitle": "加载结果",
   "Dialog.AddFolderTitle": "添加文件夹",
-  
   "Dialog.ClearTitle": "警告",
   "Dialog.ClearMessage": "您确定要放弃当前结果吗？您可以保存它们以便稍后继续处理。",
   "Dialog.SaveButton": "保存",
   "Dialog.DiscardButton": "放弃",
   "Dialog.CancelButton": "取消",
-  
   "Dialog.ApplyTitle": "警告",
   "Dialog.FilesWillBeDeleted": "{0} 个文件将被删除。\r\n",
   "Dialog.ResultsMarkedFalsePositive": "{0} 个结果将被标记为误报，并且不会在将来的结果中显示。\r\n",
   "Dialog.ContinueConfirmation": "您要继续吗？",
   "Dialog.YesButton": "是",
   "Dialog.NoButton": "否",
-  
   "Dialog.AboutTitle": "关于",
   "Dialog.Version": "版本：",
   "Dialog.License": "许可证：",
@@ -94,15 +81,12 @@
   "Dialog.Description": "Image Comparator 是一款强大的图像比较和分析工具。它可以帮助您识别收藏中相似或重复的图像。",
   "Dialog.Developer": "由 Mustafa Bahadır Şenel 开发",
   "Dialog.CloseButton": "关闭",
-  
   "Dialog.HowToUseTitle": "如何使用",
   "Dialog.HowToUseCloseButton": "关闭",
-  
   "Dialog.Error": "错误",
   "Dialog.CouldNotOpenLink": "无法打开链接：{0}",
   "Dialog.ErrorLoadingHelp": "加载帮助内容时出错：{0}",
   "Dialog.HelpFileNotFound": "错误：无法在 {0} 找到帮助文件",
-  
   "Error.FileNotFound": "找不到文件：{0}",
   "Error.FolderNotFound": "找不到文件夹：{0}",
   "Error.UnsupportedFileType": "不支持的文件类型：{0}\n\n仅允许图像文件。",
@@ -111,5 +95,13 @@
   "Error.CannotOpenFolder": "无法打开文件夹：\n{0}",
   "Error.Title": "错误",
   "Warning.LargeFile": "此文件非常大（{0} MB）。您确定要打开它吗？",
-  "Warning.Title": "警告"
+  "Warning.Title": "警告",
+  "Menu.ViewErrorLog": "查看错误日志",
+  "Error.SerializationFailed": "保存会话失败：{0}",
+  "Error.DeserializationFailed": "加载会话失败：{0}",
+  "Error.DeletionFailed": "无法删除 {0} 个文件：\n\n{1}",
+  "Error.ProcessingFailed": "处理图像 {0} 失败：{1}",
+  "Error.LogLocation": "错误日志：{0}",
+  "Error.NoErrorLog": "未找到错误日志。尚未记录任何错误。",
+  "Console.DeletionErrors": "无法删除 {0} 个文件（请查看错误日志）"
 }
