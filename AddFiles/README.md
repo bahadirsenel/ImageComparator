@@ -89,7 +89,6 @@ If you need to test AddFiles.exe manually:
 
 ## Diagnostic Files
 
-- **AddFiles_Started.marker** - Created when process starts (proves execution began)
 - **AddFiles_Error.log** - Created if an exception occurs (contains full error details)
 - **Results.json** - Always created with results or error flag
 
