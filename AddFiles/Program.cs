@@ -164,6 +164,21 @@ namespace AddFiles
             
             try
             {
+                // Check if input files exist (they should be created by MainWindow)
+                if (!File.Exists(directoriesPath) || !File.Exists(filtersPath))
+                {
+                    string missingFiles = "";
+                    if (!File.Exists(directoriesPath)) missingFiles += "Directories.json ";
+                    if (!File.Exists(filtersPath)) missingFiles += "Filters.json ";
+                    
+                    throw new FileNotFoundException(
+                        $"AddFiles.exe requires input files that are missing: {missingFiles}\r\n" +
+                        $"Expected location: {path}\r\n" +
+                        $"This program is designed to be called by ImageComparator.exe, not run directly.\r\n" +
+                        $"If you need to test it manually, create these JSON files first."
+                    );
+                }
+                
                 // Read Directories.json
                 string directoriesJson = File.ReadAllText(directoriesPath);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
@@ -189,9 +204,11 @@ namespace AddFiles
                     icoFiles = filtersData.IcoFiles;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 gotException = true;
+                // Re-throw so the error gets logged in Main()'s catch block
+                throw new Exception($"ReadFromFile failed: {ex.Message}", ex);
             }
             finally
             {
