@@ -41,8 +41,6 @@ namespace ImageComparator
         List<ListViewDataItem> list1 = new List<ListViewDataItem>();
         List<ListViewDataItem> list2 = new List<ListViewDataItem>();
         List<Thread> threadList;
-        StreamWriter streamWriter;
-        StreamReader streamReader;
         object myLock = new object();
         object myLock2 = new object();
         MyInt percentage = new MyInt();
@@ -2466,26 +2464,31 @@ namespace ImageComparator
 
         private void WriteToFile(List<string> input)
         {
-            using (streamWriter = new StreamWriter(path + @"\Bin\Directories.json"))
+            // Create data objects
+            var directoriesData = new DirectoriesData
             {
-                streamWriter.WriteLine(input.Count);
+                Directories = input
+            };
 
-                for (int i = 0; i < input.Count; i++)
-                {
-                    streamWriter.WriteLine(input.ElementAt(i));
-                }
-            }
-
-            using (streamWriter = new StreamWriter(path + @"\Bin\Filters.json"))
+            var filtersData = new FiltersData
             {
-                streamWriter.WriteLine(includeSubfolders);
-                streamWriter.WriteLine(jpegMenuItemChecked);
-                streamWriter.WriteLine(gifMenuItemChecked);
-                streamWriter.WriteLine(pngMenuItemChecked);
-                streamWriter.WriteLine(bmpMenuItemChecked);
-                streamWriter.WriteLine(tiffMenuItemChecked);
-                streamWriter.WriteLine(icoMenuItemChecked);
-            }
+                IncludeSubfolders = includeSubfolders,
+                JpegFiles = jpegMenuItemChecked,
+                GifFiles = gifMenuItemChecked,
+                PngFiles = pngMenuItemChecked,
+                BmpFiles = bmpMenuItemChecked,
+                TiffFiles = tiffMenuItemChecked,
+                IcoFiles = icoMenuItemChecked
+            };
+
+            // Serialize to JSON
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            
+            string directoriesJson = JsonSerializer.Serialize(directoriesData, options);
+            File.WriteAllText(path + @"\Bin\Directories.json", directoriesJson);
+
+            string filtersJson = JsonSerializer.Serialize(filtersData, options);
+            File.WriteAllText(path + @"\Bin\Filters.json", filtersJson);
         }
 
         private void AddFiles(List<string> directory)
@@ -2502,18 +2505,27 @@ namespace ImageComparator
 
         private void ReadFromFile()
         {
-            int count;
-            using (streamReader = new StreamReader(path + @"\Bin\Results.json"))
+            try
             {
-                gotException = bool.Parse(streamReader.ReadLine());
-                count = int.Parse(streamReader.ReadLine());
-
-                for (int i = 0; i < count; i++)
+                string jsonString = File.ReadAllText(path + @"\Bin\Results.json");
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var resultsData = JsonSerializer.Deserialize<ResultsData>(jsonString, options);
+                
+                if (resultsData != null)
                 {
-                    files.Add(streamReader.ReadLine());
+                    gotException = resultsData.GotException;
+                    if (resultsData.Files != null)
+                    {
+                        files.AddRange(resultsData.Files);
+                    }
                 }
+                
+                File.Delete(path + @"\Bin\Results.json");
             }
-            File.Delete(path + @"\Bin\Results.json");
+            catch (Exception ex)
+            {
+                ErrorLogger.LogError("ReadFromFile - Results", ex);
+            }
         }
 
         private Bitmap ResizeImage(System.Drawing.Image image, int width, int height)

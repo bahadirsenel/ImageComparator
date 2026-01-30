@@ -200,6 +200,7 @@
     <Compile Include="LocalizationManager.cs" />
     <Compile Include="Models\AppSettings.cs" />
     <Compile Include="Models\DiscreteCosineTransform2D.cs" />
+    <Compile Include="Models\InterProcessData.cs" />
     <Compile Include="Models\SerializableListViewDataItem.cs" />
     <Compile Include="Models\SerializableSize.cs" />
     <Compile Include="MainWindow.xaml.cs">

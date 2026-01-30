@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using AddFiles.Models;
 
 namespace AddFiles
 {
@@ -12,9 +14,6 @@ namespace AddFiles
         static readonly List<String> tempDirectories = new List<String>();
         static List<String> tempFiles = new List<String>();
         static bool includeSubfolders, jpegFiles, gifFiles, pngFiles, bmpFiles, tiffFiles, icoFiles, gotException = false;
-        static StreamWriter streamWriter;
-        static StreamReader streamReader;
-        static int count;
         static String ext, path;
         #endregion variables
 
@@ -105,41 +104,70 @@ namespace AddFiles
 
         private static void ReadFromFile()
         {
-            streamReader = new StreamReader(path + @"\Directories.json");
-            count = int.Parse(streamReader.ReadLine());
-
-            for (int i = 0; i < count; i++)
+            try
             {
-                tempDirectories.Add(streamReader.ReadLine());
+                // Read Directories.json
+                string directoriesJson = File.ReadAllText(path + @"\Directories.json");
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var directoriesData = JsonSerializer.Deserialize<DirectoriesData>(directoriesJson, options);
+                
+                if (directoriesData?.Directories != null)
+                {
+                    tempDirectories.AddRange(directoriesData.Directories);
+                }
+                
+                File.Delete(path + @"\Directories.json");
+
+                // Read Filters.json
+                string filtersJson = File.ReadAllText(path + @"\Filters.json");
+                var filtersData = JsonSerializer.Deserialize<FiltersData>(filtersJson, options);
+                
+                if (filtersData != null)
+                {
+                    includeSubfolders = filtersData.IncludeSubfolders;
+                    jpegFiles = filtersData.JpegFiles;
+                    gifFiles = filtersData.GifFiles;
+                    pngFiles = filtersData.PngFiles;
+                    bmpFiles = filtersData.BmpFiles;
+                    tiffFiles = filtersData.TiffFiles;
+                    icoFiles = filtersData.IcoFiles;
+                }
+                
+                File.Delete(path + @"\Filters.json");
             }
-
-            streamReader.Close();
-            File.Delete(path + @"\Directories.json");
-
-            streamReader = new StreamReader(path + @"\Filters.json");
-            includeSubfolders = bool.Parse(streamReader.ReadLine());
-            jpegFiles = bool.Parse(streamReader.ReadLine());
-            gifFiles = bool.Parse(streamReader.ReadLine());
-            pngFiles = bool.Parse(streamReader.ReadLine());
-            bmpFiles = bool.Parse(streamReader.ReadLine());
-            tiffFiles = bool.Parse(streamReader.ReadLine());
-            icoFiles = bool.Parse(streamReader.ReadLine());
-            streamReader.Close();
-            File.Delete(path + @"\Filters.json");
+            catch (Exception)
+            {
+                gotException = true;
+            }
         }
 
         private static void WriteToFile()
         {
-            streamWriter = new StreamWriter(path + @"\Results.json");
-            streamWriter.WriteLine(gotException);
-            streamWriter.WriteLine(files.Count);
-
-            for (int i = 0; i < files.Count; i++)
+            try
             {
-                streamWriter.WriteLine(files.ElementAt(i));
-            }
+                var resultsData = new ResultsData
+                {
+                    GotException = gotException,
+                    Files = files
+                };
 
-            streamWriter.Close();
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = JsonSerializer.Serialize(resultsData, options);
+                File.WriteAllText(path + @"\Results.json", jsonString);
+            }
+            catch (Exception)
+            {
+                // If serialization fails, mark as exception
+                gotException = true;
+                var resultsData = new ResultsData
+                {
+                    GotException = true,
+                    Files = new List<string>()
+                };
+                var options = new JsonSerializerOptions { WriteIndented = true };
+                string jsonString = JsonSerializer.Serialize(resultsData, options);
+                File.WriteAllText(path + @"\Results.json", jsonString);
+            }
         }
     }
 }
