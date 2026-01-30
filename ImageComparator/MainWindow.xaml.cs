@@ -2505,9 +2505,18 @@ namespace ImageComparator
 
         private void ReadFromFile()
         {
+            string resultsPath = path + @"\Bin\Results.json";
+            
             try
             {
-                string jsonString = File.ReadAllText(path + @"\Bin\Results.json");
+                // Check if file exists before trying to read
+                if (!File.Exists(resultsPath))
+                {
+                    ErrorLogger.LogError("ReadFromFile - Results", new FileNotFoundException($"Results.json not found at {resultsPath}. AddFiles.exe may have failed."));
+                    return;
+                }
+                
+                string jsonString = File.ReadAllText(resultsPath);
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
                 var resultsData = JsonSerializer.Deserialize<ResultsData>(jsonString, options);
                 
@@ -2520,7 +2529,7 @@ namespace ImageComparator
                     }
                 }
                 
-                File.Delete(path + @"\Bin\Results.json");
+                File.Delete(resultsPath);
             }
             catch (Exception ex)
             {
