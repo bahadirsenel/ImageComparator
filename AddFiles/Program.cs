@@ -20,10 +20,36 @@ namespace AddFiles
         [STAThread]
         static void Main()
         {
-            path = Environment.GetCommandLineArgs().ElementAt(0).Substring(0, Environment.GetCommandLineArgs().ElementAt(0).LastIndexOf("\\"));
-            ReadFromFile();
-            AddFiles();
-            WriteToFile();
+            try
+            {
+                path = Environment.GetCommandLineArgs().ElementAt(0).Substring(0, Environment.GetCommandLineArgs().ElementAt(0).LastIndexOf("\\"));
+                ReadFromFile();
+                AddFiles();
+            }
+            catch (Exception ex)
+            {
+                // Mark that an exception occurred
+                gotException = true;
+                
+                // Try to write error details to a log file for debugging
+                try
+                {
+                    string errorLog = path + @"\AddFiles_Error.log";
+                    File.WriteAllText(errorLog, $"[{DateTime.Now}] ERROR in AddFiles.exe\r\n" +
+                                                 $"Exception Type: {ex.GetType().FullName}\r\n" +
+                                                 $"Message: {ex.Message}\r\n" +
+                                                 $"Stack Trace:\r\n{ex.StackTrace}\r\n");
+                }
+                catch
+                {
+                    // If we can't write the log, just continue
+                }
+            }
+            finally
+            {
+                // Always write Results.json, even if there was an error
+                WriteToFile();
+            }
         }
 
         private static void AddFiles()
@@ -163,6 +189,19 @@ namespace AddFiles
 
         private static void WriteToFile()
         {
+            // Defensive: If path is null or empty, try to determine it
+            if (string.IsNullOrEmpty(path))
+            {
+                try
+                {
+                    path = Environment.GetCommandLineArgs().ElementAt(0).Substring(0, Environment.GetCommandLineArgs().ElementAt(0).LastIndexOf("\\"));
+                }
+                catch
+                {
+                    path = Directory.GetCurrentDirectory();
+                }
+            }
+            
             try
             {
                 var resultsData = new ResultsData
@@ -175,18 +214,32 @@ namespace AddFiles
                 string jsonString = JsonSerializer.Serialize(resultsData, options);
                 File.WriteAllText(path + @"\Results.json", jsonString);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // If serialization fails, mark as exception
-                gotException = true;
-                var resultsData = new ResultsData
+                // If serialization fails, try to write a simple error file
+                try
                 {
-                    GotException = true,
-                    Files = new List<string>()
-                };
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                string jsonString = JsonSerializer.Serialize(resultsData, options);
-                File.WriteAllText(path + @"\Results.json", jsonString);
+                    var resultsData = new ResultsData
+                    {
+                        GotException = true,
+                        Files = new List<string>()
+                    };
+                    var options = new JsonSerializerOptions { WriteIndented = true };
+                    string jsonString = JsonSerializer.Serialize(resultsData, options);
+                    File.WriteAllText(path + @"\Results.json", jsonString);
+                }
+                catch
+                {
+                    // Last resort: write a minimal file
+                    try
+                    {
+                        File.WriteAllText(path + @"\Results.json", "{\"GotException\":true,\"Files\":[]}");
+                    }
+                    catch
+                    {
+                        // Nothing more we can do
+                    }
+                }
             }
         }
     }
