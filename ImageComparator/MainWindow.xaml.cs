@@ -30,9 +30,9 @@ namespace ImageComparator
     {
         #region Variables
         // Services
-        private readonly IImageProcessingService _imageProcessingService;
-        private readonly IComparisonService _comparisonService;
-        private readonly ISerializationService _serializationService;
+        private readonly IImageProcessingService _imageProcessingService = new ImageProcessingService();
+        private readonly IComparisonService _comparisonService = new ComparisonService();
+        private readonly ISerializationService _serializationService = new SerializationService();
 
         System.Diagnostics.Process process;
         VistaFolderBrowserDialog folderBrowserDialog;
