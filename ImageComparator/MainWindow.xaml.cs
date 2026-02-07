@@ -2223,7 +2223,11 @@ namespace ImageComparator
                                     fastDCT2D = new FastDCT2D(resized32, 32);
                                     result = fastDCT2D.FastDCT();
 
-                                    //pHash(Perceptual Hash) Calculation
+                                    // pHash (Perceptual Hash) Calculation
+                                    // Applies Discrete Cosine Transform (DCT) to capture frequency patterns
+                                    // Compares each DCT coefficient against the average (excluding DC component)
+                                    // Creates 64-bit hash representing low-frequency image structure
+                                    // Result: robust to minor image modifications (scaling, compression, brightness)
                                     average = 0;
                                     for (int j = 0; j < 8; j++)
                                     {
@@ -2233,7 +2237,7 @@ namespace ImageComparator
                                         }
                                     }
 
-                                    average -= result[0, 0];
+                                    average -= result[0, 0];  // Exclude DC component (overall brightness)
                                     average /= 63;
 
                                     for (int j = 0; j < 8; j++)
@@ -2271,7 +2275,10 @@ namespace ImageComparator
                                             }
                                         }
 
-                                        //aHash(Average Hash) Calculation
+                                        // aHash (Average Hash) Calculation
+                                        // Compares each pixel's brightness against the average brightness of all pixels
+                                        // Creates 64-bit hash where each bit represents above/below average
+                                        // Result: fast computation, good for finding similar layouts and structures
                                         using (Bitmap resized8 = ResizeImage(grayscale, AHASH_RESIZE_DIMENSION, AHASH_RESIZE_DIMENSION))
                                         {
                                             average = 0;
@@ -2284,7 +2291,7 @@ namespace ImageComparator
                                                 }
                                             }
 
-                                            average /= 64;
+                                            average /= 64;  // Calculate mean brightness
 
                                             for (int j = 0; j < 8; j++)
                                             {
