@@ -27,8 +27,7 @@ namespace ImageComparator.Services
 
                 var options = new JsonSerializerOptions
                 {
-                    WriteIndented = true,
-                    PropertyNameCaseInsensitive = true
+                    WriteIndented = true
                 };
 
                 string jsonString = JsonSerializer.Serialize(settings, options);
