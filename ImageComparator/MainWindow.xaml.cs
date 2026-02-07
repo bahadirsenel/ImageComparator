@@ -2,6 +2,7 @@
 using DiscreteCosineTransform;
 using ImageComparator.Helpers;
 using ImageComparator.Models;
+using ImageComparator.Services;
 using Microsoft.VisualBasic.FileIO;
 using Ookii.Dialogs.Wpf;
 using System;
@@ -28,6 +29,11 @@ namespace ImageComparator
     public partial class MainWindow : Window
     {
         #region Variables
+        // Services
+        private readonly IImageProcessingService _imageProcessingService = new ImageProcessingService();
+        private readonly IComparisonService _comparisonService = new ComparisonService();
+        private readonly ISerializationService _serializationService = new SerializationService();
+
         System.Diagnostics.Process process;
         VistaFolderBrowserDialog folderBrowserDialog;
         VistaSaveFileDialog saveFileDialog;
@@ -47,7 +53,7 @@ namespace ImageComparator
         MyInt percentage = new MyInt();
         System.Windows.Point previewImage1Start, previewImage1Origin, previewImage2Start, previewImage2Origin;
         System.Drawing.Size[] resolutionArray;
-        Orientation[] orientationArray;
+        Models.Orientation[] orientationArray;
         int[,] pHashArray, hdHashArray, vdHashArray, aHashArray;
         string[] sha256Array;
         Thread processThread;
@@ -111,29 +117,6 @@ namespace ImageComparator
         private const int VDHASH_LOW_CONFIDENCE_THRESHOLD = 18;
         private const int AHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
         private const int AHASH_MEDIUM_CONFIDENCE_THRESHOLD = 12;
-        #endregion
-
-        #region Enums
-        public enum Orientation
-        {
-            Horizontal,
-            Vertical
-        }
-
-        public enum Confidence
-        {
-            Low,
-            Medium,
-            High,
-            Duplicate
-        }
-
-        public enum State
-        {
-            Normal,
-            MarkedForDeletion,
-            MarkedAsFalsePositive
-        }
         #endregion
 
         public class ListViewDataItem : INotifyPropertyChanged
@@ -1779,13 +1762,6 @@ namespace ImageComparator
         {
             try
             {
-                // Get and create the folder path
-                string directory = System.IO.Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
-                {
-                    Directory.CreateDirectory(directory);
-                }
-
                 var settings = new AppSettings
                 {
                     Version = 1,
@@ -1809,18 +1785,12 @@ namespace ImageComparator
                     ConsoleMessages = console?.ToList() ?? new List<string>()
                 };
 
-                var options = new JsonSerializerOptions
-                {
-                    WriteIndented = true,
-                    PropertyNameCaseInsensitive = true
-                };
-
-                string jsonString = JsonSerializer.Serialize(settings, options);
-                File.WriteAllText(path, jsonString);
+                // Use the serialization service
+                _serializationService.Serialize(path, settings);
             }
             catch (Exception ex) when (!(ex is OutOfMemoryException))
             {
-                ErrorLogger.LogError("Serialize", ex);
+                ErrorLogger.LogError("MainWindow.Serialize", ex);
                 throw;
             }
         }
@@ -1832,52 +1802,28 @@ namespace ImageComparator
         {
             try
             {
-                // If file doesn't exist, do nothing (first time opening)
-                if (!File.Exists(path))
+                // Use the serialization service
+                var settings = _serializationService.Deserialize(path);
+
+                // If file doesn't exist, service returns null
+                if (settings == null)
                 {
                     opening = false;
                     return;
                 }
 
-                string jsonString = File.ReadAllText(path);
-
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                };
-
-                var settings = JsonSerializer.Deserialize<AppSettings>(jsonString, options);
-
-                if (settings == null)
-                {
-                    throw new InvalidOperationException("Failed to deserialize settings");
-                }
-
-                // Validate settings version for forward/backward compatibility
-                const int SupportedVersion = 1;
-                // Treat 0 or missing version as SupportedVersion to avoid breaking older files
-                var loadedVersion = settings.Version;
-                if (loadedVersion != 0 && loadedVersion != SupportedVersion)
-                {
-                    throw new NotSupportedException(
-                        $"Unsupported settings version: {loadedVersion}. Supported version: {SupportedVersion}.");
-                }
-
-                // Ensure collections are not null
-                settings.Files = settings.Files ?? new List<string>();
-                settings.FalsePositiveList1 = settings.FalsePositiveList1 ?? new List<string>();
-                settings.FalsePositiveList2 = settings.FalsePositiveList2 ?? new List<string>();
-                settings.BindingList1 = settings.BindingList1 ?? new List<SerializableListViewDataItem>();
-                settings.BindingList2 = settings.BindingList2 ?? new List<SerializableListViewDataItem>();
-                settings.ConsoleMessages = settings.ConsoleMessages ?? new List<string>();
-
                 ApplySettings(settings);
             }
-            catch (JsonException ex)
+            catch (InvalidOperationException ex)
             {
-                ErrorLogger.LogError("Deserialize - JSON Parse Error", ex);
+                ErrorLogger.LogError("MainWindow.Deserialize", ex);
+                
+                string message = ex.Message.Contains("corrupted") 
+                    ? "The session file is corrupted or invalid. Please delete the file and restart the application."
+                    : "Failed to load session file. The file may be corrupted.";
+                
                 MessageBox.Show(
-                    "The session file is corrupted or invalid. Please delete the file and restart the application.",
+                    message,
                     "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error
@@ -1886,9 +1832,9 @@ namespace ImageComparator
             }
             catch (Exception ex) when (!(ex is OutOfMemoryException))
             {
-                ErrorLogger.LogError("Deserialize", ex);
+                ErrorLogger.LogError("MainWindow.Deserialize", ex);
                 MessageBox.Show(
-                    "Failed to load session file. The file may be corrupted.",
+                    "Failed to load session file.",
                     "Error",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error
@@ -2147,191 +2093,79 @@ namespace ImageComparator
         /// <param name="cancellationToken">Token for cancellation support</param>
         private void ProcessThreadStart(CancellationToken cancellationToken)
         {
-            FastDCT2D fastDCT2D;
-            int[,] result;
-            double average;
             int i;
 
-            using (SHA256Managed sha = new SHA256Managed())
+            while (processThreadsiAsync < files.Count)
             {
-                while (processThreadsiAsync < files.Count)
+                // Check for cancellation
+                if (cancellationToken.IsCancellationRequested)
                 {
-                    // Check for cancellation
+                    return;
+                }
+
+                // Check for pause
+                WaitWhilePaused(cancellationToken);
+
+                lock (myLock)
+                {
+                    // Double-check after acquiring lock
                     if (cancellationToken.IsCancellationRequested)
                     {
                         return;
                     }
 
-                    // Check for pause
-                    WaitWhilePaused(cancellationToken);
+                    i = processThreadsiAsync;
+                    processThreadsiAsync++;
+                    percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
+                }
 
-                    lock (myLock)
+                try
+                {
+                    // Use the image processing service to process the image
+                    ImageHashData hashData = _imageProcessingService.ProcessImage(
+                        files[i], 
+                        !duplicatesOnly,  // Calculate all hashes unless in duplicates-only mode
+                        cancellationToken);
+
+                    // Store the hash data in the existing arrays for compatibility
+                    resolutionArray[i] = hashData.Resolution;
+                    orientationArray[i] = hashData.Orientation;
+                    sha256Array[i] = hashData.Sha256Hash;
+
+                    // Copy hash arrays to the existing data structures
+                    if (!duplicatesOnly)
                     {
-                        // Double-check after acquiring lock
-                        if (cancellationToken.IsCancellationRequested)
+                        for (int j = 0; j < 64; j++)
                         {
-                            return;
+                            pHashArray[i, j] = hashData.PerceptualHash[j];
                         }
 
-                        i = processThreadsiAsync;
-                        processThreadsiAsync++;
-                        percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
-                    }
+                        for (int j = 0; j < 72; j++)
+                        {
+                            hdHashArray[i, j] = hashData.HorizontalDifferenceHash[j];
+                            vdHashArray[i, j] = hashData.VerticalDifferenceHash[j];
+                        }
 
+                        for (int j = 0; j < 64; j++)
+                        {
+                            aHashArray[i, j] = hashData.AverageHash[j];
+                        }
+                    }
+                    else
+                    {
+                        // In duplicates-only mode, mark as valid (not using hash arrays)
+                        // The first element being -1 indicates an invalid image
+                        if (pHashArray != null && pHashArray.GetLength(0) > i)
+                        {
+                            pHashArray[i, 0] = 0;  // Mark as valid
+                        }
+                    }
+                }
+                catch (ArgumentException)
+                {
                     try
                     {
-                        if (duplicatesOnly)
-                        {
-                            using (Bitmap image = new Bitmap(files[i]))
-                            {
-                                resolutionArray[i] = image.Size;
-
-                                if (image.Width > image.Height)
-                                {
-                                    orientationArray[i] = Orientation.Horizontal;
-                                }
-                                else
-                                {
-                                    orientationArray[i] = Orientation.Vertical;
-                                }
-                            }
-
-                            //SHA256 Calculation
-                            using (FileStream stream = File.OpenRead(files[i]))
-                            {
-                                byte[] hash = sha.ComputeHash(stream);
-                                sha256Array[i] = BitConverter.ToString(hash).Replace("-", string.Empty);
-                            }
-                        }
-                        else
-                        {
-                            using (Bitmap image = new Bitmap(files[i]))
-                            {
-                                resolutionArray[i] = image.Size;
-
-                                if (image.Width > image.Height)
-                                {
-                                    orientationArray[i] = Orientation.Horizontal;
-                                }
-                                else
-                                {
-                                    orientationArray[i] = Orientation.Vertical;
-                                }
-
-                                using (Bitmap resized32 = ResizeImage(image, PHASH_RESIZE_DIMENSION, PHASH_RESIZE_DIMENSION))
-                                {
-                                    fastDCT2D = new FastDCT2D(resized32, 32);
-                                    result = fastDCT2D.FastDCT();
-
-                                    // pHash (Perceptual Hash) Calculation
-                                    // Applies Discrete Cosine Transform (DCT) to capture frequency patterns
-                                    // Compares each DCT coefficient against the average (excluding DC component)
-                                    // Creates 64-bit hash representing low-frequency image structure
-                                    // Result: robust to minor image modifications (scaling, compression, brightness)
-                                    average = 0;
-                                    for (int j = 0; j < 8; j++)
-                                    {
-                                        for (int k = 0; k < 8; k++)
-                                        {
-                                            average += result[j, k];
-                                        }
-                                    }
-
-                                    average -= result[0, 0];  // Exclude DC component (overall brightness)
-                                    average /= 63;
-
-                                    for (int j = 0; j < 8; j++)
-                                    {
-                                        for (int k = 0; k < 8; k++)
-                                        {
-                                            pHashArray[i, j * 8 + k] = result[j, k] < average ? 0 : 1;
-                                        }
-                                    }
-
-                                    using (Bitmap resized9 = ResizeImage(resized32, DHASH_RESIZE_DIMENSION, DHASH_RESIZE_DIMENSION))
-                                    using (Bitmap grayscale = ConvertToGrayscale(resized9))
-                                    {
-                                        // hdHash (Horizontal Difference Hash) Calculation
-                                        // Compares each pixel with its RIGHT neighbor: GetPixel(j, k) vs GetPixel(j+1, k)
-                                        // Creates 8x9=72 bits by comparing columns (j to j+1) across 9 rows (k)
-                                        // Result: horizontal gradient detection
-                                        for (int j = 0; j < 8; j++)
-                                        {
-                                            for (int k = 0; k < 9; k++)
-                                            {
-                                                hdHashArray[i, j * 8 + k] = grayscale.GetPixel(j, k).R < grayscale.GetPixel(j + 1, k).R ? 0 : 1;
-                                            }
-                                        }
-
-                                        // vdHash (Vertical Difference Hash) Calculation
-                                        // Compares each pixel with its BOTTOM neighbor: GetPixel(j, k) vs GetPixel(j, k+1)
-                                        // Creates 9x8=72 bits by comparing rows (k to k+1) across 9 columns (j)
-                                        // Result: vertical gradient detection
-                                        for (int j = 0; j < 9; j++)
-                                        {
-                                            for (int k = 0; k < 8; k++)
-                                            {
-                                                vdHashArray[i, j * 8 + k] = grayscale.GetPixel(j, k).R < grayscale.GetPixel(j, k + 1).R ? 0 : 1;
-                                            }
-                                        }
-
-                                        // aHash (Average Hash) Calculation
-                                        // Compares each pixel's brightness against the average brightness of all pixels
-                                        // Creates 64-bit hash where each bit represents above/below average
-                                        // Result: fast computation, good for finding similar layouts and structures
-                                        using (Bitmap resized8 = ResizeImage(grayscale, AHASH_RESIZE_DIMENSION, AHASH_RESIZE_DIMENSION))
-                                        {
-                                            average = 0;
-
-                                            for (int j = 0; j < 8; j++)
-                                            {
-                                                for (int k = 0; k < 8; k++)
-                                                {
-                                                    average += resized8.GetPixel(j, k).R;
-                                                }
-                                            }
-
-                                            average /= 64;  // Calculate mean brightness
-
-                                            for (int j = 0; j < 8; j++)
-                                            {
-                                                for (int k = 0; k < 8; k++)
-                                                {
-                                                    aHashArray[i, j * 8 + k] = resized8.GetPixel(j, k).R < average ? 0 : 1;
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                            //SHA256 Calculation
-                            using (FileStream stream = File.OpenRead(files[i]))
-                            {
-                                byte[] hash = sha.ComputeHash(stream);
-                                sha256Array[i] = BitConverter.ToString(hash).Replace("-", string.Empty);
-                            }
-                        }
-                    }
-                    catch (ArgumentException)
-                    {
-                        try
-                        {
-                            pHashArray[i, 0] = -1;
-                        }
-                        catch (OutOfMemoryException)
-                        {
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", ex);
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        // Expected when cancelled
-                        return;
+                        pHashArray[i, 0] = -1;
                     }
                     catch (OutOfMemoryException)
                     {
@@ -2339,8 +2173,21 @@ namespace ImageComparator
                     }
                     catch (Exception ex)
                     {
-                        ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
+                        ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", ex);
                     }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Expected when cancelled
+                    return;
+                }
+                catch (OutOfMemoryException)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
                 }
             }
         }
@@ -2610,7 +2457,7 @@ namespace ImageComparator
             vdHashArray = new int[files.Count, 72];
             aHashArray = new int[files.Count, 64];
             sha256Array = new string[files.Count];
-            orientationArray = new Orientation[files.Count];
+            orientationArray = new Models.Orientation[files.Count];
             resolutionArray = new System.Drawing.Size[files.Count];
             threadList = new List<Thread>();
 
@@ -2822,161 +2669,105 @@ namespace ImageComparator
             }
         }
 
-        private Bitmap ResizeImage(System.Drawing.Image image, int width, int height)
-        {
-            Rectangle destRect = new Rectangle(0, 0, width, height);
-            Bitmap destImage = new Bitmap(width, height);
-
-            try
-            {
-                destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-
-                using (Graphics graphics = Graphics.FromImage(destImage))
-                using (ImageAttributes wrapMode = new ImageAttributes())
-                {
-                    graphics.CompositingMode = CompositingMode.SourceCopy;
-                    graphics.CompositingQuality = CompositingQuality.HighQuality;
-                    graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    graphics.SmoothingMode = SmoothingMode.HighQuality;
-                    graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-
-                    wrapMode.SetWrapMode(WrapMode.TileFlipXY);
-                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
-                }
-
-                return destImage;
-            }
-            catch
-            {
-                destImage?.Dispose();
-                throw;
-            }
-        }
-
-        private Bitmap ConvertToGrayscale(Bitmap inputImage)
-        {
-            Bitmap cloneImage = (Bitmap)inputImage.Clone();
-
-            try
-            {
-                using (Graphics graphics = Graphics.FromImage(cloneImage))
-                using (ImageAttributes attributes = new ImageAttributes())
-                {
-                    ColorMatrix colorMatrix = new ColorMatrix(new float[][]{
-                        new float[] {0.299f, 0.299f, 0.299f, 0, 0},
-                        new float[] {0.587f, 0.587f, 0.587f, 0, 0},
-                        new float[] {0.114f, 0.114f, 0.114f, 0, 0},
-                        new float[] {     0,      0,      0, 1, 0},
-                        new float[] {     0,      0,      0, 0, 0}
-                    });
-                    attributes.SetColorMatrix(colorMatrix);
-                    graphics.DrawImage(cloneImage, new Rectangle(0, 0, cloneImage.Width, cloneImage.Height), 0, 0, cloneImage.Width, cloneImage.Height, GraphicsUnit.Pixel, attributes);
-                }
-
-                return cloneImage;
-            }
-            catch
-            {
-                cloneImage?.Dispose();
-                throw;
-            }
-        }
-
         private bool FindSimilarity(int i, int j)
         {
-            if (pHashArray[i, 0] != -1 && pHashArray[j, 0] != -1)
+            // Check if both images are valid
+            if (pHashArray[i, 0] == -1 || pHashArray[j, 0] == -1)
             {
-                int pHashHammingDistance = 0, hdHashHammingDistance = 0, vdHashHammingDistance = 0, aHashHammingDistance = 0;
+                return false;
+            }
 
-                if (duplicatesOnly)
+            // Convert array data to ImageHashData objects for the service
+            var image1 = new ImageHashData
+            {
+                FilePath = files[i],
+                Resolution = resolutionArray[i],
+                Orientation = orientationArray[i],
+                Sha256Hash = sha256Array[i]
+            };
+
+            var image2 = new ImageHashData
+            {
+                FilePath = files[j],
+                Resolution = resolutionArray[j],
+                Orientation = orientationArray[j],
+                Sha256Hash = sha256Array[j]
+            };
+
+            // Copy hash arrays if not in duplicates-only mode
+            if (!duplicatesOnly)
+            {
+                for (int k = 0; k < 64; k++)
                 {
-                    if (sha256Array[i] != sha256Array[j])
-                    {
-                        return false;
-                    }
-
-                    lock (myLock2)
-                    {
-                        list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                        list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                        duplicateImageCount++;
-                    }
-                    return true;
+                    image1.PerceptualHash[k] = pHashArray[i, k];
+                    image2.PerceptualHash[k] = pHashArray[j, k];
+                    image1.AverageHash[k] = aHashArray[i, k];
+                    image2.AverageHash[k] = aHashArray[j, k];
                 }
-                else
+
+                for (int k = 0; k < 72; k++)
                 {
-                    for (int k = 1; k < 64; k++)
-                    {
-                        if (pHashArray[i, k] != pHashArray[j, k])
-                        {
-                            pHashHammingDistance++;
-                        }
-                    }
-
-                    for (int k = 0; k < 72; k++)
-                    {
-                        if (hdHashArray[i, k] != hdHashArray[j, k])
-                        {
-                            hdHashHammingDistance++;
-                        }
-                    }
-
-                    for (int k = 0; k < 72; k++)
-                    {
-                        if (vdHashArray[i, k] != vdHashArray[j, k])
-                        {
-                            vdHashHammingDistance++;
-                        }
-                    }
-
-                    for (int k = 0; k < 64; k++)
-                    {
-                        if (aHashArray[i, k] != aHashArray[j, k])
-                        {
-                            aHashHammingDistance++;
-                        }
-                    }
-
-                    if (sha256Array[i] == sha256Array[j] && pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD)
-                    {
-                        lock (myLock2)
-                        {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                            duplicateImageCount++;
-                        }
-                        return true;
-                    }
-                    else if (pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD)
-                    {
-                        lock (myLock2)
-                        {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                            highConfidenceSimilarImageCount++;
-                        }
-                    }
-                    else if ((pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD))
-                    {
-                        lock (myLock2)
-                        {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                            mediumConfidenceSimilarImageCount++;
-                        }
-                    }
-                    else if ((pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD || hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD || vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD) && aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_LOW_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_LOW_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_LOW_CONFIDENCE_THRESHOLD)
-                    {
-                        lock (myLock2)
-                        {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                            lowConfidenceSimilarImageCount++;
-                        }
-                    }
+                    image1.HorizontalDifferenceHash[k] = hdHashArray[i, k];
+                    image2.HorizontalDifferenceHash[k] = hdHashArray[j, k];
+                    image1.VerticalDifferenceHash[k] = vdHashArray[i, k];
+                    image2.VerticalDifferenceHash[k] = vdHashArray[j, k];
                 }
             }
-            return false;
+
+            // Use ComparisonService to find similarity
+            var comparisonResult = _comparisonService.FindSimilarity(
+                image1, 
+                image2, 
+                duplicatesOnly, 
+                skipDifferentOrientations: false  // Already filtered in CompareResultsThreadStart
+            );
+
+            // If no match, return false
+            if (comparisonResult == null)
+            {
+                return false;
+            }
+
+            // Add results to lists based on confidence level
+            lock (myLock2)
+            {
+                list1.Add(new ListViewDataItem(
+                    files.ElementAt(i), 
+                    (int)comparisonResult.ConfidenceLevel, 
+                    comparisonResult.PerceptualHashDistance, 
+                    comparisonResult.HorizontalDifferenceHashDistance, 
+                    comparisonResult.VerticalDifferenceHashDistance, 
+                    comparisonResult.AverageHashDistance, 
+                    sha256Array[i]));
+                    
+                list2.Add(new ListViewDataItem(
+                    files.ElementAt(j), 
+                    (int)comparisonResult.ConfidenceLevel, 
+                    comparisonResult.PerceptualHashDistance, 
+                    comparisonResult.HorizontalDifferenceHashDistance, 
+                    comparisonResult.VerticalDifferenceHashDistance, 
+                    comparisonResult.AverageHashDistance, 
+                    sha256Array[j]));
+
+                // Update counters
+                switch (comparisonResult.ConfidenceLevel)
+                {
+                    case Confidence.Duplicate:
+                        duplicateImageCount++;
+                        break;
+                    case Confidence.High:
+                        highConfidenceSimilarImageCount++;
+                        break;
+                    case Confidence.Medium:
+                        mediumConfidenceSimilarImageCount++;
+                        break;
+                    case Confidence.Low:
+                        lowConfidenceSimilarImageCount++;
+                        break;
+                }
+            }
+
+            return comparisonResult.ConfidenceLevel == Confidence.Duplicate;
         }
 
         private void ResetPanZoom1()
