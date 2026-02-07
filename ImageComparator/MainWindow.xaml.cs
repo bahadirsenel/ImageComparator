@@ -53,7 +53,7 @@ namespace ImageComparator
         MyInt percentage = new MyInt();
         System.Windows.Point previewImage1Start, previewImage1Origin, previewImage2Start, previewImage2Origin;
         System.Drawing.Size[] resolutionArray;
-        Orientation[] orientationArray;
+        Models.Orientation[] orientationArray;
         int[,] pHashArray, hdHashArray, vdHashArray, aHashArray;
         string[] sha256Array;
         Thread processThread;
@@ -117,8 +117,6 @@ namespace ImageComparator
         private const int VDHASH_LOW_CONFIDENCE_THRESHOLD = 18;
         private const int AHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
         private const int AHASH_MEDIUM_CONFIDENCE_THRESHOLD = 12;
-        #endregion
-
         #endregion
 
         public class ListViewDataItem : INotifyPropertyChanged
@@ -2459,7 +2457,7 @@ namespace ImageComparator
             vdHashArray = new int[files.Count, 72];
             aHashArray = new int[files.Count, 64];
             sha256Array = new string[files.Count];
-            orientationArray = new Orientation[files.Count];
+            orientationArray = new Models.Orientation[files.Count];
             resolutionArray = new System.Drawing.Size[files.Count];
             threadList = new List<Thread>();
 
