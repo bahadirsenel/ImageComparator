@@ -89,7 +89,7 @@ namespace ImageComparator.Services
                                 {
                                     for (int k = 0; k < 9; k++)
                                     {
-                                        hashData.HorizontalDifferenceHash[j * 8 + k] = 
+                                        hashData.HorizontalDifferenceHash[j * 9 + k] =
                                             grayscale.GetPixel(j, k).R < grayscale.GetPixel(j + 1, k).R ? 0 : 1;
                                     }
                                 }
