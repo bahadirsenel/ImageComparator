@@ -2128,6 +2128,23 @@ namespace ImageComparator
             }
         }
 
+        /// <summary>
+        /// Worker thread method for Phase 1: Image Processing.
+        /// 
+        /// Thread Safety:
+        /// - Each thread atomically obtains unique file index 'i' via lock
+        /// - Writes to unique array indices: resolutionArray[i], sha256Array[i], pHashArray[i,*], etc.
+        /// - Reads from shared 'files' list (immutable during processing)
+        /// - SHA256Managed instance is thread-local (using statement ensures disposal)
+        /// 
+        /// Hash Algorithms Computed:
+        /// 1. SHA256: Cryptographic hash of file bytes (for exact duplicate detection)
+        /// 2. pHash (Perceptual Hash): DCT-based 64-bit hash (for similar images)
+        /// 3. hdHash (Horizontal Difference Hash): 72-bit hash comparing each pixel with right neighbor
+        /// 4. vdHash (Vertical Difference Hash): 72-bit hash comparing each pixel with bottom neighbor
+        /// 5. aHash (Average Hash): 64-bit hash comparing pixels to average brightness
+        /// </summary>
+        /// <param name="cancellationToken">Token for cancellation support</param>
         private void ProcessThreadStart(CancellationToken cancellationToken)
         {
             FastDCT2D fastDCT2D;
@@ -2230,7 +2247,10 @@ namespace ImageComparator
                                     using (Bitmap resized9 = ResizeImage(resized32, DHASH_RESIZE_DIMENSION, DHASH_RESIZE_DIMENSION))
                                     using (Bitmap grayscale = ConvertToGrayscale(resized9))
                                     {
-                                        //hdHash(Horizontal Difference Hash) Calculation
+                                        // hdHash (Horizontal Difference Hash) Calculation
+                                        // Compares each pixel with its RIGHT neighbor: GetPixel(j, k) vs GetPixel(j+1, k)
+                                        // Creates 8x9=72 bits by comparing columns (j to j+1) across 9 rows (k)
+                                        // Result: horizontal gradient detection
                                         for (int j = 0; j < 8; j++)
                                         {
                                             for (int k = 0; k < 9; k++)
@@ -2239,7 +2259,10 @@ namespace ImageComparator
                                             }
                                         }
 
-                                        //vdHash(Vertical Difference Hash) Calculation
+                                        // vdHash (Vertical Difference Hash) Calculation
+                                        // Compares each pixel with its BOTTOM neighbor: GetPixel(j, k) vs GetPixel(j, k+1)
+                                        // Creates 9x8=72 bits by comparing rows (k to k+1) across 9 columns (j)
+                                        // Result: vertical gradient detection
                                         for (int j = 0; j < 9; j++)
                                         {
                                             for (int k = 0; k < 8; k++)
@@ -2334,6 +2357,23 @@ namespace ImageComparator
             }
         }
 
+        /// <summary>
+        /// Worker thread method for Phase 2: Comparison.
+        /// 
+        /// Thread Safety:
+        /// - Each thread atomically obtains unique 'i' index via lock on compareResultsiAsync
+        /// - Compares file[i] with all files[j] where j > i (no overlap between threads)
+        /// - Reads from hash arrays computed in Phase 1 (immutable - all writes completed)
+        /// - Writes to shared lists (list1/list2) protected by myLock2 in FindSimilarity
+        /// 
+        /// Algorithm:
+        /// - For each unique pair (i, j) where i < j:
+        ///   * Skips pairs with different orientations (if configured)
+        ///   * Calculates Hamming distance for all hash types
+        ///   * Classifies similarity: Duplicate, High, Medium, Low confidence
+        ///   * Adds matches to result lists
+        /// </summary>
+        /// <param name="cancellationToken">Token for cancellation support</param>
         private void CompareResultsThreadStart(CancellationToken cancellationToken)
         {
             int i, j;
@@ -2378,6 +2418,41 @@ namespace ImageComparator
             }
         }
 
+        /// <summary>
+        /// Main processing pipeline with two-phase threading model for image comparison.
+        /// 
+        /// Threading Architecture:
+        /// ======================
+        /// 
+        /// Phase 1 - Image Processing (Parallel):
+        /// --------------------------------------
+        /// - Multiple worker threads (CPU core count) process images concurrently
+        /// - Each thread:
+        ///   * Gets unique file index atomically via lock on processThreadsiAsync counter
+        ///   * Computes image hashes (SHA256, pHash, hdHash, vdHash, aHash)
+        ///   * Writes results to unique array indices (thread-safe by design)
+        /// - Reads from shared 'files' list (immutable during processing - no modifications)
+        /// - Main thread waits for all processing threads to complete via Join()
+        /// 
+        /// Phase 2 - Comparison (Parallel):
+        /// --------------------------------
+        /// - Starts AFTER all Phase 1 threads complete (Join() ensures happens-before relationship)
+        /// - Multiple worker threads compare image pairs concurrently
+        /// - Each thread:
+        ///   * Gets unique 'i' index atomically via lock on compareResultsiAsync counter
+        ///   * Compares file[i] with all files[j] where j > i
+        ///   * Reads from hash arrays (immutable in this phase - all writes completed in Phase 1)
+        ///   * Writes to shared result lists (protected by myLock2)
+        /// - Main thread waits for all comparison threads to complete via Join()
+        /// 
+        /// Thread Safety Guarantees:
+        /// ========================
+        /// 1. Counter Synchronization: processThreadsiAsync and compareResultsiAsync protected by myLock
+        /// 2. Array Access: Each thread writes to unique indices (i) obtained atomically
+        /// 3. Phase Separation: Phase 2 only begins after Phase 1 completes (Join barrier)
+        /// 4. Result Lists: list1/list2/counters protected by myLock2
+        /// 5. Cancellation: CancellationToken checked throughout for clean shutdown
+        /// </summary>
         private void Run()
         {
             try
