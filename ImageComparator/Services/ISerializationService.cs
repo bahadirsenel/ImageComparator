@@ -1,5 +1,4 @@
 using ImageComparator.Models;
-using System;
 
 namespace ImageComparator.Services
 {

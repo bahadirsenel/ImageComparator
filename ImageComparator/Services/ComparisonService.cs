@@ -165,7 +165,8 @@ namespace ImageComparator.Services
         private int CalculateHammingDistance(int[] hash1, int[] hash2, int startIndex, int length)
         {
             int distance = 0;
-            for (int i = startIndex; i < length; i++)
+            int endIndex = startIndex + length;
+            for (int i = startIndex; i < endIndex; i++)
             {
                 if (hash1[i] != hash2[i])
                 {
