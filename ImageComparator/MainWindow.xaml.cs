@@ -2673,99 +2673,103 @@ namespace ImageComparator
 
         private bool FindSimilarity(int i, int j)
         {
-            if (pHashArray[i, 0] != -1 && pHashArray[j, 0] != -1)
+            // Check if both images are valid
+            if (pHashArray[i, 0] == -1 || pHashArray[j, 0] == -1)
             {
-                int pHashHammingDistance = 0, hdHashHammingDistance = 0, vdHashHammingDistance = 0, aHashHammingDistance = 0;
+                return false;
+            }
 
-                if (duplicatesOnly)
+            // Convert array data to ImageHashData objects for the service
+            var image1 = new ImageHashData
+            {
+                FilePath = files[i],
+                Resolution = resolutionArray[i],
+                Orientation = orientationArray[i],
+                Sha256Hash = sha256Array[i]
+            };
+
+            var image2 = new ImageHashData
+            {
+                FilePath = files[j],
+                Resolution = resolutionArray[j],
+                Orientation = orientationArray[j],
+                Sha256Hash = sha256Array[j]
+            };
+
+            // Copy hash arrays if not in duplicates-only mode
+            if (!duplicatesOnly)
+            {
+                for (int k = 0; k < 64; k++)
                 {
-                    if (sha256Array[i] != sha256Array[j])
-                    {
-                        return false;
-                    }
-
-                    lock (myLock2)
-                    {
-                        list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                        list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                        duplicateImageCount++;
-                    }
-                    return true;
+                    image1.PerceptualHash[k] = pHashArray[i, k];
+                    image2.PerceptualHash[k] = pHashArray[j, k];
+                    image1.AverageHash[k] = aHashArray[i, k];
+                    image2.AverageHash[k] = aHashArray[j, k];
                 }
-                else
+
+                for (int k = 0; k < 72; k++)
                 {
-                    for (int k = 1; k < 64; k++)
-                    {
-                        if (pHashArray[i, k] != pHashArray[j, k])
-                        {
-                            pHashHammingDistance++;
-                        }
-                    }
-
-                    for (int k = 0; k < 72; k++)
-                    {
-                        if (hdHashArray[i, k] != hdHashArray[j, k])
-                        {
-                            hdHashHammingDistance++;
-                        }
-                    }
-
-                    for (int k = 0; k < 72; k++)
-                    {
-                        if (vdHashArray[i, k] != vdHashArray[j, k])
-                        {
-                            vdHashHammingDistance++;
-                        }
-                    }
-
-                    for (int k = 0; k < 64; k++)
-                    {
-                        if (aHashArray[i, k] != aHashArray[j, k])
-                        {
-                            aHashHammingDistance++;
-                        }
-                    }
-
-                    if (sha256Array[i] == sha256Array[j] && pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD)
-                    {
-                        lock (myLock2)
-                        {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Duplicate, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                            duplicateImageCount++;
-                        }
-                        return true;
-                    }
-                    else if (pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD)
-                    {
-                        lock (myLock2)
-                        {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.High, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                            highConfidenceSimilarImageCount++;
-                        }
-                    }
-                    else if ((pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && aHashHammingDistance < AHASH_MEDIUM_CONFIDENCE_THRESHOLD) || (aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_MEDIUM_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_MEDIUM_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_MEDIUM_CONFIDENCE_THRESHOLD))
-                    {
-                        lock (myLock2)
-                        {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Medium, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                            mediumConfidenceSimilarImageCount++;
-                        }
-                    }
-                    else if ((pHashHammingDistance < PHASH_HIGH_CONFIDENCE_THRESHOLD || hdHashHammingDistance < HDHASH_HIGH_CONFIDENCE_THRESHOLD || vdHashHammingDistance < VDHASH_HIGH_CONFIDENCE_THRESHOLD) && aHashHammingDistance < AHASH_HIGH_CONFIDENCE_THRESHOLD && pHashHammingDistance < PHASH_LOW_CONFIDENCE_THRESHOLD && hdHashHammingDistance < HDHASH_LOW_CONFIDENCE_THRESHOLD && vdHashHammingDistance < VDHASH_LOW_CONFIDENCE_THRESHOLD)
-                    {
-                        lock (myLock2)
-                        {
-                            list1.Add(new ListViewDataItem(files.ElementAt(i), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[i]));
-                            list2.Add(new ListViewDataItem(files.ElementAt(j), (int)Confidence.Low, pHashHammingDistance, hdHashHammingDistance, vdHashHammingDistance, aHashHammingDistance, sha256Array[j]));
-                            lowConfidenceSimilarImageCount++;
-                        }
-                    }
+                    image1.HorizontalDifferenceHash[k] = hdHashArray[i, k];
+                    image2.HorizontalDifferenceHash[k] = hdHashArray[j, k];
+                    image1.VerticalDifferenceHash[k] = vdHashArray[i, k];
+                    image2.VerticalDifferenceHash[k] = vdHashArray[j, k];
                 }
             }
-            return false;
+
+            // Use ComparisonService to find similarity
+            var comparisonResult = _comparisonService.FindSimilarity(
+                image1, 
+                image2, 
+                duplicatesOnly, 
+                skipDifferentOrientations: false  // Already filtered in CompareResultsThreadStart
+            );
+
+            // If no match, return false
+            if (comparisonResult == null)
+            {
+                return false;
+            }
+
+            // Add results to lists based on confidence level
+            lock (myLock2)
+            {
+                list1.Add(new ListViewDataItem(
+                    files.ElementAt(i), 
+                    (int)comparisonResult.ConfidenceLevel, 
+                    comparisonResult.PerceptualHashDistance, 
+                    comparisonResult.HorizontalDifferenceHashDistance, 
+                    comparisonResult.VerticalDifferenceHashDistance, 
+                    comparisonResult.AverageHashDistance, 
+                    sha256Array[i]));
+                    
+                list2.Add(new ListViewDataItem(
+                    files.ElementAt(j), 
+                    (int)comparisonResult.ConfidenceLevel, 
+                    comparisonResult.PerceptualHashDistance, 
+                    comparisonResult.HorizontalDifferenceHashDistance, 
+                    comparisonResult.VerticalDifferenceHashDistance, 
+                    comparisonResult.AverageHashDistance, 
+                    sha256Array[j]));
+
+                // Update counters
+                switch (comparisonResult.ConfidenceLevel)
+                {
+                    case Confidence.Duplicate:
+                        duplicateImageCount++;
+                        break;
+                    case Confidence.High:
+                        highConfidenceSimilarImageCount++;
+                        break;
+                    case Confidence.Medium:
+                        mediumConfidenceSimilarImageCount++;
+                        break;
+                    case Confidence.Low:
+                        lowConfidenceSimilarImageCount++;
+                        break;
+                }
+            }
+
+            return comparisonResult.ConfidenceLevel == Confidence.Duplicate;
         }
 
         private void ResetPanZoom1()
