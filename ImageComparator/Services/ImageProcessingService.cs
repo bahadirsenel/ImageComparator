@@ -35,7 +35,7 @@ namespace ImageComparator.Services
                     FilePath = filePath
                 };
 
-                using (var sha = new SHA256Managed())
+                using (var sha = SHA256.Create())
                 using (var image = new Bitmap(filePath))
                 {
                     // Get resolution and orientation
