@@ -18,7 +18,7 @@ namespace ImageComparator.Services
         /// Deserialize application state from a file
         /// </summary>
         /// <param name="filePath">Path to the file to load</param>
-        /// <returns>Deserialized application settings</returns>
-        AppSettings Deserialize(string filePath);
+        /// <returns>Deserialized application settings, or <c>null</c> if the file does not exist</returns>
+        AppSettings? Deserialize(string filePath);
     }
 }
