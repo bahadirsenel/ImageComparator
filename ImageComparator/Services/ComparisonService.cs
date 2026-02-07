@@ -61,7 +61,7 @@ namespace ImageComparator.Services
             else
             {
                 // Calculate hamming distances for all hash types
-                int pHashDistance = CalculateHammingDistance(image1.PerceptualHash, image2.PerceptualHash, 1, 64);
+                int pHashDistance = CalculateHammingDistance(image1.PerceptualHash, image2.PerceptualHash, 1, 63);
                 int hdHashDistance = CalculateHammingDistance(image1.HorizontalDifferenceHash, image2.HorizontalDifferenceHash, 0, 72);
                 int vdHashDistance = CalculateHammingDistance(image1.VerticalDifferenceHash, image2.VerticalDifferenceHash, 0, 72);
                 int aHashDistance = CalculateHammingDistance(image1.AverageHash, image2.AverageHash, 0, 64);
