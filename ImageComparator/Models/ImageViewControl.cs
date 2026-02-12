@@ -7,6 +7,24 @@ using System.Windows.Media.Imaging;
 
 namespace ImageComparator2 {
 
+    /// <summary>
+    /// Custom WPF control for displaying images with pan and zoom capabilities.
+    /// Inherits from <see cref="Border"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This control provides:
+    /// <list type="bullet">
+    /// <item>Mouse wheel zoom functionality</item>
+    /// <item>Click-and-drag panning</item>
+    /// <item>Automatic image loading from file paths</item>
+    /// <item>Transform clipping to control bounds</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// The image is rendered with transforms applied for smooth zoom and pan operations.
+    /// </para>
+    /// </remarks>
     public class ImageViewControl : Border {
 
         private Point origin;
