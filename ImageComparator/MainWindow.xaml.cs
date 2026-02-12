@@ -2909,7 +2909,9 @@ namespace ImageComparator
                 // Update percentage based on shared monotonic counter (atomic monotonic update)
                 // Phase 2 (comparison) maps to 50-100% of total progress
                 int currentIndex = Math.Min(compareResultsiAsync, files.Count - 1);
-                int newPercentage = 50 + (int)Math.Round(50.0 * currentIndex / (files.Count - 1));
+                // Guard against division by zero when files.Count is 1
+                int denominator = Math.Max(files.Count - 1, 1);
+                int newPercentage = 50 + (int)Math.Round(50.0 * currentIndex / denominator);
                 percentage.SetMaximum(newPercentage);
 
                 for (j = i + 1; j < files.Count; j++)
