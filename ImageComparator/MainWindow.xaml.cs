@@ -2558,11 +2558,11 @@ namespace ImageComparator
         /// </list>
         /// <para><b>Hash Algorithms Computed:</b></para>
         /// <list type="number">
-        /// <item><term>SHA256</term><description>Cryptographic hash for exact duplicate detection</description></item>
-        /// <item><term>pHash</term><description>Perceptual hash using DCT (64-bit)</description></item>
-        /// <item><term>hdHash</term><description>Horizontal difference hash (72-bit)</description></item>
-        /// <item><term>vdHash</term><description>Vertical difference hash (72-bit)</description></item>
-        /// <item><term>aHash</term><description>Average hash (64-bit)</description></item>
+        /// <item><description><b>SHA256</b>: Cryptographic hash for exact duplicate detection</description></item>
+        /// <item><description><b>pHash</b>: Perceptual hash using DCT (64-bit)</description></item>
+        /// <item><description><b>hdHash</b>: Horizontal difference hash (72-bit)</description></item>
+        /// <item><description><b>vdHash</b>: Vertical difference hash (72-bit)</description></item>
+        /// <item><description><b>aHash</b>: Average hash (64-bit)</description></item>
         /// </list>
         /// <para><b>Error Handling:</b></para>
         /// <para>
