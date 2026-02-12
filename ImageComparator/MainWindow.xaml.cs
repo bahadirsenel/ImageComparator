@@ -13,6 +13,7 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
@@ -2328,6 +2329,23 @@ namespace ImageComparator
                             ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", ex);
                         }
                     }
+                    catch (ExternalException ex)
+                    {
+                        // GDI+ error when loading image (corrupted file, unsupported format, etc.)
+                        try
+                        {
+                            pHashArray[i, 0] = -1;
+                            ErrorLogger.LogError($"ProcessThreadStart - Invalid Image {i} ({Path.GetFileName(files[i])})", ex);
+                        }
+                        catch (OutOfMemoryException)
+                        {
+                            throw;
+                        }
+                        catch (Exception innerEx)
+                        {
+                            ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", innerEx);
+                        }
+                    }
                     catch (OperationCanceledException)
                     {
                         // Expected when cancelled
@@ -2339,6 +2357,16 @@ namespace ImageComparator
                     }
                     catch (Exception ex)
                     {
+                        // Mark other unexpected exceptions as invalid too
+                        try
+                        {
+                            pHashArray[i, 0] = -1;
+                        }
+                        catch (OutOfMemoryException)
+                        {
+                            throw;
+                        }
+                        catch { }
                         ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
                     }
                 }
