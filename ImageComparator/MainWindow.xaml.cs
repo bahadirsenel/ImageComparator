@@ -2600,8 +2600,19 @@ namespace ImageComparator
                         break;
                     }
 
-                    // Update percentage
-                    percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
+                    // Re-check for cancellation after claiming the index
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    // Update percentage based on shared monotonic counter
+                    int currentIndex = Math.Min(processThreadsiAsync, files.Count);
+                    int newPercentage = 100 - (int)Math.Round(100.0 * (files.Count - currentIndex) / files.Count);
+                    if (newPercentage > percentage.Value)
+                    {
+                        percentage.Value = newPercentage;
+                    }
 
                     try
                     {
@@ -2891,8 +2902,19 @@ namespace ImageComparator
                     break;
                 }
 
-                // Update percentage
-                percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
+                // Quick cancellation re-check after claiming a new index
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                // Update percentage based on shared monotonic counter
+                int currentIndex = Math.Min(compareResultsiAsync, files.Count - 1);
+                int newPercentage = 100 - (int)Math.Round(100.0 * (files.Count - currentIndex) / files.Count);
+                if (newPercentage > percentage.Value)
+                {
+                    percentage.Value = newPercentage;
+                }
 
                 for (j = i + 1; j < files.Count; j++)
                 {
