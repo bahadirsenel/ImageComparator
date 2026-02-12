@@ -2331,7 +2331,13 @@ namespace ImageComparator
                         // Mark file as invalid for all exceptions to prevent false duplicate detection
                         MarkFileAsInvalid(i);
                         
-                        ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
+                        string fileNameInfo = string.Empty;
+                        if (i >= 0 && i < files.Count)
+                        {
+                            fileNameInfo = $" ({Path.GetFileName(files[i])})";
+                        }
+                        
+                        ErrorLogger.LogError($"ProcessThreadStart - Process Image {i}{fileNameInfo}", ex);
                     }
                 }
             }
@@ -2346,14 +2352,18 @@ namespace ImageComparator
         {
             try
             {
-                if (index < pHashArray.GetLength(0))
+                if (index >= 0 && index < pHashArray.GetLength(0))
                 {
                     pHashArray[index, 0] = -1;
                 }
-                if (index < sha256Array.Length)
+                if (index >= 0 && index < sha256Array.Length)
                 {
                     sha256Array[index] = null;
                 }
+            }
+            catch (OutOfMemoryException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
