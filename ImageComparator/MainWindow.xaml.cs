@@ -148,8 +148,12 @@ namespace ImageComparator
         /// The size in pixels for resizing images before dHash calculation.
         /// </summary>
         /// <remarks>
-        /// A 9x9 resize produces 8x9 horizontal gradients (72 comparisons for hdHash)
-        /// and 9x8 vertical gradients (72 comparisons for vdHash), resulting in 72-bit hashes.
+        /// A 9x9 resize is used to calculate two separate 72-bit hashes:
+        /// <list type="bullet">
+        /// <item><b>hdHash</b> (Horizontal): Compares each pixel with its right neighbor, producing 8×9 = 72 comparisons</item>
+        /// <item><b>vdHash</b> (Vertical): Compares each pixel with its bottom neighbor, producing 9×8 = 72 comparisons</item>
+        /// </list>
+        /// Each hash is stored separately and used independently for similarity comparison.
         /// </remarks>
         private const int DHASH_RESIZE_DIMENSION = 9;
         
@@ -257,23 +261,28 @@ namespace ImageComparator
         /// <summary>
         /// Specifies the confidence level of an image similarity match.
         /// </summary>
+        /// <remarks>
+        /// Confidence levels are determined by combining Hamming distances from multiple hash algorithms.
+        /// The ranges below show approximate pHash distances, but actual classification uses
+        /// a combination of pHash, hdHash, vdHash, and aHash thresholds.
+        /// </remarks>
         public enum Confidence
         {
             /// <summary>
             /// Low confidence match. Images may be related but differences are noticeable.
-            /// Hamming distance: 18-21 (pHash)
+            /// Typical pHash Hamming distance: 13-20
             /// </summary>
             Low,
             
             /// <summary>
             /// Medium confidence match. Images are similar with minor differences.
-            /// Hamming distance: 12-18 (pHash)
+            /// Typical pHash Hamming distance: 10-12
             /// </summary>
             Medium,
             
             /// <summary>
             /// High confidence match. Images are very similar.
-            /// Hamming distance: 1-9 (pHash)
+            /// Typical pHash Hamming distance: 0-9
             /// </summary>
             High,
             
