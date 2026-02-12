@@ -48,7 +48,7 @@ namespace DiscreteCosineTransform
         }
 
         /// <summary>
-        /// Checks if a matrix is square (quadric).
+        /// Checks if a matrix is square.
         /// </summary>
         /// <typeparam name="T">The type of elements in the matrix.</typeparam>
         /// <param name="matrix">The matrix to check.</param>

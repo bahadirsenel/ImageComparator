@@ -715,6 +715,7 @@ namespace ImageComparator
         /// <c>false</c> if the user cancelled the save dialog or an error occurred.
         /// </returns>
         /// <remarks>
+        /// <para>
         /// The session includes:
         /// <list type="bullet">
         /// <item>Application settings (file filters, language, etc.)</item>
@@ -722,15 +723,14 @@ namespace ImageComparator
         /// <item>Console messages</item>
         /// <item>False positive database</item>
         /// </list>
+        /// </para>
+        /// <para>
+        /// All exceptions except <see cref="OutOfMemoryException"/> are caught and handled by
+        /// displaying an error message to the user. The method returns <c>false</c> on any error.
+        /// </para>
         /// </remarks>
         /// <exception cref="OutOfMemoryException">
         /// Thrown when insufficient memory is available for serialization.
-        /// </exception>
-        /// <exception cref="UnauthorizedAccessException">
-        /// Thrown when the user lacks permissions to write to the selected file.
-        /// </exception>
-        /// <exception cref="IOException">
-        /// Thrown when an I/O error occurs during file writing.
         /// </exception>
         /// <example>
         /// <code>
@@ -2198,20 +2198,11 @@ namespace ImageComparator
         /// Validates the settings version for forward/backward compatibility.
         /// Currently supports version 1 only.
         /// </para>
+        /// <para>
+        /// All exceptions except <see cref="OutOfMemoryException"/> are caught and handled by
+        /// displaying an error message to the user. The method does not propagate exceptions.
+        /// </para>
         /// </remarks>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="path"/> is null or empty.
-        /// </exception>
-        /// <exception cref="FileNotFoundException">
-        /// Thrown when the specified file doesn't exist.
-        /// (Gracefully handled - no exception propagated)
-        /// </exception>
-        /// <exception cref="JsonException">
-        /// Thrown when the JSON file is malformed or corrupted.
-        /// </exception>
-        /// <exception cref="NotSupportedException">
-        /// Thrown when the settings version is not supported.
-        /// </exception>
         /// <exception cref="OutOfMemoryException">
         /// Thrown when insufficient memory is available for deserialization.
         /// </exception>
