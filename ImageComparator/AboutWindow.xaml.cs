@@ -6,10 +6,17 @@ using System.Windows.Navigation;
 namespace ImageComparator
 {
     /// <summary>
-    /// Interaction logic for AboutWindow.xaml
+    /// About dialog window displaying application information.
     /// </summary>
+    /// <remarks>
+    /// Shows application version, developer information, license details,
+    /// and links to the GitHub repository.
+    /// </remarks>
     public partial class AboutWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AboutWindow"/> class.
+        /// </summary>
         public AboutWindow()
         {
             InitializeComponent();

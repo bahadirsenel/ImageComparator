@@ -2,11 +2,33 @@
 
 namespace ImageComparator
 {
+    /// <summary>
+    /// Confirmation dialog for applying pending operations (deletions and false positive markings).
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This dialog displays:
+    /// <list type="bullet">
+    /// <item>Number of files marked for deletion</item>
+    /// <item>Number of results marked as false positives</item>
+    /// <item>Confirmation prompt before executing operations</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// If the user confirms, calls <see cref="MainWindow.Apply"/> to execute the operations.
+    /// </para>
+    /// </remarks>
     public partial class ApplyPopupWindow : Window
     {
         MainWindow mainWindow;
         int deleteItemCount, markAsFalsePositiveItemCount;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ApplyPopupWindow"/> class.
+        /// </summary>
+        /// <param name="mainWindow">Reference to the main window.</param>
+        /// <param name="deleteItemCount">Number of items marked for deletion.</param>
+        /// <param name="markAsFalsePositiveItemCount">Number of items marked as false positives.</param>
         public ApplyPopupWindow(MainWindow mainWindow, int deleteItemCount, int markAsFalsePositiveItemCount)
         {
             InitializeComponent();

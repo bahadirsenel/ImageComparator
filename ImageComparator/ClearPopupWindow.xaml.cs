@@ -2,10 +2,30 @@
 
 namespace ImageComparator
 {
+    /// <summary>
+    /// Confirmation dialog for clearing comparison results.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This dialog provides three options:
+    /// <list type="bullet">
+    /// <item><b>Save Results:</b> Saves the current session before clearing</item>
+    /// <item><b>Discard Results:</b> Clears results without saving</item>
+    /// <item><b>Cancel:</b> Closes dialog without any action</item>
+    /// </list>
+    /// </para>
+    /// <para>
+    /// Called when the user attempts to clear results to prevent accidental data loss.
+    /// </para>
+    /// </remarks>
     public partial class ClearPopupWindow : Window
     {
         MainWindow mainWindow;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ClearPopupWindow"/> class.
+        /// </summary>
+        /// <param name="mainWindow">Reference to the main window.</param>
         public ClearPopupWindow(MainWindow mainWindow)
         {
             InitializeComponent();
