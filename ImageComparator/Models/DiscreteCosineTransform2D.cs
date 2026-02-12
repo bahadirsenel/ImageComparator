@@ -4,8 +4,27 @@ using System.Drawing.Imaging;
 
 namespace DiscreteCosineTransform
 {
+    /// <summary>
+    /// Provides static methods for 2D Discrete Cosine Transform (DCT) operations.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// DCT is used for perceptual image hashing (pHash) to detect similar images.
+    /// The transform converts spatial domain image data into frequency domain,
+    /// allowing comparison of images based on their low-frequency components.
+    /// </para>
+    /// <para>
+    /// This implementation uses the standard DCT-II formula for forward transform
+    /// and DCT-III formula for inverse transform.
+    /// </para>
+    /// </remarks>
     public static class DiscreteCosineTransform2D
     {
+        /// <summary>
+        /// Initializes the coefficient matrix for DCT calculations.
+        /// </summary>
+        /// <param name="dim">The dimension of the square matrix.</param>
+        /// <returns>A coefficient matrix used in DCT calculations.</returns>
         private static double[,] InitCoefficientsMatrix(int dim)
         {
             double[,] coefficientsMatrix = new double[dim, dim];
@@ -28,6 +47,12 @@ namespace DiscreteCosineTransform
             return coefficientsMatrix;
         }
 
+        /// <summary>
+        /// Checks if a matrix is square.
+        /// </summary>
+        /// <typeparam name="T">The type of elements in the matrix.</typeparam>
+        /// <param name="matrix">The matrix to check.</param>
+        /// <returns><c>true</c> if the matrix is square; otherwise, <c>false</c>.</returns>
         private static bool IsQuadricMatrix<T>(T[,] matrix)
         {
             int columnsCount = matrix.GetLength(0);
@@ -35,6 +60,18 @@ namespace DiscreteCosineTransform
             return (columnsCount == rowsCount);
         }
 
+        /// <summary>
+        /// Performs forward 2D Discrete Cosine Transform on the input matrix.
+        /// </summary>
+        /// <param name="input">The input matrix to transform. Must be square.</param>
+        /// <returns>The DCT coefficients matrix.</returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the input matrix is not square.
+        /// </exception>
+        /// <remarks>
+        /// Converts spatial domain data to frequency domain.
+        /// Used for computing perceptual hashes (pHash) in image comparison.
+        /// </remarks>
         public static double[,] ForwardDCT(double[,] input)
         {
             if (IsQuadricMatrix(input) == false)
@@ -67,6 +104,17 @@ namespace DiscreteCosineTransform
             return output;
         }
 
+        /// <summary>
+        /// Performs inverse 2D Discrete Cosine Transform on the input matrix.
+        /// </summary>
+        /// <param name="input">The DCT coefficients matrix to transform. Must be square.</param>
+        /// <returns>The reconstructed spatial domain matrix.</returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the input matrix is not square.
+        /// </exception>
+        /// <remarks>
+        /// Converts frequency domain data back to spatial domain.
+        /// </remarks>
         public static double[,] InverseDCT(double[,] input)
         {
             if (IsQuadricMatrix(input) == false)
@@ -99,13 +147,51 @@ namespace DiscreteCosineTransform
         }
     }
 
+    /// <summary>
+    /// Provides fast 2D Discrete Cosine Transform implementation for image processing.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This class performs DCT operations on images for perceptual hashing.
+    /// It uses matrix multiplication with precomputed DCT kernels for improved performance.
+    /// </para>
+    /// <para>
+    /// Typical workflow:
+    /// <list type="number">
+    /// <item>Create instance from Bitmap or pixel data</item>
+    /// <item>Call <see cref="FastDCT"/> to compute DCT coefficients</item>
+    /// <item>Use low-frequency coefficients for perceptual hashing</item>
+    /// <item>Optionally call <see cref="FastInverseDCT"/> to reconstruct image</item>
+    /// </list>
+    /// </para>
+    /// </remarks>
     public class FastDCT2D
     {
         int Width, Height, Order;
+        
+        /// <summary>
+        /// Gets or sets the grayscale image data as integer array.
+        /// </summary>
         public int[,] GreyImage;
+        
+        /// <summary>
+        /// Gets or sets the input matrix, DCT coefficients, inverse DCT coefficients, and DCT kernel.
+        /// </summary>
         public double[,] Input, DCTCoefficients, IDTCoefficients, DCTkernel;
+        
+        /// <summary>
+        /// Gets or sets the original bitmap, DCT visualization, and reconstructed image.
+        /// </summary>
         public Bitmap Obj, DCTMap, IDCTImage;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FastDCT2D"/> class from a bitmap.
+        /// </summary>
+        /// <param name="Input">The input bitmap to process.</param>
+        /// <param name="DCTOrder">The order (dimension) of the DCT matrix.</param>
+        /// <remarks>
+        /// Converts the bitmap to grayscale and prepares it for DCT processing.
+        /// </remarks>
         public FastDCT2D(Bitmap Input, int DCTOrder)
         {
             Obj = Input;
@@ -115,6 +201,11 @@ namespace DiscreteCosineTransform
             ReadImage();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FastDCT2D"/> class from integer pixel data.
+        /// </summary>
+        /// <param name="InputImageData">The input grayscale image data as 2D integer array.</param>
+        /// <param name="order">The order (dimension) of the DCT matrix.</param>
         public FastDCT2D(int[,] InputImageData, int order)
         {
             int i, j;
@@ -132,6 +223,13 @@ namespace DiscreteCosineTransform
             Order = order;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FastDCT2D"/> class from DCT coefficients.
+        /// </summary>
+        /// <param name="DCTCoeffInput">The DCT coefficients matrix.</param>
+        /// <remarks>
+        /// Use this constructor when you already have DCT coefficients and want to perform inverse DCT.
+        /// </remarks>
         public FastDCT2D(double[,] DCTCoeffInput)
         {
             DCTCoefficients = DCTCoeffInput;
@@ -166,6 +264,11 @@ namespace DiscreteCosineTransform
             return;
         }
 
+        /// <summary>
+        /// Converts a double array image to a bitmap for display.
+        /// </summary>
+        /// <param name="image">The image data as 2D double array.</param>
+        /// <returns>A grayscale bitmap representation of the image.</returns>
         public Bitmap Displayimage(double[,] image)
         {
             int i, j;
@@ -193,6 +296,21 @@ namespace DiscreteCosineTransform
             return output;
         }
 
+        /// <summary>
+        /// Converts an integer array to a color-coded bitmap for DCT visualization.
+        /// </summary>
+        /// <param name="output">The DCT coefficient data as 2D integer array.</param>
+        /// <returns>A color-coded bitmap where colors represent coefficient magnitudes.</returns>
+        /// <remarks>
+        /// Uses color mapping to visualize DCT coefficients:
+        /// <list type="bullet">
+        /// <item>Negative values: Green</item>
+        /// <item>0-50: Red gradient</item>
+        /// <item>50-100: Cyan gradient</item>
+        /// <item>100-255: Green gradient</item>
+        /// <item>&gt;255: Blue gradient</item>
+        /// </list>
+        /// </remarks>
         public Bitmap Displaymap(int[,] output)
         {
             int i, j;
@@ -247,6 +365,24 @@ namespace DiscreteCosineTransform
             return image;
         }
 
+        /// <summary>
+        /// Performs fast 2D DCT using matrix multiplication.
+        /// </summary>
+        /// <returns>Integer array representation of DCT coefficients for visualization.</returns>
+        /// <remarks>
+        /// <para>
+        /// Uses the formula: DCT = K * I * K^T, where:
+        /// <list type="bullet">
+        /// <item>K is the DCT kernel matrix</item>
+        /// <item>I is the input image matrix</item>
+        /// <item>K^T is the transpose of the DCT kernel</item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// This method is significantly faster than the standard DCT-II formula
+        /// for large matrices due to optimized matrix operations.
+        /// </para>
+        /// </remarks>
         public int[,] FastDCT()
         {
             double[,] temp = new double[Width, Height];
@@ -258,6 +394,18 @@ namespace DiscreteCosineTransform
             return DCTPlotGenerate();
         }
 
+        /// <summary>
+        /// Performs fast inverse 2D DCT using matrix multiplication.
+        /// </summary>
+        /// <remarks>
+        /// Uses the formula: Image = K^T * DCT * K, where:
+        /// <list type="bullet">
+        /// <item>K^T is the transpose of the DCT kernel matrix</item>
+        /// <item>DCT is the DCT coefficients matrix</item>
+        /// <item>K is the DCT kernel matrix</item>
+        /// </list>
+        /// The reconstructed image is stored in <see cref="IDCTImage"/>.
+        /// </remarks>
         public void FastInverseDCT()
         {
             double[,] temp = new double[Width, Height];
@@ -270,6 +418,14 @@ namespace DiscreteCosineTransform
             return;
         }
 
+        /// <summary>
+        /// Generates the DCT kernel matrix for the specified order.
+        /// </summary>
+        /// <param name="order">The dimension (order) of the DCT matrix.</param>
+        /// <returns>The DCT kernel matrix used for transform computations.</returns>
+        /// <remarks>
+        /// The DCT kernel is precomputed to improve performance of multiple DCT operations.
+        /// </remarks>
         public double[,] GenerateDCTmatrix(int order)
         {
             int i, j, N = order;

@@ -4,8 +4,26 @@ using System.Windows;
 
 namespace ImageComparator
 {
+    /// <summary>
+    /// Help window displaying usage instructions for the application.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Loads localized help content from markdown files based on the current language.
+    /// Falls back to English if a language-specific file is not available.
+    /// </para>
+    /// <para>
+    /// Help files are stored in the Resources directory with naming pattern: HowToUse_{languageSuffix}.md,
+    /// where {languageSuffix} is a short code (for example, "en", "tr") derived from the current culture
+    /// (for example, "en-US", "tr-TR"). See <see cref="GetHowToUseFileName(string)"/> for the exact
+    /// mapping and fallback behavior.
+    /// </para>
+    /// </remarks>
     public partial class HowToUseWindow : Window
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HowToUseWindow"/> class.
+        /// </summary>
         public HowToUseWindow()
         {
             InitializeComponent();
@@ -116,6 +134,13 @@ namespace ImageComparator
             Close();
         }
 
+        /// <summary>
+        /// Loads the content from the specified help file.
+        /// </summary>
+        /// <param name="fileName">The name of the help file to load.</param>
+        /// <returns>
+        /// The content of the help file, or an error message if the file cannot be loaded.
+        /// </returns>
         private string LoadContentFromFile(string fileName)
         {
             try

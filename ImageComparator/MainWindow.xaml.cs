@@ -25,6 +25,25 @@ using System.Windows.Threading;
 
 namespace ImageComparator
 {
+    /// <summary>
+    /// Main window for the Image Comparator application.
+    /// Handles duplicate image detection using multiple perceptual hashing algorithms.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// This window provides functionality to:
+    /// - Scan directories for image files
+    /// - Calculate perceptual hashes (pHash, dHash, aHash) and SHA256 checksums
+    /// - Compare images to find duplicates and similar images
+    /// - Manage results and delete unwanted duplicates
+    /// </para>
+    /// <para>
+    /// Threading Model:
+    /// - Phase 1: Parallel image processing (hash calculation)
+    /// - Phase 2: Parallel hash comparison
+    /// - UI updates via Dispatcher
+    /// </para>
+    /// </remarks>
     public partial class MainWindow : Window
     {
         #region Variables
@@ -64,9 +83,22 @@ namespace ImageComparator
         private readonly object _pauseLock = new object();
         private readonly ManualResetEventSlim _pauseEvent = new ManualResetEventSlim(true);
 
+        /// <summary>
+        /// Identifies the <see cref="ImagePath1"/> dependency property.
+        /// </summary>
         public static DependencyProperty ImagePathProperty1 = DependencyProperty.Register("ImagePath1", typeof(string), typeof(MainWindow), null);
+        
+        /// <summary>
+        /// Identifies the <see cref="ImagePath2"/> dependency property.
+        /// </summary>
         public static DependencyProperty ImagePathProperty2 = DependencyProperty.Register("ImagePath2", typeof(string), typeof(MainWindow), null);
 
+        /// <summary>
+        /// Gets or sets the file path for the first preview image.
+        /// </summary>
+        /// <value>
+        /// The absolute file path to the image, or <c>null</c> if no image is selected.
+        /// </value>
         public string ImagePath1
         {
             get
@@ -79,6 +111,12 @@ namespace ImageComparator
             }
         }
 
+        /// <summary>
+        /// Gets or sets the file path for the second preview image.
+        /// </summary>
+        /// <value>
+        /// The absolute file path to the image, or <c>null</c> if no image is selected.
+        /// </value>
         public string ImagePath2
         {
             get
@@ -94,62 +132,268 @@ namespace ImageComparator
 
         #region Constants
         // Hash calculation constants
+        /// <summary>
+        /// The size in pixels for resizing images before pHash DCT calculation.
+        /// </summary>
+        /// <remarks>
+        /// A 32x32 resize provides a good balance between:
+        /// <list type="bullet">
+        /// <item>Computational efficiency (faster DCT)</item>
+        /// <item>Hash accuracy (retains important features)</item>
+        /// </list>
+        /// </remarks>
         private const int PHASH_RESIZE_DIMENSION = 32;
+        
+        /// <summary>
+        /// The size in pixels for resizing images before dHash calculation.
+        /// </summary>
+        /// <remarks>
+        /// A 9x9 resize is used to calculate two separate 72-bit hashes:
+        /// <list type="bullet">
+        /// <item><b>hdHash</b> (Horizontal): Compares each pixel with its right neighbor, producing 8×9 = 72 comparisons</item>
+        /// <item><b>vdHash</b> (Vertical): Compares each pixel with its bottom neighbor, producing 9×8 = 72 comparisons</item>
+        /// </list>
+        /// Each hash is stored separately and used independently for similarity comparison.
+        /// </remarks>
         private const int DHASH_RESIZE_DIMENSION = 9;
+        
+        /// <summary>
+        /// The size in pixels for resizing images before aHash calculation.
+        /// </summary>
+        /// <remarks>
+        /// 8x8 resize produces a 64-bit hash after average comparison.
+        /// </remarks>
         private const int AHASH_RESIZE_DIMENSION = 8;
 
         // Hash comparison thresholds
+        /// <summary>
+        /// Hamming distance threshold for exact duplicates.
+        /// </summary>
+        /// <remarks>
+        /// Images with Hamming distance less than 1 (essentially 0) combined with
+        /// matching SHA256 checksums are considered exact duplicates.
+        /// </remarks>
         private const int EXACT_DUPLICATE_THRESHOLD = 1;
+        
+        /// <summary>
+        /// Hamming distance threshold for high-confidence similar images (pHash).
+        /// </summary>
+        /// <remarks>
+        /// A distance of less than 9 indicates images are very similar.
+        /// This threshold was determined empirically through testing.
+        /// </remarks>
         private const int PHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
+        
+        /// <summary>
+        /// Hamming distance threshold for medium-confidence similar images (pHash).
+        /// </summary>
+        /// <remarks>
+        /// A distance of 12 or less indicates images are similar with minor differences.
+        /// </remarks>
         private const int PHASH_MEDIUM_CONFIDENCE_THRESHOLD = 12;
+        
+        /// <summary>
+        /// Hamming distance threshold for low-confidence similar images (pHash).
+        /// </summary>
+        /// <remarks>
+        /// A distance of less than 21 indicates images may be related but differences are noticeable.
+        /// </remarks>
         private const int PHASH_LOW_CONFIDENCE_THRESHOLD = 21;
+        
+        /// <summary>
+        /// Hamming distance threshold for high-confidence similar images (horizontal dHash).
+        /// </summary>
         private const int HDHASH_HIGH_CONFIDENCE_THRESHOLD = 10;
+        
+        /// <summary>
+        /// Hamming distance threshold for medium-confidence similar images (horizontal dHash).
+        /// </summary>
         private const int HDHASH_MEDIUM_CONFIDENCE_THRESHOLD = 13;
+        
+        /// <summary>
+        /// Hamming distance threshold for low-confidence similar images (horizontal dHash).
+        /// </summary>
         private const int HDHASH_LOW_CONFIDENCE_THRESHOLD = 18;
+        
+        /// <summary>
+        /// Hamming distance threshold for high-confidence similar images (vertical dHash).
+        /// </summary>
         private const int VDHASH_HIGH_CONFIDENCE_THRESHOLD = 10;
+        
+        /// <summary>
+        /// Hamming distance threshold for medium-confidence similar images (vertical dHash).
+        /// </summary>
         private const int VDHASH_MEDIUM_CONFIDENCE_THRESHOLD = 13;
+        
+        /// <summary>
+        /// Hamming distance threshold for low-confidence similar images (vertical dHash).
+        /// </summary>
         private const int VDHASH_LOW_CONFIDENCE_THRESHOLD = 18;
+        
+        /// <summary>
+        /// Hamming distance threshold for high-confidence similar images (aHash).
+        /// </summary>
         private const int AHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
+        
+        /// <summary>
+        /// Hamming distance threshold for medium-confidence similar images (aHash).
+        /// </summary>
         private const int AHASH_MEDIUM_CONFIDENCE_THRESHOLD = 12;
         #endregion
 
         #region Enums
+        /// <summary>
+        /// Specifies the orientation of an image based on aspect ratio.
+        /// </summary>
         public enum Orientation
         {
+            /// <summary>
+            /// Image is wider than it is tall (width &gt; height).
+            /// </summary>
             Horizontal,
+            
+            /// <summary>
+            /// Image is taller than it is wide (height &gt; width) or square.
+            /// </summary>
             Vertical
         }
 
+        /// <summary>
+        /// Specifies the confidence level of an image similarity match.
+        /// </summary>
+        /// <remarks>
+        /// Confidence levels are determined by combining Hamming distances from multiple hash algorithms.
+        /// The ranges below show approximate pHash distances, but actual classification uses
+        /// a combination of pHash, hdHash, vdHash, and aHash thresholds.
+        /// </remarks>
         public enum Confidence
         {
+            /// <summary>
+            /// Low confidence match. Images may be related but differences are noticeable.
+            /// Typical pHash Hamming distance: 13-20
+            /// </summary>
             Low,
+            
+            /// <summary>
+            /// Medium confidence match. Images are similar with minor differences.
+            /// Typical pHash Hamming distance: 10-12
+            /// </summary>
             Medium,
+            
+            /// <summary>
+            /// High confidence match. Images are very similar.
+            /// Typical pHash Hamming distance: 0-9
+            /// </summary>
             High,
+            
+            /// <summary>
+            /// Exact duplicate. Images are identical (same SHA256 hash and Hamming distance &lt; 1).
+            /// </summary>
             Duplicate
         }
 
+        /// <summary>
+        /// Specifies the current state of a comparison result item.
+        /// </summary>
         public enum State
         {
+            /// <summary>
+            /// Normal state. No action pending on this item.
+            /// </summary>
             Normal,
+            
+            /// <summary>
+            /// Item is marked for deletion and will be deleted when Apply is clicked.
+            /// </summary>
             MarkedForDeletion,
+            
+            /// <summary>
+            /// Item is marked as a false positive and will be excluded from future comparisons.
+            /// </summary>
             MarkedAsFalsePositive
         }
         #endregion
 
+        /// <summary>
+        /// Represents a single row in the comparison results list view.
+        /// Implements <see cref="INotifyPropertyChanged"/> for data binding support.
+        /// </summary>
+        /// <remarks>
+        /// This class stores all comparison metadata for a pair of images:
+        /// <list type="bullet">
+        /// <item>File path and confidence level</item>
+        /// <item>Hamming distances for multiple hash algorithms (pHash, hdHash, vdHash, aHash)</item>
+        /// <item>SHA256 checksum for exact duplicate detection</item>
+        /// <item>UI state (selected, checked, pending action)</item>
+        /// </list>
+        /// </remarks>
         public class ListViewDataItem : INotifyPropertyChanged
         {
             private bool selected;
             private int pState;
             private bool pIsChecked;
             private bool pCheckboxEnabled;
+            
+            /// <summary>
+            /// Gets or sets the file path or name for this comparison result.
+            /// </summary>
             public string text { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the confidence level of this match.
+            /// </summary>
+            /// <value>
+            /// Integer value corresponding to <see cref="Confidence"/> enum:
+            /// 0 (Low), 1 (Medium), 2 (High), 3 (Duplicate)
+            /// </value>
             public int confidence { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the perceptual hash Hamming distance.
+            /// </summary>
+            /// <value>
+            /// Hamming distance between pHash values. Lower values indicate more similar images.
+            /// </value>
             public int pHashHammingDistance { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the horizontal difference hash Hamming distance.
+            /// </summary>
+            /// <value>
+            /// Hamming distance between hdHash values. Lower values indicate more similar images.
+            /// </value>
             public int hdHashHammingDistance { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the vertical difference hash Hamming distance.
+            /// </summary>
+            /// <value>
+            /// Hamming distance between vdHash values. Lower values indicate more similar images.
+            /// </value>
             public int vdHashHammingDistance { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the average hash Hamming distance.
+            /// </summary>
+            /// <value>
+            /// Hamming distance between aHash values. Lower values indicate more similar images.
+            /// </value>
             public int aHashHammingDistance { get; set; }
+            
+            /// <summary>
+            /// Gets or sets the SHA256 checksum for exact duplicate detection.
+            /// </summary>
+            /// <value>
+            /// Hexadecimal string representation of SHA256 hash, or <c>null</c> if hash computation failed.
+            /// </value>
             public string sha256Checksum { get; set; }
 
+            /// <summary>
+            /// Gets or sets whether this item is currently selected in the UI.
+            /// </summary>
+            /// <value>
+            /// <c>true</c> if the item is selected; otherwise, <c>false</c>.
+            /// </value>
             public bool isSelected
             {
                 get
@@ -163,6 +407,13 @@ namespace ImageComparator
                 }
             }
 
+            /// <summary>
+            /// Gets or sets the current state of this item.
+            /// </summary>
+            /// <value>
+            /// Integer value corresponding to <see cref="State"/> enum:
+            /// 0 (Normal), 1 (MarkedForDeletion), 2 (MarkedAsFalsePositive)
+            /// </value>
             public int state
             {
                 get
@@ -176,6 +427,12 @@ namespace ImageComparator
                 }
             }
 
+            /// <summary>
+            /// Gets or sets whether the checkbox for this item is checked.
+            /// </summary>
+            /// <value>
+            /// <c>true</c> if the checkbox is checked; otherwise, <c>false</c>.
+            /// </value>
             public bool isChecked
             {
                 get
@@ -189,6 +446,12 @@ namespace ImageComparator
                 }
             }
 
+            /// <summary>
+            /// Gets or sets whether the checkbox for this item is enabled.
+            /// </summary>
+            /// <value>
+            /// <c>true</c> if the checkbox can be interacted with; otherwise, <c>false</c>.
+            /// </value>
             public bool CheckboxEnabled
             {
                 get
@@ -202,6 +465,16 @@ namespace ImageComparator
                 }
             }
 
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ListViewDataItem"/> class.
+            /// </summary>
+            /// <param name="text">File path or name</param>
+            /// <param name="confidence">Match confidence level (0-3)</param>
+            /// <param name="pHashHammingDistance">Perceptual hash Hamming distance</param>
+            /// <param name="hdHashHammingDistance">Horizontal difference hash Hamming distance</param>
+            /// <param name="vdHashHammingDistance">Vertical difference hash Hamming distance</param>
+            /// <param name="aHashHammingDistance">Average hash Hamming distance</param>
+            /// <param name="sha256Checksum">SHA256 checksum for exact duplicate detection</param>
             public ListViewDataItem(string text, int confidence, int pHashHammingDistance, int hdHashHammingDistance, int vdHashHammingDistance, int aHashHammingDistance, string sha256Checksum)
             {
 
@@ -218,10 +491,29 @@ namespace ImageComparator
                 CheckboxEnabled = true;
             }
 
+            /// <summary>
+            /// Occurs when a property value changes.
+            /// </summary>
             [field: NonSerialized]
             public event PropertyChangedEventHandler PropertyChanged;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindow"/> class.
+        /// </summary>
+        /// <remarks>
+        /// Performs the following initialization:
+        /// <list type="bullet">
+        /// <item>Loads application settings from JSON</item>
+        /// <item>Initializes localization</item>
+        /// <item>Sets up folder/file dialogs</item>
+        /// <item>Configures image transformation groups for pan/zoom</item>
+        /// <item>Cleans up old error logs</item>
+        /// </list>
+        /// </remarks>
+        /// <exception cref="OutOfMemoryException">
+        /// Thrown when insufficient memory is available for initialization.
+        /// </exception>
         public MainWindow()
         {
             InitializeComponent();
@@ -415,6 +707,39 @@ namespace ImageComparator
             SaveResults();
         }
 
+        /// <summary>
+        /// Saves the current comparison session to a JSON file.
+        /// </summary>
+        /// <returns>
+        /// <c>true</c> if the session was saved successfully; 
+        /// <c>false</c> if the user cancelled the save dialog or an error occurred.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// The session includes:
+        /// <list type="bullet">
+        /// <item>Application settings (file filters, language, etc.)</item>
+        /// <item>Comparison results (duplicate pairs)</item>
+        /// <item>Console messages</item>
+        /// <item>False positive database</item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// All exceptions except <see cref="OutOfMemoryException"/> are caught and handled by
+        /// displaying an error message to the user. The method returns <c>false</c> on any error.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="OutOfMemoryException">
+        /// Thrown when insufficient memory is available for serialization.
+        /// </exception>
+        /// <example>
+        /// <code>
+        /// if (SaveResults())
+        /// {
+        ///     console.Add("Session saved successfully");
+        /// }
+        /// </code>
+        /// </example>
         public bool SaveResults()
         {
             saveFileDialog.Title = LocalizationManager.GetString("Dialog.SaveTitle");
@@ -1773,8 +2098,42 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Safely serialize application state to JSON format
+        /// Serializes application state to JSON format.
         /// </summary>
+        /// <param name="path">
+        /// The absolute file path where the JSON file will be saved.
+        /// Directory will be created if it doesn't exist.
+        /// </param>
+        /// <remarks>
+        /// <para>
+        /// Serializes the following data:
+        /// </para>
+        /// <list type="bullet">
+        /// <item><description>Application settings (filters, language, etc.)</description></item>
+        /// <item><description>Comparison results and bindings</description></item>
+        /// <item><description>False positive database</description></item>
+        /// <item><description>Console messages</description></item>
+        /// </list>
+        /// <para>
+        /// The JSON format uses indented formatting for readability.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="path"/> is null or empty.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        /// Thrown when the application lacks permissions to write to the specified path.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        /// Thrown when the directory portion of the path cannot be found or created.
+        /// </exception>
+        /// <exception cref="IOException">
+        /// Thrown when an I/O error occurs during file operations.
+        /// </exception>
+        /// <exception cref="OutOfMemoryException">
+        /// Thrown when insufficient memory is available for serialization.
+        /// </exception>
+        /// <seealso cref="Deserialize(string)"/>
         public void Serialize(string path)
         {
             try
@@ -1826,8 +2185,28 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Safely deserialize application state from JSON format
+        /// Deserializes application state from a JSON file.
         /// </summary>
+        /// <param name="path">
+        /// The absolute file path to the JSON file to load.
+        /// </param>
+        /// <remarks>
+        /// <para>
+        /// If the file doesn't exist (first time opening), this method does nothing.
+        /// </para>
+        /// <para>
+        /// Validates the settings version for forward/backward compatibility.
+        /// Currently supports version 1 only.
+        /// </para>
+        /// <para>
+        /// All exceptions except <see cref="OutOfMemoryException"/> are caught and handled by
+        /// displaying an error message to the user. The method does not propagate exceptions.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="OutOfMemoryException">
+        /// Thrown when insufficient memory is available for deserialization.
+        /// </exception>
+        /// <seealso cref="Serialize(string)"/>
         public void Deserialize(string path)
         {
             try
@@ -2029,6 +2408,18 @@ namespace ImageComparator
             console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
         }
 
+        /// <summary>
+        /// Clears all comparison results and resets the UI to its initial state.
+        /// </summary>
+        /// <remarks>
+        /// This method:
+        /// <list type="bullet">
+        /// <item>Hides result-related buttons and shows initial scan buttons</item>
+        /// <item>Clears all directories, files, and console messages</item>
+        /// <item>Clears all comparison result bindings</item>
+        /// <item>Resets the progress percentage to 0</item>
+        /// </list>
+        /// </remarks>
         public void Clear()
         {
             clearResultsButton.Visibility = Visibility.Hidden;
@@ -2047,6 +2438,29 @@ namespace ImageComparator
             console.Add(LocalizationManager.GetString("Label.DragDropFolders"));
         }
 
+        /// <summary>
+        /// Applies pending operations (deletions and false positive markings) to comparison results.
+        /// </summary>
+        /// <param name="deleteItemCount">Number of items marked for deletion</param>
+        /// <param name="markAsFalsePositiveItemCount">Number of items marked as false positives</param>
+        /// <remarks>
+        /// <para>
+        /// This method performs the following actions:
+        /// </para>
+        /// <list type="number">
+        /// <item>Deletes files marked for deletion (if <paramref name="deleteItemCount"/> &gt; 0)</item>
+        /// <item>Adds false positive pairs to exclusion database (if <paramref name="markAsFalsePositiveItemCount"/> &gt; 0)</item>
+        /// <item>Removes false positive items from result bindings</item>
+        /// <item>Saves updated false positive database to disk</item>
+        /// </list>
+        /// <para>
+        /// False positive pairs are stored by their SHA256 checksums to prevent them
+        /// from appearing in future comparison results.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="OutOfMemoryException">
+        /// Thrown when insufficient memory is available for serialization.
+        /// </exception>
         public void Apply(int deleteItemCount, int markAsFalsePositiveItemCount)
         {
             if (deleteItemCount > 0)
@@ -2130,21 +2544,33 @@ namespace ImageComparator
 
         /// <summary>
         /// Worker thread method for Phase 1: Image Processing.
-        /// 
-        /// Thread Safety:
-        /// - Each thread atomically obtains unique file index 'i' via lock
-        /// - Writes to unique array indices: resolutionArray[i], sha256Array[i], pHashArray[i,*], etc.
-        /// - Reads from shared 'files' list (immutable during processing)
-        /// - SHA256Managed instance is thread-local (using statement ensures disposal)
-        /// 
-        /// Hash Algorithms Computed:
-        /// 1. SHA256: Cryptographic hash of file bytes (for exact duplicate detection)
-        /// 2. pHash (Perceptual Hash): DCT-based 64-bit hash (for similar images)
-        /// 3. hdHash (Horizontal Difference Hash): 72-bit hash comparing each pixel with right neighbor
-        /// 4. vdHash (Vertical Difference Hash): 72-bit hash comparing each pixel with bottom neighbor
-        /// 5. aHash (Average Hash): 64-bit hash comparing pixels to average brightness
         /// </summary>
-        /// <param name="cancellationToken">Token for cancellation support</param>
+        /// <param name="cancellationToken">
+        /// Token for cancellation support. When cancelled, the thread exits gracefully.
+        /// </param>
+        /// <remarks>
+        /// <para><b>Thread Safety:</b></para>
+        /// <list type="bullet">
+        /// <item>Each thread atomically obtains unique file index via lock on myLock</item>
+        /// <item>Writes to unique array indices (thread-safe by design)</item>
+        /// <item>Reads from shared 'files' list (immutable during processing)</item>
+        /// <item>SHA256 instance is thread-local (automatically disposed)</item>
+        /// </list>
+        /// <para><b>Hash Algorithms Computed:</b></para>
+        /// <list type="number">
+        /// <item><description><b>SHA256</b>: Cryptographic hash for exact duplicate detection</description></item>
+        /// <item><description><b>pHash</b>: Perceptual hash using DCT (64-bit)</description></item>
+        /// <item><description><b>hdHash</b>: Horizontal difference hash (72-bit)</description></item>
+        /// <item><description><b>vdHash</b>: Vertical difference hash (72-bit)</description></item>
+        /// <item><description><b>aHash</b>: Average hash (64-bit)</description></item>
+        /// </list>
+        /// <para><b>Error Handling:</b></para>
+        /// <para>
+        /// Invalid images are marked using <see cref="MarkFileAsInvalid"/> and excluded from comparison.
+        /// Errors are logged but don't stop processing of other files.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="CompareResultsThreadStart(CancellationToken)"/>
         private void ProcessThreadStart(CancellationToken cancellationToken)
         {
             FastDCT2D fastDCT2D;
@@ -2345,9 +2771,24 @@ namespace ImageComparator
 
         /// <summary>
         /// Marks a file as invalid to exclude it from comparison.
-        /// Sets pHashArray[i, 0] = -1 and sha256Array[i] = null with bounds checking.
         /// </summary>
-        /// <param name="index">The index of the file to mark as invalid</param>
+        /// <param name="index">The index of the file to mark as invalid.</param>
+        /// <remarks>
+        /// <para>
+        /// Sets sentinel values to indicate the file should be skipped:
+        /// <list type="bullet">
+        /// <item><c>pHashArray[index, 0] = -1</c> - Signals invalid file in comparison logic</item>
+        /// <item><c>sha256Array[index] = null</c> - Prevents false SHA256 matches</item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// Includes bounds checking to prevent array index exceptions.
+        /// Called when image loading or hash calculation fails.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="OutOfMemoryException">
+        /// Rethrown if insufficient memory is available.
+        /// </exception>
         private void MarkFileAsInvalid(int index)
         {
             try
@@ -2373,8 +2814,16 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Wait while paused, checking for cancellation
+        /// Waits while the processing is paused, periodically checking for cancellation.
         /// </summary>
+        /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+        /// <remarks>
+        /// Uses a <see cref="ManualResetEventSlim"/> to efficiently wait for resume signal.
+        /// Checks cancellation status every 100ms to ensure responsive shutdown.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        /// Thrown when the operation is cancelled during the wait.
+        /// </exception>
         private void WaitWhilePaused(CancellationToken cancellationToken)
         {
             while (_isPaused && !cancellationToken.IsCancellationRequested)
@@ -2392,22 +2841,32 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Worker thread method for Phase 2: Comparison.
-        /// 
-        /// Thread Safety:
-        /// - Each thread atomically obtains unique 'i' index via lock on compareResultsiAsync
-        /// - Compares file[i] with all files[j] where j > i (no overlap between threads)
-        /// - Reads from hash arrays computed in Phase 1 (immutable - all writes completed)
-        /// - Writes to shared lists (list1/list2) protected by myLock2 in FindSimilarity
-        /// 
-        /// Algorithm:
-        /// - For each unique pair (i, j) where i < j:
-        ///   * Skips pairs with different orientations (if configured)
-        ///   * Calculates Hamming distance for all hash types
-        ///   * Classifies similarity: Duplicate, High, Medium, Low confidence
-        ///   * Adds matches to result lists
+        /// Worker thread method for Phase 2: Hash Comparison.
         /// </summary>
-        /// <param name="cancellationToken">Token for cancellation support</param>
+        /// <param name="cancellationToken">
+        /// Token for cancellation support. When cancelled, the thread exits gracefully.
+        /// </param>
+        /// <remarks>
+        /// <para><b>Thread Safety:</b></para>
+        /// <list type="bullet">
+        /// <item>Each thread atomically obtains unique 'i' index via lock on compareResultsiAsync</item>
+        /// <item>Compares file[i] with all files[j] where j &gt; i (no overlap between threads)</item>
+        /// <item>Reads from hash arrays computed in Phase 1 (immutable - all writes completed)</item>
+        /// <item>Writes to shared lists (list1/list2) protected by myLock2 in <see cref="FindSimilarity"/></item>
+        /// </list>
+        /// <para><b>Algorithm:</b></para>
+        /// <para>
+        /// For each unique pair (i, j) where i &lt; j:
+        /// </para>
+        /// <list type="bullet">
+        /// <item>Skips pairs with different orientations (if configured)</item>
+        /// <item>Calculates Hamming distance for all hash types</item>
+        /// <item>Classifies similarity: Duplicate, High, Medium, Low confidence</item>
+        /// <item>Adds matches to result lists</item>
+        /// </list>
+        /// </remarks>
+        /// <seealso cref="ProcessThreadStart(CancellationToken)"/>
+        /// <seealso cref="FindSimilarity"/>
         private void CompareResultsThreadStart(CancellationToken cancellationToken)
         {
             int i, j;
