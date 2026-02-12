@@ -2551,7 +2551,7 @@ namespace ImageComparator
         /// <remarks>
         /// <para><b>Thread Safety:</b></para>
         /// <list type="bullet">
-        /// <item>Each thread atomically obtains unique file index via lock on myLock</item>
+        /// <item>Each thread atomically obtains unique file index via Interlocked.Increment</item>
         /// <item>Writes to unique array indices (thread-safe by design)</item>
         /// <item>Reads from shared 'files' list (immutable during processing)</item>
         /// <item>SHA256 instance is thread-local (automatically disposed)</item>
@@ -2580,7 +2580,7 @@ namespace ImageComparator
 
             using (SHA256Managed sha = new SHA256Managed())
             {
-                while (processThreadsiAsync < files.Count)
+                while (true)
                 {
                     // Check for cancellation
                     if (cancellationToken.IsCancellationRequested)
@@ -2591,18 +2591,26 @@ namespace ImageComparator
                     // Check for pause
                     WaitWhilePaused(cancellationToken);
 
-                    lock (myLock)
-                    {
-                        // Double-check after acquiring lock
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            return;
-                        }
+                    // Atomic increment - no lock needed
+                    i = Interlocked.Increment(ref processThreadsiAsync) - 1;
 
-                        i = processThreadsiAsync;
-                        processThreadsiAsync++;
-                        percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
+                    // Bounds check
+                    if (i >= files.Count)
+                    {
+                        break;
                     }
+
+                    // Re-check for cancellation after claiming the index
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    // Update percentage based on shared monotonic counter (atomic monotonic update)
+                    // Phase 1 (processing) maps to 0-50% of total progress
+                    int currentIndex = Math.Min(processThreadsiAsync, files.Count);
+                    int newPercentage = (int)Math.Round(50.0 * currentIndex / files.Count);
+                    percentage.SetMaximum(newPercentage);
 
                     try
                     {
@@ -2849,7 +2857,7 @@ namespace ImageComparator
         /// <remarks>
         /// <para><b>Thread Safety:</b></para>
         /// <list type="bullet">
-        /// <item>Each thread atomically obtains unique 'i' index via lock on compareResultsiAsync</item>
+        /// <item>Each thread atomically obtains unique 'i' index via Interlocked.Increment</item>
         /// <item>Compares file[i] with all files[j] where j &gt; i (no overlap between threads)</item>
         /// <item>Reads from hash arrays computed in Phase 1 (immutable - all writes completed)</item>
         /// <item>Writes to shared lists (list1/list2) protected by myLock2 in <see cref="FindSimilarity"/></item>
@@ -2872,7 +2880,7 @@ namespace ImageComparator
             int i, j;
             bool isDuplicate;
 
-            while (compareResultsiAsync < files.Count - 1)
+            while (true)
             {
                 // Check for cancellation
                 if (cancellationToken.IsCancellationRequested)
@@ -2883,18 +2891,28 @@ namespace ImageComparator
                 // Check for pause
                 WaitWhilePaused(cancellationToken);
 
-                lock (myLock)
-                {
-                    // Double-check after acquiring lock
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        return;
-                    }
+                // Atomic increment - no lock needed
+                i = Interlocked.Increment(ref compareResultsiAsync) - 1;
 
-                    i = compareResultsiAsync;
-                    compareResultsiAsync++;
-                    percentage.Value = 100 - (int)Math.Round(100.0 * (files.Count - i) / files.Count);
+                // Bounds check
+                if (i >= files.Count - 1)
+                {
+                    break;
                 }
+
+                // Quick cancellation re-check after claiming a new index
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                // Update percentage based on shared monotonic counter (atomic monotonic update)
+                // Phase 2 (comparison) maps to 50-100% of total progress
+                int currentIndex = Math.Min(compareResultsiAsync, files.Count - 1);
+                // Guard against division by zero when files.Count is 1
+                int denominator = Math.Max(files.Count - 1, 1);
+                int newPercentage = 50 + (int)Math.Round(50.0 * currentIndex / denominator);
+                percentage.SetMaximum(newPercentage);
 
                 for (j = i + 1; j < files.Count; j++)
                 {
@@ -2921,7 +2939,7 @@ namespace ImageComparator
         /// --------------------------------------
         /// - Multiple worker threads (CPU core count) process images concurrently
         /// - Each thread:
-        ///   * Gets unique file index atomically via lock on processThreadsiAsync counter
+        ///   * Gets unique file index atomically via Interlocked.Increment on processThreadsiAsync counter
         ///   * Computes image hashes (SHA256, pHash, hdHash, vdHash, aHash)
         ///   * Writes results to unique array indices (thread-safe by design)
         /// - Reads from shared 'files' list (immutable during processing - no modifications)
@@ -2932,7 +2950,7 @@ namespace ImageComparator
         /// - Starts AFTER all Phase 1 threads complete (Join() ensures happens-before relationship)
         /// - Multiple worker threads compare image pairs concurrently
         /// - Each thread:
-        ///   * Gets unique 'i' index atomically via lock on compareResultsiAsync counter
+        ///   * Gets unique 'i' index atomically via Interlocked.Increment on compareResultsiAsync counter
         ///   * Compares file[i] with all files[j] where j > i
         ///   * Reads from hash arrays (immutable in this phase - all writes completed in Phase 1)
         ///   * Writes to shared result lists (protected by myLock2)
@@ -2940,7 +2958,7 @@ namespace ImageComparator
         /// 
         /// Thread Safety Guarantees:
         /// ========================
-        /// 1. Counter Synchronization: processThreadsiAsync and compareResultsiAsync protected by myLock
+        /// 1. Counter Synchronization: processThreadsiAsync and compareResultsiAsync incremented atomically via Interlocked operations
         /// 2. Array Access: Each thread writes to unique indices (i) obtained atomically
         /// 3. Phase Separation: Phase 2 only begins after Phase 1 completes (Join barrier)
         /// 4. Result Lists: list1/list2/counters protected by myLock2

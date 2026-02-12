@@ -75,6 +75,30 @@ namespace ImageComparator
         }
 
         /// <summary>
+        /// Atomically sets the value to the maximum of the current value and the specified value.
+        /// </summary>
+        /// <param name="value">The value to compare with the current value.</param>
+        /// <remarks>
+        /// <para>
+        /// This method ensures that the value can only increase (monotonic updates).
+        /// The read-compare-write operation is performed atomically under synchronization.
+        /// </para>
+        /// <para>
+        /// Used in multi-threaded scenarios where multiple threads may update progress
+        /// out of order, but the displayed value should never decrease.
+        /// </para>
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SetMaximum(int value)
+        {
+            if (value > myValue)
+            {
+                myValue = value;
+                onChange(EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
         /// Raises the <see cref="OnChange"/> event.
         /// </summary>
         /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
