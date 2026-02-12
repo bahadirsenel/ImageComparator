@@ -2962,8 +2962,13 @@ namespace ImageComparator
 
                     // Check for exact duplicates (same SHA256 hash and very low Hamming distances)
                     // Prevent false duplicate detection if either SHA256 is null/empty (failed image loading)
-                    if (!string.IsNullOrEmpty(sha256Array[i]) && !string.IsNullOrEmpty(sha256Array[j]) && 
-                        sha256Array[i] == sha256Array[j] && pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD)
+                    bool hasSameHash = !string.IsNullOrEmpty(sha256Array[i]) && !string.IsNullOrEmpty(sha256Array[j]) && sha256Array[i] == sha256Array[j];
+                    bool hasLowHammingDistances = pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && 
+                                                   hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && 
+                                                   vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && 
+                                                   aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD;
+                    
+                    if (hasSameHash && hasLowHammingDistances)
                     {
                         lock (myLock2)
                         {
