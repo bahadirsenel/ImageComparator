@@ -2317,7 +2317,14 @@ namespace ImageComparator
                     {
                         try
                         {
-                            pHashArray[i, 0] = -1;
+                            if (i < pHashArray.GetLength(0))
+                            {
+                                pHashArray[i, 0] = -1;
+                            }
+                            if (i < sha256Array.Length)
+                            {
+                                sha256Array[i] = null;
+                            }
                         }
                         catch (OutOfMemoryException)
                         {
@@ -2339,6 +2346,23 @@ namespace ImageComparator
                     }
                     catch (Exception ex)
                     {
+                        // Mark file as invalid for all exceptions to prevent false duplicate detection
+                        try
+                        {
+                            if (i < pHashArray.GetLength(0))
+                            {
+                                pHashArray[i, 0] = -1;
+                            }
+                            if (i < sha256Array.Length)
+                            {
+                                sha256Array[i] = null;
+                            }
+                        }
+                        catch
+                        {
+                            // Ignore marking errors
+                        }
+                        
                         ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
                     }
                 }
@@ -2890,6 +2914,12 @@ namespace ImageComparator
 
                 if (duplicatesOnly)
                 {
+                    // Prevent false duplicate detection if either SHA256 is null/empty (failed image loading)
+                    if (string.IsNullOrEmpty(sha256Array[i]) || string.IsNullOrEmpty(sha256Array[j]))
+                    {
+                        return false;
+                    }
+                    
                     if (sha256Array[i] != sha256Array[j])
                     {
                         return false;
@@ -2937,7 +2967,10 @@ namespace ImageComparator
                         }
                     }
 
-                    if (sha256Array[i] == sha256Array[j] && pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD)
+                    // Check for exact duplicates (same SHA256 hash and very low Hamming distances)
+                    // Prevent false duplicate detection if either SHA256 is null/empty (failed image loading)
+                    if (!string.IsNullOrEmpty(sha256Array[i]) && !string.IsNullOrEmpty(sha256Array[j]) && 
+                        sha256Array[i] == sha256Array[j] && pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD)
                     {
                         lock (myLock2)
                         {
