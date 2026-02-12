@@ -2607,8 +2607,9 @@ namespace ImageComparator
                     }
 
                     // Update percentage based on shared monotonic counter (atomic monotonic update)
+                    // Phase 1 (processing) maps to 0-50% of total progress
                     int currentIndex = Math.Min(processThreadsiAsync, files.Count);
-                    int newPercentage = 100 - (int)Math.Round(100.0 * (files.Count - currentIndex) / files.Count);
+                    int newPercentage = (int)Math.Round(50.0 * currentIndex / files.Count);
                     percentage.SetMaximum(newPercentage);
 
                     try
@@ -2906,8 +2907,9 @@ namespace ImageComparator
                 }
 
                 // Update percentage based on shared monotonic counter (atomic monotonic update)
+                // Phase 2 (comparison) maps to 50-100% of total progress
                 int currentIndex = Math.Min(compareResultsiAsync, files.Count - 1);
-                int newPercentage = 100 - (int)Math.Round(100.0 * (files.Count - currentIndex) / files.Count);
+                int newPercentage = 50 + (int)Math.Round(50.0 * currentIndex / (files.Count - 1));
                 percentage.SetMaximum(newPercentage);
 
                 for (j = i + 1; j < files.Count; j++)
