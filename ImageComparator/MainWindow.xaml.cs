@@ -2315,25 +2315,7 @@ namespace ImageComparator
                     }
                     catch (ArgumentException)
                     {
-                        try
-                        {
-                            if (i < pHashArray.GetLength(0))
-                            {
-                                pHashArray[i, 0] = -1;
-                            }
-                            if (i < sha256Array.Length)
-                            {
-                                sha256Array[i] = null;
-                            }
-                        }
-                        catch (OutOfMemoryException)
-                        {
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", ex);
-                        }
+                        MarkFileAsInvalid(i);
                     }
                     catch (OperationCanceledException)
                     {
@@ -2347,25 +2329,36 @@ namespace ImageComparator
                     catch (Exception ex)
                     {
                         // Mark file as invalid for all exceptions to prevent false duplicate detection
-                        try
-                        {
-                            if (i < pHashArray.GetLength(0))
-                            {
-                                pHashArray[i, 0] = -1;
-                            }
-                            if (i < sha256Array.Length)
-                            {
-                                sha256Array[i] = null;
-                            }
-                        }
-                        catch
-                        {
-                            // Ignore marking errors
-                        }
+                        MarkFileAsInvalid(i);
                         
                         ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Marks a file as invalid to exclude it from comparison.
+        /// Sets pHashArray[i, 0] = -1 and sha256Array[i] = null with bounds checking.
+        /// </summary>
+        /// <param name="index">The index of the file to mark as invalid</param>
+        private void MarkFileAsInvalid(int index)
+        {
+            try
+            {
+                if (index < pHashArray.GetLength(0))
+                {
+                    pHashArray[index, 0] = -1;
+                }
+                if (index < sha256Array.Length)
+                {
+                    sha256Array[index] = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log if we fail to mark the file as invalid (shouldn't happen in normal operation)
+                ErrorLogger.LogError($"MarkFileAsInvalid - Failed to mark file {index} as invalid", ex);
             }
         }
 
