@@ -2315,18 +2315,7 @@ namespace ImageComparator
                     }
                     catch (ArgumentException)
                     {
-                        try
-                        {
-                            pHashArray[i, 0] = -1;
-                        }
-                        catch (OutOfMemoryException)
-                        {
-                            throw;
-                        }
-                        catch (Exception ex)
-                        {
-                            ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", ex);
-                        }
+                        MarkFileAsInvalid(i);
                     }
                     catch (OperationCanceledException)
                     {
@@ -2339,9 +2328,47 @@ namespace ImageComparator
                     }
                     catch (Exception ex)
                     {
-                        ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
+                        // Mark file as invalid for all exceptions to prevent false duplicate detection
+                        MarkFileAsInvalid(i);
+                        
+                        string fileNameInfo = string.Empty;
+                        if (i >= 0 && i < files.Count)
+                        {
+                            fileNameInfo = $" ({Path.GetFileName(files[i])})";
+                        }
+                        
+                        ErrorLogger.LogError($"ProcessThreadStart - Process Image {i}{fileNameInfo}", ex);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Marks a file as invalid to exclude it from comparison.
+        /// Sets pHashArray[i, 0] = -1 and sha256Array[i] = null with bounds checking.
+        /// </summary>
+        /// <param name="index">The index of the file to mark as invalid</param>
+        private void MarkFileAsInvalid(int index)
+        {
+            try
+            {
+                if (index >= 0 && index < pHashArray.GetLength(0))
+                {
+                    pHashArray[index, 0] = -1;
+                }
+                if (index >= 0 && index < sha256Array.Length)
+                {
+                    sha256Array[index] = null;
+                }
+            }
+            catch (OutOfMemoryException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Log if we fail to mark the file as invalid (shouldn't happen in normal operation)
+                ErrorLogger.LogError($"MarkFileAsInvalid - Failed to mark file {index} as invalid", ex);
             }
         }
 
@@ -2890,6 +2917,12 @@ namespace ImageComparator
 
                 if (duplicatesOnly)
                 {
+                    // Prevent false duplicate detection if either SHA256 is null/empty (failed image loading)
+                    if (string.IsNullOrEmpty(sha256Array[i]) || string.IsNullOrEmpty(sha256Array[j]))
+                    {
+                        return false;
+                    }
+                    
                     if (sha256Array[i] != sha256Array[j])
                     {
                         return false;
@@ -2937,7 +2970,15 @@ namespace ImageComparator
                         }
                     }
 
-                    if (sha256Array[i] == sha256Array[j] && pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD)
+                    // Check for exact duplicates (same SHA256 hash and very low Hamming distances)
+                    // Prevent false duplicate detection if either SHA256 is null/empty (failed image loading)
+                    bool hasSameHash = !string.IsNullOrEmpty(sha256Array[i]) && !string.IsNullOrEmpty(sha256Array[j]) && sha256Array[i] == sha256Array[j];
+                    bool hasLowHammingDistances = pHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && 
+                                                   hdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && 
+                                                   vdHashHammingDistance < EXACT_DUPLICATE_THRESHOLD && 
+                                                   aHashHammingDistance < EXACT_DUPLICATE_THRESHOLD;
+                    
+                    if (hasSameHash && hasLowHammingDistances)
                     {
                         lock (myLock2)
                         {
