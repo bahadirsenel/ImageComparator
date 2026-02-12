@@ -2366,7 +2366,11 @@ namespace ImageComparator
                         {
                             throw;
                         }
-                        catch { }
+                        catch
+                        {
+                            // Silently ignore exceptions when marking invalid - the main exception is already logged below
+                            // If marking fails (e.g., index out of range due to race condition), the image will be skipped anyway
+                        }
                         ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
                     }
                 }
