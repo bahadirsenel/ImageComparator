@@ -132,22 +132,107 @@ namespace ImageComparator
 
         #region Constants
         // Hash calculation constants
+        /// <summary>
+        /// The size in pixels for resizing images before pHash DCT calculation.
+        /// </summary>
+        /// <remarks>
+        /// A 32x32 resize provides a good balance between:
+        /// <list type="bullet">
+        /// <item>Computational efficiency (faster DCT)</item>
+        /// <item>Hash accuracy (retains important features)</item>
+        /// </list>
+        /// </remarks>
         private const int PHASH_RESIZE_DIMENSION = 32;
+        
+        /// <summary>
+        /// The size in pixels for resizing images before dHash calculation.
+        /// </summary>
+        /// <remarks>
+        /// 9x9 resize (which produces 9x8 = 72-bit hash after gradient comparison).
+        /// </remarks>
         private const int DHASH_RESIZE_DIMENSION = 9;
+        
+        /// <summary>
+        /// The size in pixels for resizing images before aHash calculation.
+        /// </summary>
+        /// <remarks>
+        /// 8x8 resize produces a 64-bit hash after average comparison.
+        /// </remarks>
         private const int AHASH_RESIZE_DIMENSION = 8;
 
         // Hash comparison thresholds
+        /// <summary>
+        /// Hamming distance threshold for exact duplicates.
+        /// </summary>
+        /// <remarks>
+        /// Images with Hamming distance less than 1 (essentially 0) combined with
+        /// matching SHA256 checksums are considered exact duplicates.
+        /// </remarks>
         private const int EXACT_DUPLICATE_THRESHOLD = 1;
+        
+        /// <summary>
+        /// Hamming distance threshold for high-confidence similar images (pHash).
+        /// </summary>
+        /// <remarks>
+        /// A distance of 9 or less indicates images are very similar.
+        /// This threshold was determined empirically through testing.
+        /// </remarks>
         private const int PHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
+        
+        /// <summary>
+        /// Hamming distance threshold for medium-confidence similar images (pHash).
+        /// </summary>
+        /// <remarks>
+        /// A distance of 12 or less indicates images are similar with minor differences.
+        /// </remarks>
         private const int PHASH_MEDIUM_CONFIDENCE_THRESHOLD = 12;
+        
+        /// <summary>
+        /// Hamming distance threshold for low-confidence similar images (pHash).
+        /// </summary>
+        /// <remarks>
+        /// A distance of 21 or less indicates images may be related but differences are noticeable.
+        /// </remarks>
         private const int PHASH_LOW_CONFIDENCE_THRESHOLD = 21;
+        
+        /// <summary>
+        /// Hamming distance threshold for high-confidence similar images (horizontal dHash).
+        /// </summary>
         private const int HDHASH_HIGH_CONFIDENCE_THRESHOLD = 10;
+        
+        /// <summary>
+        /// Hamming distance threshold for medium-confidence similar images (horizontal dHash).
+        /// </summary>
         private const int HDHASH_MEDIUM_CONFIDENCE_THRESHOLD = 13;
+        
+        /// <summary>
+        /// Hamming distance threshold for low-confidence similar images (horizontal dHash).
+        /// </summary>
         private const int HDHASH_LOW_CONFIDENCE_THRESHOLD = 18;
+        
+        /// <summary>
+        /// Hamming distance threshold for high-confidence similar images (vertical dHash).
+        /// </summary>
         private const int VDHASH_HIGH_CONFIDENCE_THRESHOLD = 10;
+        
+        /// <summary>
+        /// Hamming distance threshold for medium-confidence similar images (vertical dHash).
+        /// </summary>
         private const int VDHASH_MEDIUM_CONFIDENCE_THRESHOLD = 13;
+        
+        /// <summary>
+        /// Hamming distance threshold for low-confidence similar images (vertical dHash).
+        /// </summary>
         private const int VDHASH_LOW_CONFIDENCE_THRESHOLD = 18;
+        
+        /// <summary>
+        /// Hamming distance threshold for high-confidence similar images (aHash).
+        /// </summary>
         private const int AHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
+        
+        /// <summary>
+        /// Hamming distance threshold for medium-confidence similar images (aHash).
+        /// </summary>
         private const int AHASH_MEDIUM_CONFIDENCE_THRESHOLD = 12;
         #endregion
 
@@ -2458,21 +2543,33 @@ namespace ImageComparator
 
         /// <summary>
         /// Worker thread method for Phase 1: Image Processing.
-        /// 
-        /// Thread Safety:
-        /// - Each thread atomically obtains unique file index 'i' via lock
-        /// - Writes to unique array indices: resolutionArray[i], sha256Array[i], pHashArray[i,*], etc.
-        /// - Reads from shared 'files' list (immutable during processing)
-        /// - SHA256Managed instance is thread-local (using statement ensures disposal)
-        /// 
-        /// Hash Algorithms Computed:
-        /// 1. SHA256: Cryptographic hash of file bytes (for exact duplicate detection)
-        /// 2. pHash (Perceptual Hash): DCT-based 64-bit hash (for similar images)
-        /// 3. hdHash (Horizontal Difference Hash): 72-bit hash comparing each pixel with right neighbor
-        /// 4. vdHash (Vertical Difference Hash): 72-bit hash comparing each pixel with bottom neighbor
-        /// 5. aHash (Average Hash): 64-bit hash comparing pixels to average brightness
         /// </summary>
-        /// <param name="cancellationToken">Token for cancellation support</param>
+        /// <param name="cancellationToken">
+        /// Token for cancellation support. When cancelled, the thread exits gracefully.
+        /// </param>
+        /// <remarks>
+        /// <para><b>Thread Safety:</b></para>
+        /// <list type="bullet">
+        /// <item>Each thread atomically obtains unique file index via <see cref="Interlocked.Increment"/> (inside lock)</item>
+        /// <item>Writes to unique array indices (thread-safe by design)</item>
+        /// <item>Reads from shared 'files' list (immutable during processing)</item>
+        /// <item>SHA256 instance is thread-local (automatically disposed)</item>
+        /// </list>
+        /// <para><b>Hash Algorithms Computed:</b></para>
+        /// <list type="number">
+        /// <item><term>SHA256</term><description>Cryptographic hash for exact duplicate detection</description></item>
+        /// <item><term>pHash</term><description>Perceptual hash using DCT (64-bit)</description></item>
+        /// <item><term>hdHash</term><description>Horizontal difference hash (72-bit)</description></item>
+        /// <item><term>vdHash</term><description>Vertical difference hash (72-bit)</description></item>
+        /// <item><term>aHash</term><description>Average hash (64-bit)</description></item>
+        /// </list>
+        /// <para><b>Error Handling:</b></para>
+        /// <para>
+        /// Invalid images are marked using <see cref="MarkFileAsInvalid"/> and excluded from comparison.
+        /// Errors are logged but don't stop processing of other files.
+        /// </para>
+        /// </remarks>
+        /// <seealso cref="CompareResultsThreadStart(CancellationToken)"/>
         private void ProcessThreadStart(CancellationToken cancellationToken)
         {
             FastDCT2D fastDCT2D;
@@ -2673,9 +2770,24 @@ namespace ImageComparator
 
         /// <summary>
         /// Marks a file as invalid to exclude it from comparison.
-        /// Sets pHashArray[i, 0] = -1 and sha256Array[i] = null with bounds checking.
         /// </summary>
-        /// <param name="index">The index of the file to mark as invalid</param>
+        /// <param name="index">The index of the file to mark as invalid.</param>
+        /// <remarks>
+        /// <para>
+        /// Sets sentinel values to indicate the file should be skipped:
+        /// <list type="bullet">
+        /// <item><c>pHashArray[index, 0] = -1</c> - Signals invalid file in comparison logic</item>
+        /// <item><c>sha256Array[index] = null</c> - Prevents false SHA256 matches</item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// Includes bounds checking to prevent array index exceptions.
+        /// Called when image loading or hash calculation fails.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="OutOfMemoryException">
+        /// Rethrown if insufficient memory is available.
+        /// </exception>
         private void MarkFileAsInvalid(int index)
         {
             try
@@ -2701,8 +2813,16 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Wait while paused, checking for cancellation
+        /// Waits while the processing is paused, periodically checking for cancellation.
         /// </summary>
+        /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+        /// <remarks>
+        /// Uses a <see cref="ManualResetEventSlim"/> to efficiently wait for resume signal.
+        /// Checks cancellation status every 100ms to ensure responsive shutdown.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        /// Thrown when the operation is cancelled during the wait.
+        /// </exception>
         private void WaitWhilePaused(CancellationToken cancellationToken)
         {
             while (_isPaused && !cancellationToken.IsCancellationRequested)
@@ -2720,22 +2840,32 @@ namespace ImageComparator
         }
 
         /// <summary>
-        /// Worker thread method for Phase 2: Comparison.
-        /// 
-        /// Thread Safety:
-        /// - Each thread atomically obtains unique 'i' index via lock on compareResultsiAsync
-        /// - Compares file[i] with all files[j] where j > i (no overlap between threads)
-        /// - Reads from hash arrays computed in Phase 1 (immutable - all writes completed)
-        /// - Writes to shared lists (list1/list2) protected by myLock2 in FindSimilarity
-        /// 
-        /// Algorithm:
-        /// - For each unique pair (i, j) where i < j:
-        ///   * Skips pairs with different orientations (if configured)
-        ///   * Calculates Hamming distance for all hash types
-        ///   * Classifies similarity: Duplicate, High, Medium, Low confidence
-        ///   * Adds matches to result lists
+        /// Worker thread method for Phase 2: Hash Comparison.
         /// </summary>
-        /// <param name="cancellationToken">Token for cancellation support</param>
+        /// <param name="cancellationToken">
+        /// Token for cancellation support. When cancelled, the thread exits gracefully.
+        /// </param>
+        /// <remarks>
+        /// <para><b>Thread Safety:</b></para>
+        /// <list type="bullet">
+        /// <item>Each thread atomically obtains unique 'i' index via lock on compareResultsiAsync</item>
+        /// <item>Compares file[i] with all files[j] where j &gt; i (no overlap between threads)</item>
+        /// <item>Reads from hash arrays computed in Phase 1 (immutable - all writes completed)</item>
+        /// <item>Writes to shared lists (list1/list2) protected by myLock2 in <see cref="FindSimilarity"/></item>
+        /// </list>
+        /// <para><b>Algorithm:</b></para>
+        /// <para>
+        /// For each unique pair (i, j) where i &lt; j:
+        /// </para>
+        /// <list type="bullet">
+        /// <item>Skips pairs with different orientations (if configured)</item>
+        /// <item>Calculates Hamming distance for all hash types</item>
+        /// <item>Classifies similarity: Duplicate, High, Medium, Low confidence</item>
+        /// <item>Adds matches to result lists</item>
+        /// </list>
+        /// </remarks>
+        /// <seealso cref="ProcessThreadStart(CancellationToken)"/>
+        /// <seealso cref="FindSimilarity"/>
         private void CompareResultsThreadStart(CancellationToken cancellationToken)
         {
             int i, j;
