@@ -2606,13 +2606,10 @@ namespace ImageComparator
                         return;
                     }
 
-                    // Update percentage based on shared monotonic counter
+                    // Update percentage based on shared monotonic counter (atomic monotonic update)
                     int currentIndex = Math.Min(processThreadsiAsync, files.Count);
                     int newPercentage = 100 - (int)Math.Round(100.0 * (files.Count - currentIndex) / files.Count);
-                    if (newPercentage > percentage.Value)
-                    {
-                        percentage.Value = newPercentage;
-                    }
+                    percentage.SetMaximum(newPercentage);
 
                     try
                     {
@@ -2908,13 +2905,10 @@ namespace ImageComparator
                     return;
                 }
 
-                // Update percentage based on shared monotonic counter
+                // Update percentage based on shared monotonic counter (atomic monotonic update)
                 int currentIndex = Math.Min(compareResultsiAsync, files.Count - 1);
                 int newPercentage = 100 - (int)Math.Round(100.0 * (files.Count - currentIndex) / files.Count);
-                if (newPercentage > percentage.Value)
-                {
-                    percentage.Value = newPercentage;
-                }
+                percentage.SetMaximum(newPercentage);
 
                 for (j = i + 1; j < files.Count; j++)
                 {
