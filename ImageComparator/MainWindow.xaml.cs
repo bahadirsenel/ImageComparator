@@ -148,7 +148,8 @@ namespace ImageComparator
         /// The size in pixels for resizing images before dHash calculation.
         /// </summary>
         /// <remarks>
-        /// 9x9 resize (which produces 9x8 = 72-bit hash after gradient comparison).
+        /// A 9x9 resize produces 8x9 horizontal gradients (72 comparisons for hdHash)
+        /// and 9x8 vertical gradients (72 comparisons for vdHash), resulting in 72-bit hashes.
         /// </remarks>
         private const int DHASH_RESIZE_DIMENSION = 9;
         
@@ -2550,7 +2551,7 @@ namespace ImageComparator
         /// <remarks>
         /// <para><b>Thread Safety:</b></para>
         /// <list type="bullet">
-        /// <item>Each thread atomically obtains unique file index via <see cref="Interlocked.Increment"/> (inside lock)</item>
+        /// <item>Each thread atomically obtains unique file index via lock on myLock</item>
         /// <item>Writes to unique array indices (thread-safe by design)</item>
         /// <item>Reads from shared 'files' list (immutable during processing)</item>
         /// <item>SHA256 instance is thread-local (automatically disposed)</item>
