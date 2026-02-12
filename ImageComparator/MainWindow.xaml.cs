@@ -2332,18 +2332,33 @@ namespace ImageComparator
                     catch (ExternalException ex)
                     {
                         // GDI+ error when loading image (corrupted file, unsupported format, etc.)
-                        try
+                        // Log the original exception first to preserve context
+                        bool hasFileName = i >= 0 && i < files.Count;
+                        if (hasFileName)
                         {
-                            pHashArray[i, 0] = -1;
                             ErrorLogger.LogError($"ProcessThreadStart - Invalid Image {i} ({Path.GetFileName(files[i])})", ex);
                         }
-                        catch (OutOfMemoryException)
+                        else
                         {
-                            throw;
+                            ErrorLogger.LogError($"ProcessThreadStart - Invalid Image with index {i}", ex);
                         }
-                        catch (Exception innerEx)
+
+                        // Then attempt to mark as invalid
+                        bool canMarkInvalid = i >= 0 && i < pHashArray.GetLength(0);
+                        if (canMarkInvalid)
                         {
-                            ErrorLogger.LogError($"ProcessThreadStart - Mark Invalid Image {i}", innerEx);
+                            try
+                            {
+                                pHashArray[i, 0] = -1;
+                            }
+                            catch (OutOfMemoryException)
+                            {
+                                throw;
+                            }
+                            catch (Exception innerEx)
+                            {
+                                ErrorLogger.LogError($"ProcessThreadStart - Failed to mark image {i} as invalid", innerEx);
+                            }
                         }
                     }
                     catch (OperationCanceledException)
@@ -2357,21 +2372,38 @@ namespace ImageComparator
                     }
                     catch (Exception ex)
                     {
-                        // Mark other unexpected exceptions as invalid too
-                        try
+                        // Mark other unexpected exceptions as invalid too, when possible
+                        bool canMarkInvalid = i >= 0 && i < pHashArray.GetLength(0);
+                        if (canMarkInvalid)
                         {
-                            pHashArray[i, 0] = -1;
+                            try
+                            {
+                                pHashArray[i, 0] = -1;
+                            }
+                            catch (OutOfMemoryException)
+                            {
+                                throw;
+                            }
+                            catch
+                            {
+                                // Silently ignore exceptions when marking invalid - the main exception is already logged below
+                            }
                         }
-                        catch (OutOfMemoryException)
+
+                        bool hasFileName = i >= 0 && i < files.Count;
+                        if (hasFileName)
                         {
-                            throw;
+                            ErrorLogger.LogError(
+                                $"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})",
+                                ex);
                         }
-                        catch
+                        else
                         {
-                            // Silently ignore exceptions when marking invalid - the main exception is already logged below
-                            // If marking fails (e.g., index out of range due to race condition), the image will be skipped anyway
+                            // Fallback logging when index is out of range; avoid throwing from the error handler itself
+                            ErrorLogger.LogError(
+                                $"ProcessThreadStart - Process Image with invalid index {i}",
+                                ex);
                         }
-                        ErrorLogger.LogError($"ProcessThreadStart - Process Image {i} ({Path.GetFileName(files[i])})", ex);
                     }
                 }
             }
