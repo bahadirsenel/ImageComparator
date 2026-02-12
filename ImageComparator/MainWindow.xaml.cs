@@ -196,7 +196,7 @@ namespace ImageComparator
         /// Hamming distance threshold for low-confidence similar images (pHash).
         /// </summary>
         /// <remarks>
-        /// A distance of 21 or less indicates images may be related but differences are noticeable.
+        /// A distance of less than 21 indicates images may be related but differences are noticeable.
         /// </remarks>
         private const int PHASH_LOW_CONFIDENCE_THRESHOLD = 21;
         
