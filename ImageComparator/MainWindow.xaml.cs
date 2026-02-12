@@ -179,7 +179,7 @@ namespace ImageComparator
         /// Hamming distance threshold for high-confidence similar images (pHash).
         /// </summary>
         /// <remarks>
-        /// A distance of 9 or less indicates images are very similar.
+        /// A distance of less than 9 indicates images are very similar.
         /// This threshold was determined empirically through testing.
         /// </remarks>
         private const int PHASH_HIGH_CONFIDENCE_THRESHOLD = 9;
